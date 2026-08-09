@@ -272,6 +272,9 @@ tr.expanded{background:#f3f7ff}
 .tref-bar{flex-basis:100%;height:4px;border-radius:2px;background:rgba(0,0,0,.09);overflow:hidden;margin-top:1px}
 .tref-bar span{display:block;height:100%;border-radius:2px;transition:width .3s ease}
 .tref-row{display:flex;flex-direction:column;line-height:1.45;white-space:nowrap}
+.tref-badge{display:inline-block;padding:0 7px;border-radius:6px;font-size:11px;font-weight:700;line-height:1.7}
+.tref-badge.buy{background:rgba(226,59,59,.12);color:var(--up);border:1px solid rgba(226,59,59,.32)}
+.tref-badge.sell{background:rgba(22,163,74,.12);color:var(--down);border:1px solid rgba(22,163,74,.32)}
 .name-cell{display:flex;flex-direction:column;gap:1px;line-height:1.3}
 .name-cell .n{font-weight:600}
 .name-cell .c{font-size:11.5px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
@@ -1025,14 +1028,15 @@ function isExchangeTraded(code){
 }
 function fullCode(h){
   const c = String(h.code).replace(/\D/g, '');
-  if (h.type !== 'stock' && !isExchangeTraded(c)) return h.code;
+  if (effType(c, h.type) !== 'stock' && !isExchangeTraded(c)) return h.code;
   return (h.market || guessMarket(c)) + c;
 }
-function qkey(h){ return h.type + ':' + h.code; }
-/* 腾讯行情符号：股票/场内基金 sh600519·sz159915 / 场外基金 jj161725 / 港股 hk00700 */
+function qkey(h){ return effType(h.code, h.type) + ':' + h.code; }
+/* 腾讯行情符号：股票/场内基金 sh600519·sz159915 / 场外基金 jj161725 / 港股 hk00700。
+   用权威类型 effType 判断（即使数据里 type 存错，行情也走正确接口） */
 function quoteSymbol(h){
   const c = String(h.code).replace(/\D/g, '');
-  if (h.type === 'fund' && !isExchangeTraded(c)) return 'jj' + c;
+  if (effType(c, h.type) === 'fund' && !isExchangeTraded(c)) return 'jj' + c;
   return (h.market || guessMarket(c)) + c;
 }
 /* 同一标的的候选行情符号：主符号查不到时依次回退，命中后回写 market 持久化
@@ -1282,7 +1286,7 @@ async function refreshQuotes(silent){
       if (!q) return;
       if (q.err){ failed++; if (q.unreachable) unreachable++; return; }
       if (q.name && !/\uFFFD/.test(q.name) && (!h.name || h.name === h.code)) { h.name = q.name; persist.holdings(); }
-      if (h.type === 'fund' && !isExchangeTraded(h.code)) post.push(enhanceFundEstimate(h.code, q).then(nq => { state.quotes[qkey(h)] = nq; }));
+      if (effType(h.code, h.type) === 'fund' && !isExchangeTraded(h.code)) post.push(enhanceFundEstimate(h.code, q).then(nq => { state.quotes[qkey(h)] = nq; }));
     });
     if (post.length) await Promise.all(post);
     if (fixed && !silent) toast('已自动校正 ' + fixed + ' 个标的的交易所前缀', 'ok');
@@ -2346,10 +2350,13 @@ function tRefCell(h, c){
   const clsV = up ? 'up' : 'down';
   const arrow = up ? '▲' : '▼';
   const lb = last.side === 'buy' ? '加仓' : '减仓';
+  const badge = last.side === 'buy'
+    ? '<span class="tref-badge buy">加仓</span>'
+    : '<span class="tref-badge sell">减仓</span>';
   const d = String(last.date || '').slice(5);  // MM-DD
   return '<div class="tref-row" title="最近一次' + lb + '（' + esc(last.date || '') + '）成交价 ' + price4(tp) +
     ' → 现价 ' + price4(price) + '，差价 ' + sign2(diff) + '（' + (up ? '+' : '') + pct.toFixed(2) + '%）">' +
-    '<div><span class="dim" style="font-size:10.5px">' + lb + ' ' + esc(d) + '</span>' +
+    '<div><span class="dim" style="font-size:10.5px">' + badge + ' ' + esc(d) + '</span>' +
       ' <span class="mono dim" style="font-size:10.5px">' + price4(tp) + '→' + price4(price) + '</span></div>' +
     '<div class="mono ' + clsV + '" style="font-weight:600;font-size:12px;line-height:1.4">' + arrow + ' ' +
       (up ? '+' : '') + pct.toFixed(2) + '%</div></div>';
@@ -2379,8 +2386,11 @@ function tRefBlock(h, c, q){
     const tip = t.side === 'buy'
       ? (up ? '现价高于最近加仓成本，减仓做T有空间' : '现价低于最近加仓成本，减仓会亏损')
       : (up ? '现价高于最近减仓价，接回成本偏高' : '现价低于最近减仓价，可考虑接回做T');
+    const badge = t.side === 'buy'
+      ? '<span class="tref-badge buy">加仓</span>'
+      : '<span class="tref-badge sell">减仓</span>';
     return '<div class="tref-item" style="' + bg + '">' +
-      '<span class="tref-lb">' + label + ' <span class="dim" style="font-weight:400">' + esc(String(t.date || '').slice(5)) + '</span></span>' +
+      '<span class="tref-lb">' + badge + ' <span class="dim" style="font-weight:400">' + esc(String(t.date || '').slice(5)) + '</span></span>' +
       '<span class="mono dim">' + price4(tp) + '</span><span class="dim">→</span>' +
       '<span class="mono" style="font-weight:700;font-size:15px">' + price4(price) + '</span>' +
       '<span class="mono ' + cls + '" style="font-weight:700;font-size:15px">' + arrow + ' ' + sign2(diff) +
@@ -2450,7 +2460,7 @@ function subPanel(h, c){
   const q = state.quotes[qkey(h)] || {};
   const meta = '<div class="hint" style="margin:0 0 10px">' +
     (c.quoteErr ? '<span style="color:var(--warn)">⚠ ' + esc(c.quoteErr) + '</span>' :
-      ((h.type === 'fund' ? (q.estimated ? '盘中估算净值' : '最新单位净值') + ' ' + price4(q.price) +
+      ((effType(h.code, h.type) === 'fund' ? (q.estimated ? '盘中估算净值' : '最新单位净值') + ' ' + price4(q.price) +
             (isFinite(q.accNav) ? ' · 累计净值 ' + price4(q.accNav) : '') +
             (q.navDate ? ' · 净值日期 ' + esc(q.navDate) : '') + (q.gzsj ? ' · 估值时间 ' + esc(q.gzsj) : '')
         : '昨收 ' + price4(q.preClose) + (isFinite(q.high) ? ' · 最高 ' + price4(q.high) + ' · 最低 ' + price4(q.low) : '')) +
@@ -4950,11 +4960,18 @@ function getFeeType(code, type){
    用代码判定自动升级为 etf，保证三类标签在旧数据上也正确 */
 function effType(code, type){
   const c = String(code || '').replace(/\D/g, '');
-  /* 0 开头 6 位代码（ETF联接C/E、LOFC 等）必为场外基金，与 _td_compress 口径一致 */
-  if (/^0\d{5}$/.test(c)) return 'fund';
-  if (type === 'fund' && !isExchangeTraded(c)) return 'fund';
-  if (type === 'etf' || isExchangeTraded(c)) return 'etf';
-  return 'stock';
+  /* 场内 ETF/LOF（15/16/18/50/51/52/56/58）→ etf，代码段权威优先 */
+  if (isExchangeTraded(c)) return 'etf';
+  /* 港股 5 位代码 */
+  if (c.length === 5) return 'hk';
+  /* 深市股票 000~003 段（000001 平安银行 / 002517 恺英网络等中小板）→ 强制股票，
+     旧逻辑 /^0\d{5}$/ 无条件判基金导致 002xxx 深市股票全被误判为场外基金 */
+  if (/^(000|001|002|003)\d{3}/.test(c)) return 'stock';
+  /* 非歧义股票段：创业板 30 / 沪市 60·68 / B股 20 / 北交所 43·83·87·88·89·92 → 强制股票 */
+  if (/^(30|60|68|20|39|43|83|87|88|89|92)\d{4}/.test(c)) return 'stock';
+  /* 其余 0 开头 6 位（004xxx~099xxx、01xxxx、024xxx 场外基金）→ 基金（尊重用户录入） */
+  if (/^0\d{5}$/.test(c)) return (type === 'stock') ? 'stock' : 'fund';
+  return (type === 'fund' || type === 'etf') ? type : 'stock';
 }
 function typeLabel(code, type){
   return ({ stock:'股票', etf:'场内ETF', fund:'场外基金' })[effType(code, type)] || '股票';
@@ -5098,8 +5115,8 @@ function _extractCodeName(codeName){
     if (c.length === 5) return { code: c, type: 'hk' };
     if (c.length === 7) return { code: c, type: 'fund' };
     if (/^(15|16|18|50|51|52|56|58)/.test(c)) return { code: c, type: 'stock', isETF: true };
-    // 00xxxx/001xxx/002xxx/003xxx/004xxx → 深市股票；005xxx~099xxx → 基金
-    if (/^00[0-4]\d{3}/.test(c)) return { code: c, type: 'stock' };
+    // 000xxx/001xxx/002xxx/003xxx → 深市股票（002517 恺英网络等）；004xxx~099xxx → 基金
+    if (/^(000|001|002|003)\d{3}/.test(c)) return { code: c, type: 'stock' };
     // 其余 0xxxxx (005xxx~099xxx) → 场外基金（含 ETF联接C/E、LOFC、增强指数 C 类等）
     if (/^0\d{5}/.test(c)) return { code: c, type: 'fund' };
     if (/^(43|83|87|88|89|92)/.test(c)) return { code: c, type: 'stock', market: 'bj' };
@@ -5109,7 +5126,7 @@ function _extractCodeName(codeName){
   const digits = s.replace(/\D/g, '');
   if (digits.length >= 5){
     if (digits.length === 5) return { code: digits, type: 'hk' };
-    if (/^00[0-4]\d{3}/.test(digits)) return { code: digits, type: 'stock' };
+    if (/^(000|001|002|003)\d{3}/.test(digits)) return { code: digits, type: 'stock' };
     if (/^0\d{5}/.test(digits)) return { code: digits, type: 'fund' };
     return { code: digits, type: 'stock' };
   }
