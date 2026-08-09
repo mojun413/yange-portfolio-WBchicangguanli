@@ -88,6 +88,8 @@ body{
 .side-foot a{color:#7fb0ff;text-decoration:none}
 .side-foot a:hover{text-decoration:underline}
 .side-foot .sf-status{color:#93c5fd;font-size:11px;margin-top:3px;word-break:break-all}
+.side-foot .sf-ver{color:#5f6d89;font-size:10.5px;margin-top:5px;border-top:1px dashed rgba(255,255,255,.08);padding-top:5px;letter-spacing:.2px;cursor:pointer}
+.side-foot .sf-ver:hover{color:#aeb9cd}
 .side-foot .sf-snap{color:#7c8aa5;font-size:10.5px;margin-top:2px;word-break:break-all;cursor:pointer}
 
 /* 分页：默认隐藏，激活显示 */
@@ -110,6 +112,15 @@ body{
 .spacer{flex:1 1 auto}
 .page-title-current{font-size:18px;font-weight:700;color:var(--text);white-space:nowrap;letter-spacing:-.2px;position:relative;padding-left:14px}
 .page-title-current::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:5px;height:18px;border-radius:3px;background:linear-gradient(180deg,var(--accent),var(--gold))}
+/* 版本徽章：顶栏常驻，一眼识别当前构建版本（构建脚本自动递增） */
+.ver-chip{
+  display:inline-flex;align-items:center;gap:4px;margin-left:10px;padding:3px 9px;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent);border:1px solid rgba(79,70,229,.18);
+  font-size:11.5px;font-weight:700;letter-spacing:.3px;cursor:pointer;user-select:none;white-space:nowrap;
+  transition:.15s;line-height:1.4;
+}
+.ver-chip:hover{background:#e0e3ff;border-color:rgba(79,70,229,.35);transform:translateY(-1px)}
+.ver-chip::before{content:"";width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.18)}
 .status{font-size:12px;color:var(--muted);white-space:nowrap}
 .status b{color:var(--text);font-weight:600}
 .tb-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -627,6 +638,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
+      <div class="sf-ver" id="sfVer">v42 · 2026-08-09 17:23</div>
     </div>
   </aside>
 
@@ -637,6 +649,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v42</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -862,6 +875,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v42 · 2026-08-09 17:23 · 构建时自动更新</div></div>
+              <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
             <div class="setting-row"><div><div class="t">账户偏好</div><div class="d">主题色、涨跌色、刷新间隔、自动刷新</div></div>
@@ -903,6 +918,10 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  *  个人持仓 / 交易管理  —  单文件版
  *  所有可自定义项都集中在下面的 CONFIG 里，改完保存刷新即可生效。
  * ========================================================================= */
+/* 版本标识（构建脚本 _bump_version.py 自动递增）：
+   每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
+const APP_VERSION = 'v42';
+const APP_BUILD   = '2026-08-09 17:23';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1059,6 +1078,33 @@ function toast(msg, type){
   $('#toasts').appendChild(d);
   setTimeout(() => { d.style.transition = '.25s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 260); }, type === 'err' ? 4200 : 2600);
 }
+
+/* ===== 版本标识 UI（构建脚本 _bump_version.py 自动递增版本号）=====
+   顶栏徽章 / 侧栏底部 / 设置页三处同步显示；点击徽章或侧栏版本行弹出完整构建信息。 */
+function setVersionUI(){
+  const full = APP_VERSION + ' · ' + APP_BUILD + ' 构建 · 构建时自动递增';
+  const chip = document.getElementById('verChip');
+  if (chip){
+    chip.textContent = APP_VERSION;
+    chip.onclick = () => toast(full + '（点击右侧「刷新」可确认数据也最新）');
+  }
+  const sf = document.getElementById('sfVer');
+  if (sf){
+    sf.textContent = APP_VERSION + ' · ' + APP_BUILD;
+    sf.onclick = () => toast(full);
+  }
+  const info = document.getElementById('verInfo');
+  if (info) info.textContent = APP_VERSION + ' · ' + APP_BUILD + ' · 每次发布自动递增，刷新页面即可确认是否最新';
+  const cp = document.getElementById('btnVerCopy');
+  if (cp) cp.onclick = () => {
+    const t = APP_VERSION + ' (' + APP_BUILD + ')';
+    const done = () => toast('已复制：' + t);
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(done).catch(() => done());
+    } else { done(); }
+  };
+}
+setVersionUI();
 
 /* 通用弹窗：返回 Promise<按钮 value | null> */
 function dialog({ title, bodyHTML, buttons }){
