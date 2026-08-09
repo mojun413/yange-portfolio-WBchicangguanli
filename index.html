@@ -201,6 +201,16 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .monitor-card .mc-price{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.3}
 .monitor-card.up{border-color:#f3c9c9;background:#fff7f7}
 .monitor-card.down{border-color:#c6e8d3;background:#f4fcf7}
+/* 自选标的卡片（盯盘看板）：带移除按钮 + 点击看 K 线 */
+.watch-card{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:9px 10px;display:flex;flex-direction:column;gap:1px;transition:border-color .15s, transform .15s, box-shadow .15s;cursor:pointer}
+.watch-card:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px)}
+.watch-card .mc-name{font-size:12.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;padding-right:14px}
+.watch-card .mc-pct{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.3px;line-height:1.05}
+.watch-card .mc-price{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.3}
+.watch-card.up{border-color:#f3c9c9;background:#fff7f7}
+.watch-card.down{border-color:#c6e8d3;background:#f4fcf7}
+.watch-card .watch-del{position:absolute;top:4px;right:4px;width:18px;height:18px;line-height:14px;text-align:center;border:none;background:transparent;color:var(--muted);font-size:14px;border-radius:5px;cursor:pointer;padding:0}
+.watch-card .watch-del:hover{background:rgba(229,72,77,.12);color:var(--up)}
 .monitor-card.flat{border-color:var(--line-2)}
 .monitor-card.mc-top{border-width:2px}
 .monitor-foot{font-size:12px;color:var(--muted);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
@@ -667,23 +677,22 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
         <div class="panel">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>盯盘看板</div>
-            <div class="panel-sub" id="monitorSub">A股行业板块 · 每60秒自动刷新 · 红涨绿跌</div>
+            <div class="panel-sub" id="monitorSub">自选标的 · 每60秒自动刷新 · 红涨绿跌</div>
             <div class="spacer"></div>
-            <select id="monitorSortSel" class="btn-sm" title="选择排序方式（也可点上方标题循环切换）" style="height:auto;padding:5px 8px;font-size:12px">
+            <div class="mb-search"><input id="watchInput" type="text" placeholder="代码/名称 添加自选（如 002517 / 512000）" autocomplete="off"></div>
+            <button class="btn-sm" id="btnWatchAdd" title="将输入的代码加入自选">＋ 添加</button>
+            <select id="monitorSortSel" class="btn-sm" title="选择排序方式" style="height:auto;padding:5px 8px;font-size:12px">
               <option value="pct-desc">涨跌幅 ↓</option>
               <option value="pct-asc">涨跌幅 ↑</option>
               <option value="name-asc">名称 A→Z</option>
               <option value="name-desc">名称 Z→A</option>
-              <option value="price-desc">点位 ↓</option>
-              <option value="price-asc">点位 ↑</option>
+              <option value="price-desc">现价 ↓</option>
+              <option value="price-asc">现价 ↑</option>
             </select>
-            <button class="btn-sm" id="btnMonitorRefresh" title="手动刷新板块行情">刷新</button>
+            <button class="btn-sm" id="btnMonitorRefresh" title="手动刷新自选行情">刷新</button>
             <button class="btn-sm" id="btnMonitorReset" title="恢复默认排序（涨跌幅降序）">重置排序</button>
           </div>
           <div class="panel-body tight">
-            <div class="monitor-bar">
-              <div class="mb-search"><input id="monitorSearch" type="text" placeholder="🔍 搜索板块（如：证券/银行/半导体）"></div>
-            </div>
             <div class="monitor-grid" id="monitorGrid"></div>
             <div class="monitor-foot" id="monitorFoot"></div>
           </div>
@@ -2111,7 +2120,7 @@ function renderLive(){
     })
     .sort((a, b) => (a.name || a.code).localeCompare(b.name || b.code, 'zh-Hans-CN'));
   if (!list.length){ grid.innerHTML = '<div class="dim" style="padding:12px">暂无持仓</div>'; return; }
-  grid.innerHTML = list.map(h => {
+  grid.innerHTML = list.map((h, idx) => {
     const c = calcHolding(h);
     const q = state.quotes[qkey(h)] || {};
     const price = isFinite(q.price) ? q.price : NaN;
@@ -2131,193 +2140,135 @@ function renderLive(){
         pctHtml = '<div class="lc-noquote">净值</div>';
       }
     }
-    return '<div class="live-card">' +
-      '<div class="lc-name" title="' + esc(name) + ' · ' + esc(h.code) + '">' + esc(name) + '</div>' +
+    return '<div class="live-card" onclick="openKline(' + idx + ')" title="' + esc(name) + ' · ' + esc(h.code) + ' · 点击查看K线">' +
+      '<div class="lc-name">' + esc(name) + '</div>' +
       priceHtml + pctHtml +
     '</div>';
   }).join('');
 }
 
-/* ============================ 盯盘看板：A股行业板块实时行情 ============================
-   数据源：东方财富 push2.eastmoney.com 板块行情接口（m:90+t:2 = 行业板块，共约 496 个）
-   接口：https://push2.eastmoney.com/api/qt/clist/get?pn=页&pz=100&po=1&np=1&fltt=2&invt=2&fid=f3&fs=m:90+t:2&fields=f2,f3,f12,f14
-   返回：data.diff[] = { f2:最新点位, f3:涨跌幅%, f12:板块代码, f14:板块名称 }
-   若东财接口不可达，fallback 到腾讯指数接口展示主要指数。 */
-const MONITOR_EM_URL = 'https://push2.eastmoney.com/api/qt/clist/get';
-let monitorData = [];        // [{code, name, price, pct}]
+/* ============================ 盯盘看板：自选标的实时行情 ============================
+   自选标的由用户主动添加（本地持久化 pm_watchlist），只显示自选标的最新行情，
+   行情源与持仓一致（腾讯 qt.gtimg.cn 批量接口 fetchQuotes）。卡片点击可看 60 日 K 线。 */
+let watchList = load('watchlist', []);   // [{code, name, market, type}] market:'sh'|'sz'|'bj'|'hk'|''（场外jj）
+let watchQuotes = {};                    // sym -> quote（现价/涨跌幅）
 let monitorSortKey = 'pct';  // 'pct' | 'name' | 'price'
 let monitorSortDir = 'desc';
-let monitorFilter = '';
 let monitorLoading = false;
+const persistWatch = () => save('watchlist', watchList);
+const watchSym = w => {
+  const c = String(w.code || '').replace(/\D/g, '');
+  return quoteSymbol({ code: c, type: w.type || 'stock', market: w.market || '' });
+};
 
-/* 通用 JSONP：注入 <script> 并等待回调返回 JSON。
-   用于东财等不发送 CORS 头的接口——浏览器里 fetch 跨域会被拦，JSONP 注入 script 标签则可正常拿数据。 */
-function jsonpGet(url, timeout){
-  return new Promise((resolve, reject) => {
-    const cb = 'emcb_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 1e9).toString(36);
-    const s = document.createElement('script');
-    s.async = true;
-    const t = setTimeout(() => {
-      try { delete window[cb]; } catch (e) {}
-      if (s.parentNode) s.remove();
-      reject(new Error('JSONP 超时'));
-    }, timeout || CONFIG.jsonpTimeout);
-    window[cb] = (data) => {
-      clearTimeout(t);
-      try { delete window[cb]; } catch (e) {}
-      if (s.parentNode) s.remove();
-      resolve(data);
-    };
-    s.onerror = () => {
-      clearTimeout(t);
-      try { delete window[cb]; } catch (e) {}
-      if (s.parentNode) s.remove();
-      reject(new Error('JSONP 加载失败'));
-    };
-    s.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'cb=' + cb;
-    document.head.appendChild(s);
-  });
-}
-
-/* 拉取全部板块（分页，JSONP 绕过浏览器跨域限制）。
-   东财 push2 接口不发送 Access-Control-Allow-Origin，直接 fetch 跨域会被浏览器拦截，
-   因此改用 JSONP（cb 回调）注入 <script> 拉取。
-   三系列并行：行业板块（m:90+t:2，约 496）+ 概念板块（m:90+t:3，约 800+）+ 地域板块（m:90+t:1，约 30+）。 */
-async function fetchMonitorBlocks(){
-  /* [fs 参数, 起始页, 页数] —— 行业 5 页、概念 9 页、地域 1 页 */
-  const series = [ ['m:90+t:2', 1, 5], ['m:90+t:3', 1, 9], ['m:90+t:1', 1, 1] ];
-  const tasks = [];
-  for (const [fs, pn0, pages] of series){
-    for (let pn = pn0; pn < pn0 + pages; pn++){
-      const url = MONITOR_EM_URL + '?pn=' + pn + '&pz=100&po=1&np=1&fltt=2&invt=2&fid=f3&fs=' + encodeURIComponent(fs) + '&fields=f2,f3,f12,f14';
-      tasks.push(jsonpGet(url));
-    }
-  }
-  const results = await Promise.all(tasks);
-  const pages = [];
-  for (const j of results){
-    if (j && j.data && Array.isArray(j.data.diff)) pages.push(...j.data.diff);
-  }
-  /* 去重（部分板块同时出现在 Ⅱ/Ⅲ 分级里，按代码去重保留首个） */
-  const seen = new Set();
-  const out = [];
-  for (const d of pages){
-    const name = String(d.f14 || '').trim();
-    const code = String(d.f12 || '').trim();
-    if (!name || seen.has(code)) continue;
-    seen.add(code);
-    out.push({
-      code,
-      name,
-      price: isFinite(Number(d.f2)) ? Number(d.f2) : NaN,
-      pct: isFinite(Number(d.f3)) ? Number(d.f3) : NaN
-    });
-  }
-  return out;
-}
-
-/* 腾讯主要指数 fallback（东财不可达时兜底）。沿用主行情的 injectScript 注入方式，
-   读取 window['v_xxx'] 全局变量，避免 fetch 跨域被拦；涨跌幅用 现价/昨收 计算，
-   规避不同标的字段位置差异（原代码取 f[32] 会误读成点位，导致涨跌幅异常）。 */
-async function fetchMonitorFallback(){
-  const syms = 'sh000001,sz399001,sz399006,sh000688,sh000300,sh000905,sh000852'.split(',');
-  syms.forEach(c => { try { delete window['v_' + c]; } catch (e) { window['v_' + c] = undefined; } });
-  try {
-    await injectScript(CONFIG.stockApi + syms.join(',') + '&_=' + Date.now(), 'GBK');
-  } catch (e) { /* 继续，下面按有无数据判空 */ }
-  const out = [];
-  for (const c of syms){
-    const raw = window['v_' + c];
-    if (typeof raw !== 'string' || raw.length < 10) continue;
-    const f = raw.split('~');
-    if (f.length < 5) continue;
-    const price = Number(f[3]);
-    const preClose = Number(f[4]);
-    const pct = (isFinite(price) && isFinite(preClose) && preClose > 0)
-      ? (price - preClose) / preClose * 100 : NaN;
-    out.push({ code: f[2], name: (f[1] || '').trim(), price: isFinite(price) ? price : NaN, pct });
-  }
-  return out;
-}
-
-/* 刷新盯盘看板（拉数据 → 渲染） */
+/* 刷新自选行情（复用持仓同款腾讯行情接口） */
 async function refreshMonitor(silent){
   if (monitorLoading) return;
-  monitorLoading = true;
   const sub = document.getElementById('monitorSub');
-  if (!silent && sub) sub.innerHTML = '<span class="spin"></span>正在拉取板块行情…';
+  if (!watchList.length){ renderWatch(); if (sub) sub.textContent = '自选标的 · 每60秒自动刷新 · 红涨绿跌'; return; }
+  monitorLoading = true;
+  if (!silent && sub) sub.innerHTML = '<span class="spin"></span>正在拉取自选行情…';
   try {
-    let blocks;
-    try { blocks = await fetchMonitorBlocks(); }
-    catch (e) { blocks = []; }
-    /* 东财可达但返回空（如按 Referer 风控拦截）时也走腾讯兜底，而不是直接报错 */
-    if (!blocks || !blocks.length){
-      try { blocks = await fetchMonitorFallback(); } catch (e) { blocks = []; }
-    }
-    if (!blocks || !blocks.length) throw new Error('无数据');
-    monitorData = blocks;
-    if (sub) sub.textContent = 'A股行业·概念·地域板块 ' + blocks.length + ' 个 · 每60秒自动刷新 · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
-    renderMonitor();
+    const syms = [...new Set(watchList.map(watchSym))];
+    const map = await fetchQuotes(syms);
+    watchQuotes = map;
+    renderWatch();
+    const nf = syms.filter(s => { const q = map[s]; return !q || q.err || !isFinite(q.price); }).length;
+    if (sub) sub.textContent = '自选 ' + watchList.length + ' 个 · ' + (syms.length - nf) + ' 个有行情 · 每60秒自动刷新 · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
   } catch (e) {
     if (!silent){
       const grid = document.getElementById('monitorGrid');
-      if (grid) grid.innerHTML = '<div class="dim" style="padding:14px">板块行情拉取失败：' + esc(e.message) + '。请检查网络后点「刷新」重试。</div>';
+      if (grid) grid.innerHTML = '<div class="dim" style="padding:14px">行情拉取失败：' + esc(e.message) + '。请检查网络后点「刷新」重试。</div>';
     }
   } finally {
     monitorLoading = false;
   }
 }
 
-/* 渲染盯盘看板（排序 + 搜索过滤；无搜索时最多显示 MAX_MONITOR_CARDS 张，防移动端卡顿） */
-const MAX_MONITOR_CARDS = 200;
-function renderMonitor(){
+/* 渲染自选标的卡片（排序；卡片点击看 K 线，× 移除） */
+function renderWatch(){
   const grid = document.getElementById('monitorGrid');
   if (!grid) return;
-  const kw = (monitorFilter || '').trim().toLowerCase();
-  let list = monitorData;
-  if (kw){
-    list = list.filter(b => b.name.toLowerCase().includes(kw) || b.code.toLowerCase().includes(kw));
+  if (!watchList.length){
+    grid.innerHTML = '<div class="empty" style="padding:30px 16px"><div class="big">暂无自选标的</div>' +
+      '<div style="font-size:12.5px;color:var(--muted)">在面板顶部输入代码 / 名称，点「＋ 添加」加入盯盘</div></div>';
+    const foot = document.getElementById('monitorFoot');
+    if (foot) foot.innerHTML = '';
+    return;
   }
   const dir = monitorSortDir === 'asc' ? 1 : -1;
-  list = list.slice().sort((A, B) => {
-    if (monitorSortKey === 'name') return A.name.localeCompare(B.name, 'zh-Hans-CN') * dir;
-    const a = A[monitorSortKey], b = B[monitorSortKey];
+  const list = watchList.slice().sort((A, B) => {
+    if (monitorSortKey === 'name') return (A.name || A.code).localeCompare(B.name || B.code, 'zh-Hans-CN') * dir;
+    const qa = watchQuotes[watchSym(A)], qb = watchQuotes[watchSym(B)];
+    const a = monitorSortKey === 'price' ? (qa && qa.price) : (qa && qa.pct);
+    const b = monitorSortKey === 'price' ? (qb && qb.price) : (qb && qb.pct);
     const ea = !isFinite(a), eb = !isFinite(b);
-    if (ea && eb) return 0;
+    if (ea && eb) return (A.code > B.code ? 1 : -1);
     if (ea) return 1;
     if (eb) return -1;
     return (a - b) * dir;
   });
-  const limited = !kw ? list.slice(0, MAX_MONITOR_CARDS) : list;
-  if (!list.length){
-    grid.innerHTML = '<div class="dim" style="padding:14px">没有匹配的板块' + (kw ? '：「' + esc(monitorFilter) + '」' : '') + '</div>';
-  } else {
-    grid.innerHTML = limited.map(b => {
-      const upN = isFinite(b.pct) && b.pct > 0;
-      const downN = isFinite(b.pct) && b.pct < 0;
-      const clsN = upN ? 'up' : (downN ? 'down' : 'flat');
-      const arrow = upN ? '▲' : (downN ? '▼' : '·');
-      return '<div class="monitor-card ' + clsN + '" title="' + esc(b.name) + '（' + esc(b.code) + '）">' +
-        '<div class="mc-name">' + esc(b.name) + '</div>' +
-        '<div class="mc-pct ' + clsN + '">' + (isFinite(b.pct) ? arrow + (b.pct > 0 ? '+' : '') + b.pct.toFixed(2) + '%' : '—') + '</div>' +
-        '<div class="mc-price">' + (isFinite(b.price) ? b.price.toFixed(2) : '—') + '</div>' +
-      '</div>';
-    }).join('');
-  }
-  const upC = list.filter(b => isFinite(b.pct) && b.pct > 0).length;
-  const downC = list.filter(b => isFinite(b.pct) && b.pct < 0).length;
-  const flatC = list.filter(b => !isFinite(b.pct) || b.pct === 0).length;
+  grid.innerHTML = list.map(w => {
+    const sym = watchSym(w);
+    const q = watchQuotes[sym] || {};
+    const price = isFinite(q.price) ? q.price : NaN;
+    const pct = isFinite(q.pct) ? q.pct : NaN;
+    const upN = isFinite(pct) && pct > 0, downN = isFinite(pct) && pct < 0;
+    const clsN = upN ? 'up' : (downN ? 'down' : 'flat');
+    const arrow = upN ? '▲' : (downN ? '▼' : '·');
+    const name = q.name || w.name || w.code;
+    return '<div class="watch-card ' + clsN + '" data-code="' + esc(w.code) + '" title="' + esc(name) + '（' + esc(w.code) + '）· 点击查看K线">' +
+      '<button class="watch-del" data-del="' + esc(w.code) + '" title="移除自选">×</button>' +
+      '<div class="mc-name">' + esc(name) + '</div>' +
+      '<div class="mc-pct ' + clsN + '">' + (isFinite(pct) ? arrow + (pct > 0 ? '+' : '') + pct.toFixed(2) + '%' : '<span class="dim">—</span>') + '</div>' +
+      '<div class="mc-price">' + (isFinite(price) ? price4(price) : '<span class="dim">—</span>') + '</div>' +
+    '</div>';
+  }).join('');
+  const upC = list.filter(w => { const q = watchQuotes[watchSym(w)]; return isFinite(q && q.pct) && q.pct > 0; }).length;
+  const downC = list.filter(w => { const q = watchQuotes[watchSym(w)]; return isFinite(q && q.pct) && q.pct < 0; }).length;
   const foot = document.getElementById('monitorFoot');
   if (foot){
     foot.innerHTML =
-      '<span>显示 <b class="mf-num">' + (kw ? list.length : Math.min(list.length, MAX_MONITOR_CARDS)) + '</b> / ' + monitorData.length + ' 板块' +
-        (!kw && list.length > MAX_MONITOR_CARDS ? '（搜索可看全部）' : '') + '</span>' +
-      '<span><b style="color:var(--up)">▲ ' + upC + '</b> · <b style="color:var(--down)">▼ ' + downC + '</b> · <span class="dim">— ' + flatC + '</span></span>' +
-      '<span class="dim">排序：' + ({pct:'涨跌幅', name:'名称', price:'点位'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升' : '降') + '）</span>';
+      '<span>自选 <b class="mf-num">' + watchList.length + '</b> 个</span>' +
+      '<span><b style="color:var(--up)">▲ ' + upC + '</b> · <b style="color:var(--down)">▼ ' + downC + '</b></span>' +
+      '<span class="dim">排序：' + ({pct:'涨跌幅', name:'名称', price:'现价'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升' : '降') + '）</span>';
   }
   /* 排序下拉同步当前值（标题循环/重置后保持一致） */
   const sortSel = document.getElementById('monitorSortSel');
   if (sortSel) sortSel.value = monitorSortKey + '-' + monitorSortDir;
+}
+/* 兼容别名（原板块版函数名，测试/绑定沿用） */
+const renderMonitor = renderWatch;
+
+/* 添加自选标的（输入代码 → 查行情 → 入库） */
+async function addWatch(){
+  const inp = document.getElementById('watchInput');
+  const raw = (inp ? inp.value : '').trim();
+  if (!raw){ toast('请输入标的代码', 'warn'); return; }
+  const digits = raw.replace(/\D/g, '');
+  if (!digits || digits.length < 5){ toast('无法识别代码：' + esc(raw), 'warn'); return; }
+  if (watchList.some(w => w.code === digits)){ toast('该标的已在自选中', 'info'); return; }
+  /* 0 开头 6 位且非 000~004 段 → 场外基金（jj 行情）；其余走号段判定 */
+  const isFund = /^0\d{5}$/.test(digits) && !/^00[0-4]\d{3}/.test(digits);
+  const sym = quoteSymbol({ code: digits, type: isFund ? 'fund' : 'stock', market: '' });
+  try {
+    const map = await fetchQuotes([sym]);
+    const q = map[sym];
+    if (!q || q.err || !q.name){ toast('未找到标的 ' + esc(raw) + '，请核对代码', 'warn'); return; }
+    watchList.push({ code: digits, name: q.name, market: sym.slice(0, 2) === 'jj' ? '' : sym.slice(0, 2), type: isFund ? 'fund' : 'stock' });
+    persistWatch();
+    if (inp) inp.value = '';
+    await refreshMonitor(true);
+    toast('已添加自选：' + q.name, 'ok');
+  } catch (e) { toast('查询失败：' + e.message, 'err'); }
+}
+
+/* 移除自选 */
+function removeWatch(code){
+  watchList = watchList.filter(w => w.code !== code);
+  persistWatch();
+  refreshMonitor(true);
+  toast('已移除自选', 'ok');
 }
 
 /* 盯盘看板：切换排序（点面板标题循环） */
@@ -2325,7 +2276,131 @@ function cycleMonitorSort(){
   if (monitorSortKey === 'pct' && monitorSortDir === 'desc'){ monitorSortKey = 'pct'; monitorSortDir = 'asc'; }
   else if (monitorSortKey === 'pct' && monitorSortDir === 'asc'){ monitorSortKey = 'name'; monitorSortDir = 'asc'; }
   else { monitorSortKey = 'pct'; monitorSortDir = 'desc'; }
-  renderMonitor();
+  renderWatch();
+}
+
+/* ============================ K 线图（腾讯 K 线 JSONP） ============================
+   数据源：https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=<sym>,day,,,<n>,qfq
+   返回 data[sym].qfqday = [[date, open, close, high, low, volume], ...]（前复权日K） */
+function klineJsonp(sym, days){
+  return new Promise((resolve, reject) => {
+    const cbName = '_klcb_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
+    const t = setTimeout(() => { try { delete window[cbName]; } catch(e){} reject(new Error('K线请求超时')); }, CONFIG.jsonpTimeout);
+    window[cbName] = data => { clearTimeout(t); try { delete window[cbName]; } catch(e){} resolve(data); };
+    const src = 'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=' + encodeURIComponent(sym + ',day,,,' + days + ',qfq') + '&_callback=' + cbName;
+    injectScript(src).catch(e => { clearTimeout(t); try { delete window[cbName]; } catch(e){} reject(e); });
+  });
+}
+function parseKline(data, sym){
+  const node = data && data.data && (data.data[sym] || {});
+  const arr = (node && (node.qfqday || node.day)) || [];
+  return arr.map(r => ({
+    date: String(r[0]),
+    open: Number(r[1]), close: Number(r[2]), high: Number(r[3]), low: Number(r[4]),
+    vol: Number(r[5]) || 0
+  })).filter(r => isFinite(r.open) && isFinite(r.close) && isFinite(r.high) && isFinite(r.low) && r.open > 0 && r.close > 0);
+}
+/* 生成蜡烛图 SVG（A股惯例：涨红跌绿） */
+function klineSVG(rows, name){
+  const W = 600, H = 340, padL = 52, padR = 14, padT = 18, padB = 42;
+  const n = rows.length;
+  if (!n) return '';
+  let hi = -Infinity, lo = Infinity;
+  rows.forEach(r => { hi = Math.max(hi, r.high); lo = Math.min(lo, r.low); });
+  const range = (hi - lo) || 1;
+  const volMax = Math.max.apply(null, rows.map(r => r.vol)) || 1;
+  const cw = (W - padL - padR) / n;
+  const bw = Math.max(2, Math.min(9, cw * 0.7));
+  const plotH = H - padT - padB - 34;
+  const yOf = v => padT + (hi - v) / range * plotH;
+  const volH = 30, volBase = H - padB;
+  const xOf = i => padL + i * cw + cw / 2;
+  const up = '#e5484d', down = '#15a34a', flat = '#8a93a6';
+  const col = r => (r.close >= r.open ? (r.close === r.open ? flat : up) : down);
+  const ma = k => {
+    const pts = [];
+    for (let i = k - 1; i < n; i++){
+      let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].close;
+      pts.push([xOf(i), yOf(s / k)]);
+    }
+    return pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  };
+  const pathMA5 = ma(5), pathMA10 = ma(10);
+  let cand = '', vol = '', gridY = '', yLbl = '';
+  for (let i = 0; i <= 4; i++){
+    const v = hi - range * i / 4;
+    const y = yOf(v);
+    gridY += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#eef0f5" stroke-width="1"/>';
+    yLbl += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + v.toFixed(2) + '</text>';
+  }
+  rows.forEach((r, i) => {
+    const x = xOf(i);
+    const y1 = yOf(r.high), y2 = yOf(r.low), yo = yOf(r.open), yc = yOf(r.close);
+    const c = col(r);
+    cand += '<line x1="' + x.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + c + '" stroke-width="1"/>';
+    const top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yo - yc));
+    cand += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + hgt.toFixed(1) + '" fill="' + c + '" rx="0.6"/>';
+    const vh = Math.max(1, r.vol / volMax * volH);
+    vol += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + (volBase - vh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + c + '" opacity="0.55"/>';
+  });
+  let xLbl = '';
+  [0, Math.floor((n - 1) / 2), n - 1].forEach(i => {
+    xLbl += '<text x="' + xOf(i).toFixed(1) + '" y="' + (H - padB + 16) + '" text-anchor="' + (i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle')) + '" font-size="10" fill="#9aa3b5">' + String(rows[i].date).slice(5) + '</text>';
+  });
+  const last = rows[n - 1], first = rows[0];
+  const chg = first.close > 0 ? (last.close - first.close) / first.close * 100 : 0;
+  const chgC = chg > 0 ? up : (chg < 0 ? down : flat);
+  const title = '<text x="' + padL + '" y="' + (padT - 2) + '" font-size="13" font-weight="700" fill="#161a22">' + esc(name) + '</text>' +
+    '<text x="' + (W - padR) + '" y="' + (padT - 2) + '" text-anchor="end" font-size="12.5" font-weight="700" fill="' + chgC + '">' + last.close.toFixed(2) + '  ' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</text>';
+  const maLbl = '<text x="' + padL + '" y="' + (padT + 12) + '" font-size="10" fill="#e0a83e">— MA5</text>' +
+    '<text x="' + (padL + 52) + '" y="' + (padT + 12) + '" font-size="10" fill="#4f8ef7">— MA10</text>';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto">' +
+    title + maLbl + gridY + yLbl +
+    (pathMA5 ? '<path d="' + pathMA5 + '" fill="none" stroke="#e0a83e" stroke-width="1.3"/>' : '') +
+    (pathMA10 ? '<path d="' + pathMA10 + '" fill="none" stroke="#4f8ef7" stroke-width="1.2"/>' : '') +
+    cand + vol + xLbl +
+    '</svg>';
+}
+/* 打开 K 线弹窗（总览实时行情：持仓索引 → 与 renderLive 同口径列表） */
+function openKline(idx){
+  const list = state.holdings
+    .filter(h => { if (h.closed) return false; const c = calcHolding(h); return c.shares > 1e-8; })
+    .sort((a, b) => (a.name || a.code).localeCompare(b.name || b.code, 'zh-Hans-CN'));
+  const h = list[idx];
+  if (!h) return;
+  const c = String(h.code || '').replace(/\D/g, '');
+  showKlineDialog(h.name || h.code, quoteSymbol({ code: c, type: h.type || 'stock', market: h.market || '' }));
+}
+/* 打开 K 线弹窗（自选标的：代码） */
+function openKlineByCode(code){
+  const w = watchList.find(x => x.code === code);
+  if (!w) return;
+  const c = String(code).replace(/\D/g, '');
+  showKlineDialog(w.name || code, watchSym(w));
+}
+/* K 线弹窗：mask + loading → SVG（场外基金 jj 无日K，直接提示） */
+function showKlineDialog(name, sym){
+  const isFund = String(sym).slice(0, 2) === 'jj';
+  const mask = document.createElement('div');
+  mask.className = 'mask';
+  mask.innerHTML = '<div class="modal" style="max-width:660px"><h3>' + esc(name) + ' · K线（60日 · 前复权）</h3>' +
+    '<div class="mb" id="klBody" style="text-align:center;padding:22px">' + (isFund ? '<div class="dim" style="padding:20px">场外基金无日K线行情</div>' : '<span class="spin"></span> 加载K线数据…') + '</div>' +
+    '<div class="mf"><button class="btn-primary">关闭</button></div></div>';
+  const close = () => { mask.remove(); document.removeEventListener('keydown', onKey); };
+  mask.querySelector('button').onclick = close;
+  mask.addEventListener('mousedown', e => { if (e.target === mask) close(); });
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(mask);
+  if (isFund) return;
+  const body = mask.querySelector('#klBody');
+  klineJsonp(sym, 60).then(data => {
+    const rows = parseKline(data, sym);
+    if (!rows.length){ body.innerHTML = '<div class="dim" style="padding:20px">K线数据拉取失败（' + esc(sym) + '）</div>'; return; }
+    body.innerHTML = klineSVG(rows, name);
+  }).catch(e => {
+    body.innerHTML = '<div class="dim" style="padding:20px">K线加载失败：' + esc(e.message) + '</div>';
+  });
 }
 
 /* 总览 6 张卡片金额隐藏（小眼睛）：每张卡独立开关，掩码 = 首个字符 ***** 尾字符 */
@@ -3531,17 +3606,26 @@ function bind(){
     state.settings.posShowClosed = !!e.target.checked;
     persist.settings(); renderPosition();
   });
-  /* 盯盘看板 */
+  /* 盯盘看板（自选标的） */
   $('#btnMonitorRefresh').onclick = () => refreshMonitor(false);
-  $('#btnMonitorReset').onclick = () => { monitorSortKey = 'pct'; monitorSortDir = 'desc'; renderMonitor(); };
-  $('#monitorSearch').oninput = e => { monitorFilter = e.target.value; renderMonitor(); };
-  $('#monitorSub').onclick = () => { cycleMonitorSort(); toast('已切换排序：' + ({pct:'涨跌幅', name:'名称', price:'点位'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升序' : '降序') + '）'); };
-  /* 排序下拉：直观选择排序方式（涨跌幅/名称/点位 × 升降序） */
+  $('#btnMonitorReset').onclick = () => { monitorSortKey = 'pct'; monitorSortDir = 'desc'; renderWatch(); };
+  $('#monitorSub').onclick = () => { cycleMonitorSort(); toast('已切换排序：' + ({pct:'涨跌幅', name:'名称', price:'现价'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升序' : '降序') + '）'); };
+  /* 添加自选：按钮 / 回车 */
+  $('#btnWatchAdd').onclick = () => addWatch();
+  $('#watchInput').onkeydown = e => { if (e.key === 'Enter') addWatch(); };
+  /* 自选卡片：点击看 K 线，点 × 移除（事件委托） */
+  $('#monitorGrid').addEventListener('click', e => {
+    const del = e.target.closest('.watch-del');
+    if (del){ removeWatch(del.getAttribute('data-del')); return; }
+    const card = e.target.closest('.watch-card');
+    if (card){ openKlineByCode(card.getAttribute('data-code')); }
+  });
+  /* 排序下拉：直观选择排序方式（涨跌幅/名称/现价 × 升降序） */
   $('#monitorSortSel') && ($('#monitorSortSel').onchange = e => {
     const v = (e.target.value || '').split('-');
     if (v.length === 2 && ['pct','name','price'].includes(v[0]) && ['asc','desc'].includes(v[1])){
       monitorSortKey = v[0]; monitorSortDir = v[1];
-      renderMonitor();
+      renderWatch();
     }
   });
   /* 6 张卡片金额隐藏小眼睛：事件委托（点 .cards 内任意 eye-btn → 单卡独立切换） */
