@@ -488,6 +488,11 @@ th.sorted .si{opacity:1}
 .modal h3{margin:0;padding:16px 20px;font-size:16px;border-bottom:1px solid var(--line-2);font-weight:700}
 .modal .mb{padding:18px 20px;overflow:auto}
 .modal .mf{padding:13px 20px;border-top:1px solid var(--line-2);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;background:var(--panel-2)}
+/* K 线周期切换 tab（同花顺式：日K/周K/月K） */
+.kl-tabs{display:inline-flex;gap:4px;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:3px}
+.kl-tabs .kt{padding:4px 14px;font-size:12.5px;font-weight:600;color:var(--muted);border-radius:7px;cursor:pointer;user-select:none;transition:.15s;white-space:nowrap}
+.kl-tabs .kt:hover{color:var(--text);background:rgba(255,255,255,.7)}
+.kl-tabs .kt.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.35)}
 .setting-row{display:grid;grid-template-columns:1fr 160px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px dashed var(--line-2)}
 .setting-row:last-child{border-bottom:none}
 .setting-row .t{font-size:13.5px;font-weight:600}
@@ -643,7 +648,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v44 · 2026-08-09 18:07</div>
+      <div class="sf-ver" id="sfVer">v45 · 2026-08-09 18:45</div>
     </div>
   </aside>
 
@@ -654,7 +659,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v44</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v45</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -884,7 +889,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v44 · 2026-08-09 18:07 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v45 · 2026-08-09 18:45 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -930,8 +935,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v44';
-const APP_BUILD   = '2026-08-09 18:07';
+const APP_VERSION = 'v45';
+const APP_BUILD   = '2026-08-09 18:45';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2458,84 +2463,161 @@ function cycleMonitorSort(){
 /* ============================ K 线图（腾讯 K 线 JSONP） ============================
    数据源：https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=<sym>,day,,,<n>,qfq
    返回 data[sym].qfqday = [[date, open, close, high, low, volume], ...]（前复权日K） */
-function klineJsonp(sym, days){
+function klineJsonp(sym, period, count){
+  /* 腾讯前复权K线：period = day | week | month；count 根数（日K 200 够画 MA60） */
+  const p = period || 'day';
+  const days = count || (p === 'day' ? 200 : (p === 'week' ? 120 : 80));
   return new Promise((resolve, reject) => {
     const cbName = '_klcb_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
     const t = setTimeout(() => { try { delete window[cbName]; } catch(e){} reject(new Error('K线请求超时')); }, CONFIG.jsonpTimeout);
     window[cbName] = data => { clearTimeout(t); try { delete window[cbName]; } catch(e){} resolve(data); };
-    const src = 'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=' + encodeURIComponent(sym + ',day,,,' + days + ',qfq') + '&_callback=' + cbName;
+    const src = 'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=' + encodeURIComponent(sym + ',' + p + ',,,' + days + ',qfq') + '&_callback=' + cbName;
     injectScript(src).catch(e => { clearTimeout(t); try { delete window[cbName]; } catch(e){} reject(e); });
   });
 }
-function parseKline(data, sym){
+function parseKline(data, sym, period){
   const node = data && data.data && (data.data[sym] || {});
-  const arr = (node && (node.qfqday || node.day)) || [];
+  const p = period || 'day';
+  const arr = (node && (node['qfq' + p] || node[p] || node.qfqday || node.day)) || [];
   return arr.map(r => ({
     date: String(r[0]),
     open: Number(r[1]), close: Number(r[2]), high: Number(r[3]), low: Number(r[4]),
     vol: Number(r[5]) || 0
   })).filter(r => isFinite(r.open) && isFinite(r.close) && isFinite(r.high) && isFinite(r.low) && r.open > 0 && r.close > 0);
 }
-/* 生成蜡烛图 SVG（A股惯例：涨红跌绿） */
-function klineSVG(rows, name){
-  const W = 600, H = 340, padL = 52, padR = 14, padT = 18, padB = 42;
+/* 成交量格式化：万 / 亿 */
+function fmtVol(v){
+  if (!isFinite(v) || v <= 0) return '—';
+  if (v >= 1e8) return (v / 1e8).toFixed(2) + '亿';
+  if (v >= 1e4) return (v / 1e4).toFixed(1) + '万';
+  return String(Math.round(v));
+}
+/* 同花顺风格 K 线 SVG：周期切换 + MA5/10/20/60 多均线 + 成交量副图 + 十字光标读数 */
+function klineSVG(rows, name, period){
+  const W = 720, H = 430, padL = 56, padR = 16, padT = 30, padB = 34;
+  const volArea = 66, volGap = 12;
   const n = rows.length;
   if (!n) return '';
+  const up = '#e5484d', down = '#15a34a', flat = '#8a93a6';
+  const maCols = { 5:'#607d8b', 10:'#f59e0b', 20:'#8b5cf6', 60:'#10b981' };
   let hi = -Infinity, lo = Infinity;
   rows.forEach(r => { hi = Math.max(hi, r.high); lo = Math.min(lo, r.low); });
   const range = (hi - lo) || 1;
   const volMax = Math.max.apply(null, rows.map(r => r.vol)) || 1;
   const cw = (W - padL - padR) / n;
-  const bw = Math.max(2, Math.min(9, cw * 0.7));
-  const plotH = H - padT - padB - 34;
+  const bw = Math.max(1.5, Math.min(9, cw * 0.7));
+  const plotH = H - padT - padB - volArea - volGap;
+  const plotB = padT + plotH;
   const yOf = v => padT + (hi - v) / range * plotH;
-  const volH = 30, volBase = H - padB;
   const xOf = i => padL + i * cw + cw / 2;
-  const up = '#e5484d', down = '#15a34a', flat = '#8a93a6';
   const col = r => (r.close >= r.open ? (r.close === r.open ? flat : up) : down);
-  const ma = k => {
+  const maLine = k => {
     const pts = [];
     for (let i = k - 1; i < n; i++){
       let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].close;
       pts.push([xOf(i), yOf(s / k)]);
     }
-    return pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    return { d: pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') };
   };
-  const pathMA5 = ma(5), pathMA10 = ma(10);
-  let cand = '', vol = '', gridY = '', yLbl = '';
+  const maLast = k => { if (n < k) return NaN; let s = 0; for (let j = n - k; j < n; j++) s += rows[j].close; return s / k; };
+  const ma5 = maLine(5), ma10 = maLine(10), ma20 = maLine(20), ma60 = maLine(60);
+  let gridY = '', yLbl = '';
   for (let i = 0; i <= 4; i++){
     const v = hi - range * i / 4;
     const y = yOf(v);
     gridY += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#eef0f5" stroke-width="1"/>';
     yLbl += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + v.toFixed(2) + '</text>';
   }
-  rows.forEach((r, i) => {
-    const x = xOf(i);
+  gridY += '<line x1="' + padL + '" y1="' + (plotB + volGap) + '" x2="' + (W - padR) + '" y2="' + (plotB + volGap) + '" stroke="#eef0f5" stroke-width="1"/>';
+  yLbl += '<text x="' + (padL - 6) + '" y="' + (plotB + volGap + 3.5) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + fmtVol(volMax) + '</text>';
+  let cand = '', vol = '';
+  for (let i = 0; i < n; i++){
+    const r = rows[i], x = xOf(i);
     const y1 = yOf(r.high), y2 = yOf(r.low), yo = yOf(r.open), yc = yOf(r.close);
     const c = col(r);
     cand += '<line x1="' + x.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + c + '" stroke-width="1"/>';
     const top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yo - yc));
     cand += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + hgt.toFixed(1) + '" fill="' + c + '" rx="0.6"/>';
-    const vh = Math.max(1, r.vol / volMax * volH);
-    vol += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + (volBase - vh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + c + '" opacity="0.55"/>';
-  });
+    const vh = Math.max(1, r.vol / volMax * (volArea - 8));
+    vol += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + (H - padB - vh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + c + '" opacity="0.6"/>';
+  }
   let xLbl = '';
-  [0, Math.floor((n - 1) / 2), n - 1].forEach(i => {
-    xLbl += '<text x="' + xOf(i).toFixed(1) + '" y="' + (H - padB + 16) + '" text-anchor="' + (i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle')) + '" font-size="10" fill="#9aa3b5">' + String(rows[i].date).slice(5) + '</text>';
+  [0, Math.floor(n / 4), Math.floor(n / 2), Math.floor(3 * n / 4), n - 1].forEach(i => {
+    const anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
+    xLbl += '<text x="' + xOf(i).toFixed(1) + '" y="' + (H - padB + 15) + '" text-anchor="' + anchor + '" font-size="10" fill="#9aa3b5">' + String(rows[i].date).slice(5) + '</text>';
   });
   const last = rows[n - 1], first = rows[0];
   const chg = first.close > 0 ? (last.close - first.close) / first.close * 100 : 0;
   const chgC = chg > 0 ? up : (chg < 0 ? down : flat);
-  const title = '<text x="' + padL + '" y="' + (padT - 2) + '" font-size="13" font-weight="700" fill="#161a22">' + esc(name) + '</text>' +
-    '<text x="' + (W - padR) + '" y="' + (padT - 2) + '" text-anchor="end" font-size="12.5" font-weight="700" fill="' + chgC + '">' + last.close.toFixed(2) + '  ' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</text>';
-  const maLbl = '<text x="' + padL + '" y="' + (padT + 12) + '" font-size="10" fill="#e0a83e">— MA5</text>' +
-    '<text x="' + (padL + 52) + '" y="' + (padT + 12) + '" font-size="10" fill="#4f8ef7">— MA10</text>';
-  return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto">' +
-    title + maLbl + gridY + yLbl +
-    (pathMA5 ? '<path d="' + pathMA5 + '" fill="none" stroke="#e0a83e" stroke-width="1.3"/>' : '') +
-    (pathMA10 ? '<path d="' + pathMA10 + '" fill="none" stroke="#4f8ef7" stroke-width="1.2"/>' : '') +
-    cand + vol + xLbl +
+  const pName = { day:'日K', week:'周K', month:'月K' }[period] || '日K';
+  const title = '<text x="' + padL + '" y="' + (padT - 8) + '" font-size="13.5" font-weight="700" fill="#161a22">' + esc(name) + ' · ' + pName + '（前复权）</text>' +
+    '<text x="' + (W - padR) + '" y="' + (padT - 8) + '" text-anchor="end" font-size="12.5" font-weight="700" fill="' + chgC + '">' + last.close.toFixed(2) + '  ' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</text>';
+  const leg = k => {
+    const v = maLast(k);
+    return '<text x="' + (W - padR) + '" y="' + (padT + 10 + [0, 13, 26, 39][[5,10,20,60].indexOf(k)]) + '" text-anchor="end" font-size="10" fill="' + maCols[k] + '">MA' + k + (isFinite(v) ? ':' + v.toFixed(2) : '') + '</text>';
+  };
+  const legend = leg(5) + leg(10) + leg(20) + leg(60);
+  const cross =
+    '<g id="klCross" style="display:none">' +
+      '<line id="klVL" stroke="rgba(30,41,59,.45)" stroke-width="1" stroke-dasharray="3,3"/>' +
+      '<line id="klHL" stroke="rgba(30,41,59,.45)" stroke-width="1" stroke-dasharray="3,3"/>' +
+      '<circle id="klDot" r="3" fill="#334155" stroke="#fff" stroke-width="1.2"/>' +
+    '</g>' +
+    '<rect id="klOverlay" x="' + padL + '" y="' + padT + '" width="' + (W - padL - padR) + '" height="' + (H - padT - padB) + '" fill="transparent" style="cursor:crosshair"/>';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;display:block">' +
+      title + legend + gridY + yLbl +
+      (ma5.d ? '<path d="' + ma5.d + '" fill="none" stroke="' + maCols[5] + '" stroke-width="1.3"/>' : '') +
+      (ma10.d ? '<path d="' + ma10.d + '" fill="none" stroke="' + maCols[10] + '" stroke-width="1.2"/>' : '') +
+      (ma20.d ? '<path d="' + ma20.d + '" fill="none" stroke="' + maCols[20] + '" stroke-width="1.2"/>' : '') +
+      (ma60.d ? '<path d="' + ma60.d + '" fill="none" stroke="' + maCols[60] + '" stroke-width="1.2"/>' : '') +
+      cand + vol + xLbl + cross +
     '</svg>';
+}
+/* 十字光标交互：绑定在 SVG 上（同花顺式读数） */
+function bindKlineCross(svg, rows){
+  if (!svg || !rows.length) return;
+  const W = 720, padL = 56, padR = 16, padT = 30, padB = 34;
+  const n = rows.length, cw = (W - padL - padR) / n;
+  const cross = svg.querySelector('#klCross'), vl = svg.querySelector('#klVL'),
+    hl = svg.querySelector('#klHL'), dot = svg.querySelector('#klDot');
+  const info = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  info.id = 'klInfo';
+  info.innerHTML = '<rect width="210" height="62" rx="6" fill="rgba(255,255,255,.94)" stroke="#e2e8f0"/>' +
+    '<text id="klInfoT" x="8" y="15" font-size="10.5" fill="#334155"></text>';
+  svg.insertBefore(info, svg.querySelector('#klCross'));
+  const infoT = info.querySelector('#klInfoT');
+  const hide = () => { if (cross) cross.style.display = 'none'; if (info) info.style.display = 'none'; };
+  svg.addEventListener('mousemove', e => {
+    const rect = svg.getBoundingClientRect();
+    if (!rect.width) return;
+    const x = (e.clientX - rect.left) / rect.width * W;
+    const y = (e.clientY - rect.top) / rect.height * 430;
+    let i = Math.round((x - padL) / cw - 0.5);
+    i = Math.max(0, Math.min(n - 1, i));
+    const r = rows[i], cx = padL + i * cw + cw / 2;
+    if (cross) cross.style.display = '';
+    if (info) info.style.display = '';
+    const plotB = 430 - padB - 66 - 12;
+    if (vl){ vl.setAttribute('x1', cx.toFixed(1)); vl.setAttribute('x2', cx.toFixed(1)); vl.setAttribute('y1', padT); vl.setAttribute('y2', 430 - padB); }
+    if (hl){ hl.setAttribute('x1', padL); hl.setAttribute('x2', 720 - padR); hl.setAttribute('y1', y.toFixed(1)); hl.setAttribute('y2', y.toFixed(1)); }
+    if (dot){ dot.setAttribute('cx', cx.toFixed(1)); dot.setAttribute('cy', y.toFixed(1)); }
+    let ix = cx + 12, iy = Math.max(padT, Math.min(plotB - 66, y - 30));
+    if (ix + 210 > 720 - 4) ix = cx - 222;
+    if (info) info.setAttribute('transform', 'translate(' + ix + ',' + iy + ')');
+    if (infoT){
+      const prev = i > 0 ? rows[i - 1].close : r.open;
+      const d = prev > 0 ? (r.close - prev) / prev * 100 : 0;
+      const dC = d > 0 ? 'var(--up)' : (d < 0 ? 'var(--down)' : 'var(--flat)');
+      const maV = k => { if (i + 1 < k) return '—'; let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].close; return (s / k).toFixed(2); };
+      infoT.innerHTML =
+        '<tspan x="8" dy="0" font-weight="700">' + esc(String(r.date)) + '</tspan>' +
+        '<tspan x="118" fill="' + dC + '" font-weight="700">' + (d >= 0 ? '+' : '') + d.toFixed(2) + '%</tspan>' +
+        '<tspan x="8" dy="14">开 <tspan font-weight="700">' + r.open.toFixed(2) + '</tspan>  高 <tspan font-weight="700" fill="var(--up)">' + r.high.toFixed(2) + '</tspan>  低 <tspan font-weight="700" fill="var(--down)">' + r.low.toFixed(2) + '</tspan>  收 <tspan font-weight="700">' + r.close.toFixed(2) + '</tspan></tspan>' +
+        '<tspan x="8" dy="14">量 <tspan font-weight="700">' + fmtVol(r.vol) + '</tspan>  MA5 <tspan font-weight="700">' + maV(5) + '</tspan>  MA10 <tspan font-weight="700">' + maV(10) + '</tspan></tspan>' +
+        '<tspan x="8" dy="14">MA20 <tspan font-weight="700">' + maV(20) + '</tspan>  MA60 <tspan font-weight="700">' + maV(60) + '</tspan>';
+    }
+  });
+  svg.addEventListener('mouseleave', hide);
 }
 /* 打开 K 线弹窗（总览实时行情：持仓索引 → 与 renderLive 同口径列表） */
 function openKline(idx){
@@ -2554,13 +2636,21 @@ function openKlineByCode(code){
   const c = String(code).replace(/\D/g, '');
   showKlineDialog(w.name || code, watchSym(w));
 }
-/* K 线弹窗：mask + loading → SVG（场外基金 jj 无日K，直接提示） */
+/* K 线弹窗：周期切换（日K/周K/月K）+ loading → 同花顺风格 SVG + 十字光标 */
 function showKlineDialog(name, sym){
   const isFund = String(sym).slice(0, 2) === 'jj';
   const mask = document.createElement('div');
   mask.className = 'mask';
-  mask.innerHTML = '<div class="modal" style="max-width:660px"><h3>' + esc(name) + ' · K线（60日 · 前复权）</h3>' +
-    '<div class="mb" id="klBody" style="text-align:center;padding:22px">' + (isFund ? '<div class="dim" style="padding:20px">场外基金无日K线行情</div>' : '<span class="spin"></span> 加载K线数据…') + '</div>' +
+  mask.innerHTML = '<div class="modal" style="max-width:760px">' +
+    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+      '<h3 style="margin:0">' + esc(name) + ' · K线（前复权）</h3>' +
+      '<div class="kl-tabs" id="klTabs">' +
+        '<span class="kt active" data-p="day">日K</span>' +
+        '<span class="kt" data-p="week">周K</span>' +
+        '<span class="kt" data-p="month">月K</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="mb" id="klBody" style="text-align:center;padding:22px">' + (isFund ? '<div class="dim" style="padding:20px">场外基金无K线行情</div>' : '<span class="spin"></span> 加载K线数据…') + '</div>' +
     '<div class="mf"><button class="btn-primary">关闭</button></div></div>';
   const close = () => { mask.remove(); document.removeEventListener('keydown', onKey); };
   mask.querySelector('button').onclick = close;
@@ -2570,13 +2660,34 @@ function showKlineDialog(name, sym){
   document.body.appendChild(mask);
   if (isFund) return;
   const body = mask.querySelector('#klBody');
-  klineJsonp(sym, 60).then(data => {
-    const rows = parseKline(data, sym);
-    if (!rows.length){ body.innerHTML = '<div class="dim" style="padding:20px">K线数据拉取失败（' + esc(sym) + '）</div>'; return; }
-    body.innerHTML = klineSVG(rows, name);
-  }).catch(e => {
-    body.innerHTML = '<div class="dim" style="padding:20px">K线加载失败：' + esc(e.message) + '</div>';
+  const tabs = mask.querySelector('#klTabs');
+  let loading = false;
+  const load = (period) => {
+    if (loading) return;
+    loading = true;
+    body.innerHTML = '<span class="spin"></span> 加载' + ({day:'日K', week:'周K', month:'月K'})[period] + '…';
+    klineJsonp(sym, period).then(data => {
+      const rows = parseKline(data, sym, period);
+      if (!rows.length){ body.innerHTML = '<div class="dim" style="padding:20px">K线数据拉取失败（' + esc(sym) + '）</div>'; loading = false; return; }
+      const holder = document.createElement('div');
+      holder.innerHTML = klineSVG(rows, name, period);
+      body.innerHTML = '';
+      body.appendChild(holder.firstElementChild);
+      bindKlineCross(body.firstElementChild, rows);
+      loading = false;
+    }).catch(e => {
+      body.innerHTML = '<div class="dim" style="padding:20px">K线加载失败：' + esc(e.message) + '</div>';
+      loading = false;
+    });
+  };
+  tabs.querySelectorAll('.kt').forEach(t => {
+    t.onclick = () => {
+      tabs.querySelectorAll('.kt').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      load(t.dataset.p);
+    };
   });
+  load('day');
 }
 
 /* 总览 6 张卡片金额隐藏（小眼睛）：每张卡独立开关，掩码 = 首个字符 ***** 尾字符 */
