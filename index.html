@@ -656,7 +656,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.2 · 2026-08-10 00:00</div>
+      <div class="sf-ver" id="sfVer">v53.3 · 2026-08-10 00:19</div>
     </div>
   </aside>
 
@@ -667,7 +667,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.2</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.3</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -930,7 +930,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.2 · 2026-08-10 00:00 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.3 · 2026-08-10 00:19 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -976,8 +976,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.2';
-const APP_BUILD   = '2026-08-10 00:00';
+const APP_VERSION = 'v53.3';
+const APP_BUILD   = '2026-08-10 00:19';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2446,14 +2446,19 @@ function returnAttribution(){
   state.holdings.forEach(h => { const c = calcHolding(h); if (isFinite(c.realized)) realized += c.realized; });
   const agg = openAggregate(), cf = cashflowStats();
   const floatPnl = isFinite(agg.floatPnl) ? agg.floatPnl : 0;
-  const cost = isFinite(agg.cost) ? agg.cost : 0;
   const totalPnl = realized + floatPnl;                              /* 分红已内含于摊薄成本（floatPnl），不重复计 */
+  /* 关键纠正：分母用「净投入 = 累计买入 − 累计卖出净额（不含分红）」，而非「当前持仓成本」。
+     旧版用 agg.cost（仅当前持仓的摊薄成本）作分母，但当已止盈/减仓（realized≠0）时，
+     已实现收益来自已卖出的仓位、其成本早已不在 agg.cost 中，导致分母偏小、收益率虚高失真。 */
+  const invCapital = cf.buyTotal - cf.sellTotal;
   return {
-    realized, floatPnl, divTotal: cf.divTotal || 0, cost, totalPnl,
-    simpleRoi: cost > 0 ? totalPnl / cost * 100 : NaN,              /* 成本加权（简单收益率） */
-    occRoi:    cf.peakInvested > 0 ? totalPnl / cf.peakInvested * 100 : NaN, /* 峰值占用加权 */
+    realized, floatPnl, divTotal: cf.divTotal || 0, totalPnl,
+    buyTotal: cf.buyTotal, sellTotal: cf.sellTotal,
+    invCapital, peakInvested: cf.peakInvested, netInvested: cf.netInvested,
+    netRoi:  invCapital > 0 ? totalPnl / invCapital * 100 : NaN,         /* 净投入收益率（分母=买入−卖出，不含分红） */
+    occRoi:  cf.peakInvested > 0 ? totalPnl / cf.peakInvested * 100 : NaN, /* 峰值占用收益率 */
+    simpleRoi: invCapital > 0 ? totalPnl / invCapital * 100 : NaN,    /* 兼容旧字段 = 净投入收益率 */
     irr: xirr(buildFlows()),
-    peakInvested: cf.peakInvested, netInvested: cf.netInvested,
     mv: isFinite(agg.mv) ? agg.mv : 0
   };
 }
@@ -2470,6 +2475,61 @@ function industryAgg(){
   const segs = Object.keys(m).map(k => ({ label: k, value: m[k], pct: total > 0 ? m[k] / total * 100 : 0 }))
                      .sort((a, b) => b.value - a.value);
   return { segs, total, unclassified, n };
+}
+
+/* ---------- 行业自动识别（A股全栈数据技能：东财申万行业 f127；基金按名称主题词推断）---------- */
+function parseIndustryFromEastmoney(d){
+  try { const v = d && d.data && d.data.f127; return (typeof v === 'string' && v.trim()) ? v.trim() : ''; } catch(e){ return ''; }
+}
+/* 基金/非A股：按名称主题词推断所属行业桶（覆盖常见赛道关键词） */
+function inferIndustryFromName(name){
+  const n = (name || '').toString();
+  const rules = [
+    [/半导体|芯片|集成电路|算力|AI|人工智能|机器人|消费电子/, '半导体/芯片'],
+    [/纳指|纳斯达克|标普|美股|全球|海外|QDII|港股|H股|中概|香港/, '港股/海外'],
+    [/新能源|电池|光伏|锂电|储能|电动车|车/, '新能源/光伏'],
+    [/稀土|有色|钢铁|化工|煤炭|石油|石化|资源|材料|水泥/, '周期(化工/有色/钢铁)'],
+    [/医药|医疗|生物|健康|制药/, '医药'],
+    [/消费|白酒|食品|饮料|酒|农业|养殖|猪肉/, '白酒/消费'],
+    [/券商|证券/, '券商'],
+    [/银行/, '银行'],
+    [/保险/, '保险'],
+    [/军工|航空|航天|国防/, '军工'],
+    [/计算机|软件|信息|科技|数字|通信|5G|传媒/, '计算机/软件'],
+    [/地产|房地产|物业/, '地产'],
+    [/公用|电力|水务|燃气|环保/, '公用事业']
+  ];
+  for (const [re, ind] of rules) if (re.test(n)) return ind;
+  return '';
+}
+/* 主入口：先试东财申万行业（A股/ETF 精准），失败/非A股再按名称推断（基金可用） */
+async function fetchIndustry(code, name){
+  const c = (code || '').toString().replace(/\D/g, '');
+  if (c.length === 6){
+    const secid = (c.startsWith('6') ? '1.' : '0.') + c;   // 沪=1 / 深·创·科·北=0（东财 secid 规则）
+    try {
+      const r = await fetch('https://push2.eastmoney.com/api/qt/stock/get?fltt=2&invt=2&fields=f127&secid=' + secid, { mode: 'cors' });
+      if (r.ok){ const ind = parseIndustryFromEastmoney(await r.json()); if (ind) return ind; }
+    } catch(e){}
+  }
+  return inferIndustryFromName(name);   // 基金或识别失败 → 名称主题词兜底
+}
+/* 批量识别：force=true 覆盖全部；否则只填空白字段（非破坏性）。返回填充条数 */
+async function autoIdentifyIndustries(force){
+  const targets = state.holdings.filter(h => {
+    const c = (h.code || '').toString().replace(/\D/g, '');
+    if (c.length !== 6) return false;
+    return !!force || !(h.industry && h.industry.trim());
+  });
+  if (!targets.length) return 0;
+  let changed = 0;
+  for (const h of targets){
+    const ind = await fetchIndustry(h.code, h.name);
+    if (ind && ind !== h.industry){ h.industry = ind; changed++; }
+    await new Promise(r => setTimeout(r, 120));   /* 对东财友好，避免突发并发 */
+  }
+  if (changed){ try { persist.holdings(); } catch(e){} const box = document.getElementById('page-analysis'); if (box && box.classList.contains('active')) renderAnalysis(); }
+  return changed;
 }
 
 /* ---------- 预警与纪律 ---------- */
@@ -2566,17 +2626,21 @@ function renderAnalysis(){
 
   /* 2) 收益归因 */
   const irrTxt = isFinite(att.irr) ? (att.irr >= 0 ? '+' : '') + att.irr.toFixed(2) + '%' : '—';
+  const netRoiTxt = isFinite(att.netRoi) ? (att.netRoi >= 0 ? '+' : '') + att.netRoi.toFixed(2) + '%' : '—';
+  const occRoiTxt = isFinite(att.occRoi) ? (att.occRoi >= 0 ? '+' : '') + att.occRoi.toFixed(2) + '%' : '—';
   const attrHTML =
     '<div class="kpi-grid">' +
-    kpi2('总收益', sign2(att.totalPnl), cls(att.totalPnl)) +
+    kpi2('总收益(已实现+浮动)', sign2(att.totalPnl), cls(att.totalPnl)) +
     kpi2('已实现收益', sign2(att.realized), cls(att.realized)) +
     kpi2('浮动盈亏', sign2(att.floatPnl), cls(att.floatPnl)) +
-    kpi2('累计分红(现金)', '+' + money(att.divTotal), '') +
-    kpi2('成本收益率(简单)', pct2(att.simpleRoi), cls(att.simpleRoi)) +
+    kpi2('累计分红(已摊入成本)', '+' + money(att.divTotal), '') +
+    kpi2('净投入收益率', netRoiTxt, cls(att.netRoi)) +
+    kpi2('峰值占用收益率', occRoiTxt, cls(att.occRoi)) +
     kpi2('IRR(资金加权·年化)', irrTxt, cls(att.irr)) +
     '</div>' +
-    '<div class="an-note">IRR 与成本收益率差异 = 加仓/减仓的<b>时机与体量</b>效应：IRR 高而简单收益率低，说明大笔投入踩在低位（靠本事）；反之说明高位重仓摊低了账面收益。<br>' +
-    '口径：买入=资金投入、卖出/分红=资金回收、当前持仓市值=期末赎回；无独立现金账户假设。分红已内含于摊薄成本，未重复计入。</div>';
+    '<div class="an-note"><b>计算依据</b>：总收益 = 已实现盈亏 + 浮动盈亏；分红已摊入摊薄成本（floatPnl 已含），不重复计入。' +
+    '三种收益率分母不同：①<b>净投入收益率</b> = 总收益 ÷（累计买入 − 累计卖出净额，<b>不含分红</b>）；②<b>峰值占用收益率</b> = 总收益 ÷ 历史峰值占用本金；③<b>IRR</b> = 逐笔现金流（买入流出 / 卖出·分红流入 / 期末市值赎回）解出的资金加权年化收益率，体现加仓减仓的时机与体量。' +
+    '旧版曾误用「当前持仓成本」作分母，在已止盈/减仓后严重失真，现已纠正为净投入口径。</div>';
 
   /* 3) 行业暴露 */
   let sectorWarn = '';
@@ -2626,7 +2690,8 @@ function renderAnalysis(){
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>收益归因（IRR vs 成本收益率）</div></div>' +
     '<div class="panel-body">' + attrHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>行业 / 板块暴露</div>' +
-    '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警</div></div>' +
+    '<div class="spacer"></div><button class="btn-sm" id="btnIdentifyAll">批量识别行业</button>' +
+    '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 行业取自东财申万行业(自动)</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>预警与纪律</div>' +
     '<div class="panel-sub">交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警</div></div>' +
@@ -2634,6 +2699,8 @@ function renderAnalysis(){
   box.querySelectorAll('[data-an-range]').forEach(b => b.onclick = () => { state.settings.analysisRange = b.dataset.anRange; persist.settings(); renderAnalysis(); });
   const nb = box.querySelector('#btnEnableNotify');
   if (nb) nb.onclick = () => { try { if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') Notification.requestPermission().then(p => toast('浏览器通知' + (p === 'granted' ? '已开启' : '保持关闭'), 'info')); else toast('浏览器通知已开启或不支持', 'info'); } catch(e){ toast('通知开启失败：' + e.message, 'err'); } };
+  const bia = box.querySelector('#btnIdentifyAll');
+  if (bia) bia.onclick = async () => { bia.disabled = true; const t0 = bia.textContent; bia.textContent = '识别中…'; const n = await autoIdentifyIndustries(true); bia.textContent = t0; bia.disabled = false; renderAnalysis(); toast('已按东财申万行业重新识别 ' + n + ' 个标的（基金按名称主题推断）', 'ok'); };
 }
 function kpi2(label, val, clsN){ return '<div class="kpi-card"><div class="k">' + label + '</div><div class="v ' + (clsN || '') + '">' + val + '</div></div>'; }
 function warnRow(ic, txt){ return '<div class="an-warn"><span class="ic">' + ic + '</span><span>' + txt + '</span></div>'; }
@@ -4901,8 +4968,11 @@ function bind(){
             '<option value="fund"' + (effType(h.code, h.type) === 'fund' ? ' selected' : '') + '>场外基金</option></select></div>' +
           '<div class="field"><label class="fl">市场（股票）</label><select id="e_mkt">' +
             ['','sh','sz','bj'].map(m => '<option value="' + m + '"' + (h.market === m ? ' selected' : '') + '>' + (m ? m.toUpperCase() : '自动') + '</option>').join('') + '</select></div>' +
-          '<div class="field"><label class="fl">行业（暴露分析）</label><select id="e_industry">' +
-            INDUSTRY_LIST.map(k => '<option value="' + k + '"' + ((h.industry || '') === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div>' +
+          '<div class="field"><label class="fl">行业（自动识别·可手填）</label>' +
+            '<div style="display:flex;gap:6px;align-items:center">' +
+            '<input id="e_industry" list="ind_list" placeholder="点右侧「识别」自动获取" value="' + esc(h.industry || '') + '" style="flex:1;min-width:0">' +
+            '<button type="button" class="btn-sm" id="e_ident">识别</button></div>' +
+            '<datalist id="ind_list">' + INDUSTRY_LIST.map(k => '<option value="' + k + '">').join('') + '</datalist></div>' +
           '<div class="field"><label class="fl">止损价（破线预警）</label><input id="e_alertLow" type="number" step="0.001" min="0" placeholder="留空=不预警" value="' + (Number(h.alertLow) || '') + '"></div>' +
           '<div class="field"><label class="fl">止盈价（破线预警）</label><input id="e_alertHigh" type="number" step="0.001" min="0" placeholder="留空=不预警" value="' + (Number(h.alertHigh) || '') + '"></div></div>';
         let picked = null;
@@ -6338,6 +6408,22 @@ function init(){
   initNav();
   bind();
   try { bindAnalysis(); } catch(e){}
+  /* 行业自动识别（A股全栈数据技能：东财申万行业/基金主题词）：仅填充空行业字段，非破坏性；依赖网络，失败静默 */
+  try { autoIdentifyIndustries(false); } catch(e){}
+  /* 编辑标的弹窗「识别」按钮：弹窗每次重建，用 document 事件委托一次性绑定 */
+  if (!window.__indDeleg){
+    window.__indDeleg = true;
+    document.addEventListener('click', async (e) => {
+      const btn = e.target && e.target.closest && e.target.closest('#e_ident');
+      if (!btn || btn.disabled) return;
+      const codeEl = document.getElementById('e_code'), nameEl = document.getElementById('e_name'), indEl = document.getElementById('e_industry');
+      if (!codeEl || !indEl) return;
+      btn.disabled = true; const t0 = btn.textContent; btn.textContent = '识别中…';
+      const ind = await fetchIndustry(codeEl.value, nameEl ? nameEl.value : '');
+      if (ind) indEl.value = ind; else toast('未能自动识别（非A股代码或网络异常），可手动填写', 'warn');
+      btn.textContent = t0; btn.disabled = false;
+    });
+  }
   renderAll();
   renderMarketStatus(true);    /* 市场阶段提示：交易中 / 休市 + 下次开盘时间 */
   /* 首屏拉一次行情：休市时也拉（用收盘价把页面填满），之后由 ticker 按交易时段严格控制 */
