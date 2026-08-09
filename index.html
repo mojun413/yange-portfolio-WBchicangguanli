@@ -2693,7 +2693,7 @@ function renderPosition(){
   const sKey = state.settings.posSortKey, sDir = state.settings.posSortDir;
   const th = (col) => {
     const on = sKey === col.key;
-    const ind = on ? (sDir === 'asc' ? '↑' : '↓') : '';
+    const ind = on ? (sDir === 'asc' ? '▲' : '▼') : '⇅';
     return '<th' + (col.cls ? ' class="' + col.cls + (on ? ' sorted' : '') + '"' : (on ? ' class="sorted"' : '')) +
       ' data-sort="' + col.key + '" title="点击按「' + col.label + '」排序">' + col.label + '<span class="si">' + ind + '</span></th>';
   };
