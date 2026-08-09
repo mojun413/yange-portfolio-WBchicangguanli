@@ -802,6 +802,11 @@ function switchPage(page){
   const t = document.getElementById('pageTitleCurrent');
   if (t) t.textContent = PAGE_TITLES[page] || page;
   try { localStorage.setItem(K('page'), page); } catch(e){}
+  /* 移动端：切页后自动收起侧边栏（避免遮住内容区） */
+  if (window.innerWidth <= 900){
+    const sb = document.getElementById('sidebar');
+    if (sb && sb.classList.contains('open')) sb.classList.remove('open');
+  }
 }
 
 function initNav(){
@@ -815,6 +820,29 @@ function initNav(){
     if (window.innerWidth <= 900){ sb.classList.toggle('open'); }
     else { sb.classList.toggle('collapsed'); }
   };
+  /* 移动端侧边栏增强：
+     1) 初始确保收起（防残留 open 类）
+     2) 打开后点击内容区自动收起
+     3) 窗口跨断点（旋转/缩放宽窄）自动切换模式 */
+  const mainEl = document.querySelector('.main');
+  const ensureMobileSidebar = () => {
+    if (!sb) return;
+    if (window.innerWidth <= 900){
+      if (sb.classList.contains('open')) sb.classList.remove('open');
+      if (sb.classList.contains('collapsed')) sb.classList.remove('collapsed');
+    } else {
+      if (sb.classList.contains('open')) sb.classList.remove('open');
+    }
+  };
+  ensureMobileSidebar();
+  if (mainEl) mainEl.addEventListener('click', e => {
+    if (window.innerWidth <= 900 && sb && sb.classList.contains('open') && !e.target.closest('#sidebar')){
+      sb.classList.remove('open');
+    }
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 900 && sb && sb.classList.contains('open')) sb.classList.remove('open');
+  });
   /* 设置页内快捷按钮联动 */
   const link = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
   link('btnFeeSettings2', () => showFeeSettings());
@@ -4859,7 +4887,7 @@ function effType(code, type){
 function typeLabel(code, type){
   return ({ stock:'股票', etf:'场内ETF', fund:'场外基金' })[effType(code, type)] || '股票';
 }
-init();
+/* init() 调用已移至文件末尾（cloud 是后置 const，此处调用会 TDZ 崩溃导致云端永不自动连接） */
 function _parseYangE2(){
   const d = YANGEDATA_RAW;
   // 补充: 从压缩名提取纯代码和类型的辅助函数
@@ -5017,69 +5045,82 @@ function _extractCodeName(codeName){
 }
 
 /* 从内嵌初始快照重建全部数据（无确认弹窗——调用方负责确认可覆盖）。
-   供「恢复初始数据」按钮与「全新浏览器自动载入」共用，避免两处重复逻辑。 */
+   供「恢复初始数据」按钮与「全新浏览器自动载入」共用，避免两处重复逻辑。
+   关键保护：恢复期间抑制云端推送 + 时间戳归零 —— 初始快照是「基线」不是「本机新数据」，
+   绝不能用它覆盖云端真实数据（否则手动录入全部丢失且同步到所有设备）。 */
 function seedFromYangE(){
-  const d = _parseYangE2();
-  // 1. 清空现有数据
-  state.holdings = [];
-  state.dailyOps = [];
-  state.trades = [];
-  state.quotes = {};
-  state.expanded = new Set();
-  state.externalClosed = [];  // 外部清仓数据
-  // 2. 先导入所有交易（分组到标的）
-  const txMap = new Map();  // code -> [transactions]
-  for (const t of d.transactions){
-    const [date, codeName, side, shares, nav, amount, fee, total] = t;
-    const info = _extractCodeName(codeName);
-    const key = info.code;
-    if (!txMap.has(key)) txMap.set(key, { info, name: codeName, txs: [] });
-    txMap.get(key).txs.push({ date, side: side > 0 ? 'buy' : 'sell', shares: Math.abs(shares), price: nav, fee, amount });
-  }
-  // 3. 为每个代码创建标的 + 写入交易流水
-  let importedCodes = 0;
-  /* 名称去掉尾部括号代码："券商ETF（512000）" → "券商ETF"；纯代码名保留 */
-  const cleanName = nm => {
-    const t = String(nm || '').trim().replace(/\s*[（(]\d{5,7}[）)]\s*$/, '');
-    return t || String(nm || '').trim();
-  };
-  for (const [code, group] of txMap){
-    const { info, name } = group;
-    let htype = info.type === 'fund' ? 'fund' : 'stock';
-    let market = info.market || '';
-    if (!market && htype !== 'fund'){
-      const c = String(code).replace(/\D/g, '');
-      if (/^(00|30|12|15|16|18|20|39)/.test(c)) market = 'sz';
-      else if (/^(60|68|11|13|50|51|52|56|58|90|99)/.test(c)) market = 'sh';
-      else if (/^(43|83|87|88|89|92)/.test(c)) market = 'bj';
+  const _prevSuppress = cloud.suppressPush;
+  cloud.suppressPush = true;   // 种子/恢复期：不盖章、不推送云端
+  try {
+    const d = _parseYangE2();
+    // 1. 清空现有数据
+    state.holdings = [];
+    state.dailyOps = [];
+    state.trades = [];
+    state.quotes = {};
+    state.expanded = new Set();
+    state.externalClosed = [];  // 外部清仓数据
+    // 2. 先导入所有交易（分组到标的）
+    const txMap = new Map();  // code -> [transactions]
+    for (const t of d.transactions){
+      const [date, codeName, side, shares, nav, amount, fee, total] = t;
+      const info = _extractCodeName(codeName);
+      const key = info.code;
+      if (!txMap.has(key)) txMap.set(key, { info, name: codeName, txs: [] });
+      txMap.get(key).txs.push({ date, side: side > 0 ? 'buy' : 'sell', shares: Math.abs(shares), price: nav, fee, amount });
     }
-    /* 场内ETF（LOF等）存为 etf 类型，与费率/标签三分类一致 */
-    if (htype === 'stock' && isExchangeTraded(String(code).replace(/\D/g, ''))) htype = 'etf';
-    const h = {
-      id: uid(), type: htype, code: String(code).replace(/\D/g, ''),
-      name: cleanName(name), market: market, txs: []
+    // 3. 为每个代码创建标的 + 写入交易流水
+    let importedCodes = 0;
+    /* 名称去掉尾部括号代码："券商ETF（512000）" → "券商ETF"；纯代码名保留 */
+    const cleanName = nm => {
+      const t = String(nm || '').trim().replace(/\s*[（(]\d{5,7}[）)]\s*$/, '');
+      return t || String(nm || '').trim();
     };
-    // 按日期排序写入
-    group.txs.sort((a, b) => a.date < b.date ? -1 : 1);
-    for (const t of group.txs){
-      h.txs.push({ id: uid(), date: t.date, side: t.side, price: t.price, shares: t.shares, fee: t.fee, amount: t.amount, seq: Date.now() + Math.random() * 1000 });
+    for (const [code, group] of txMap){
+      const { info, name } = group;
+      let htype = info.type === 'fund' ? 'fund' : 'stock';
+      let market = info.market || '';
+      if (!market && htype !== 'fund'){
+        const c = String(code).replace(/\D/g, '');
+        if (/^(00|30|12|15|16|18|20|39)/.test(c)) market = 'sz';
+        else if (/^(60|68|11|13|50|51|52|56|58|90|99)/.test(c)) market = 'sh';
+        else if (/^(43|83|87|88|89|92)/.test(c)) market = 'bj';
+      }
+      /* 场内ETF（LOF等）存为 etf 类型，与费率/标签三分类一致 */
+      if (htype === 'stock' && isExchangeTraded(String(code).replace(/\D/g, ''))) htype = 'etf';
+      const h = {
+        id: uid(), type: htype, code: String(code).replace(/\D/g, ''),
+        name: cleanName(name), market: market, txs: []
+      };
+      // 按日期排序写入
+      group.txs.sort((a, b) => a.date < b.date ? -1 : 1);
+      for (const t of group.txs){
+        h.txs.push({ id: uid(), date: t.date, side: t.side, price: t.price, shares: t.shares, fee: t.fee, amount: t.amount, seq: Date.now() + Math.random() * 1000 });
+      }
+      state.holdings.push(h);
+      importedCodes++;
     }
-    state.holdings.push(h);
-    importedCodes++;
+    // 4. 清仓数据由流水自动推导（autoRemoveClosed 会把"持股归零且卖出"标记 closed）
+    state.externalClosed = [];
+    // 5. 同步费率
+    getFeeRates();
+    // 6. 自动清除已清仓标的（标记 closed=true，从持仓面板隐藏，仍保留在清仓结算中）
+    autoRemoveClosed(1);
+    // 7. 持久化
+    persist.holdings();
+    persist.trades();
+    persist.dailyOps();
+    persist.settings();
+    saveExtClosed();
+    return { importedCodes };
+  } finally {
+    cloud.suppressPush = _prevSuppress;
+    /* 时间戳归零：初始快照不参与「新旧比较」——云端真实数据保持较新，
+       下次 cloudPull 会自动拉云端覆盖本机，确保「恢复初始数据」绝不顶掉云端数据 */
+    cloud.lastSavedAt = 0;
+    cloud.state.localAt = 0;
+    try { localStorage.setItem(K('savedAt'), '0'); } catch(e){}
   }
-  // 4. 清仓数据由流水自动推导（autoRemoveClosed 会把"持股归零且卖出"标记 closed）
-  state.externalClosed = [];
-  // 5. 同步费率
-  getFeeRates();
-  // 6. 自动清除已清仓标的（标记 closed=true，从持仓面板隐藏，仍保留在清仓结算中）
-  autoRemoveClosed(1);
-  // 7. 持久化
-  persist.holdings();
-  persist.trades();
-  persist.dailyOps();
-  persist.settings();
-  saveExtClosed();
-  return { importedCodes };
 }
 
 async function importYangE2(){
@@ -5096,12 +5137,18 @@ async function importYangE2(){
     '点击下方「确认恢复」将<b>清空全部手动录入</b>，恢复到该初始快照。</div>';
   // 确认（已有数据则警告）
   const hasData = state.holdings.length > 0 || state.dailyOps.length > 0;
+  /* 云端保护提示：恢复初始数据是「本机操作」，绝不覆盖云端（云端有手动录入的真实数据） */
+  const cloudOn = !!(cloud.cfg && cloud.cfg.enabled && cloud.cfg.supabaseUrl);
+  const cloudTip = cloudOn
+    ? '<div class="hint" style="margin-top:8px;color:var(--accent)">☁️ 已开启云同步：恢复<b>仅影响本机</b>，<b>不会覆盖云端数据</b>。' +
+      '刷新页面或点「立即同步」将从云端加载你手动录入的最新数据。</div>'
+    : '';
   if (hasData){
     const ok = await dialog({ title: '恢复初始数据',
       bodyHTML: '<div class="import-progress"><div class="big">⚠ 将清空全部手动录入</div>' +
         '<div class="sub">当前已有 ' + state.holdings.length + ' 个标的 / ' + state.dailyOps.length + ' 条操作记录 / ' + state.trades.length + ' 条做T。<br>' +
         '确认后将<b>清空并恢复到内嵌初始快照</b>。</div></div>' +
-        '<div class="hint" style="margin-top:8px">' + srcLine + '</div>',
+        '<div class="hint" style="margin-top:8px">' + srcLine + '</div>' + cloudTip,
       buttons: [{ label: '取消', value: null }, { label: '确认恢复', value: true, cls: 'btn-danger' }] });
     if (!ok) return;
   }
@@ -5128,7 +5175,8 @@ async function importYangE2(){
   const meta2 = YANGEDATA_RAW.meta || {};
   const closedN = (state.holdings || []).filter(h => h.closed).length;
   toast('已恢复初始数据：导入交易明细 ' + d.transactions.length + ' 笔 → 生成 ' + r.importedCodes + ' 个标的 · ' +
-    closedN + ' 个清仓（网页算法自动计算）', 'ok');
+    closedN + ' 个清仓（网页算法自动计算）' +
+    (cloudOn ? '。云端数据未受影响，刷新页面将自动加载云端最新数据' : ''), 'ok');
 }
 
 /* ============================ 外部清仓数据加载 ============================ */
@@ -5514,7 +5562,9 @@ function cloudSubscribe(){
     .subscribe();
 }
 
-/* 云端同步初始化：加载 SDK → 连接 → 拉取合并 → 订阅实时 */
+/* 云端同步初始化：加载 SDK → 连接 → 拉取合并 → 订阅实时。
+   失败自动重试（3s→10s→30s，最多 3 次）：SDK CDN 偶发失败 / 网络抖动时
+   页面打开后会自动补连，无需用户手动「保存并重连」。 */
 async function cloudInit(){
   const c = cloud.cfg;
   if (!c.enabled || !c.supabaseUrl || !c.supabaseKey){ cloud.state.offline = true; cloud.state.connecting = false; cloud.state.errMsg = '未配置 URL/key'; renderCloudStatus(); return; }
@@ -5528,12 +5578,21 @@ async function cloudInit(){
     if (cloud.cfg.realtime !== false) cloudSubscribe();
     else cloud.channel = null;
     cloud.state.connecting = false; cloud.state.offline = false; cloud.state.errMsg = '';
+    cloud.initRetryN = 0;
     renderCloudStatus();
   } catch(e){
     console.warn('云同步初始化失败', e);
     cloud.state.connecting = false; cloud.state.offline = true;
     cloud.state.errMsg = '初始化失败：' + ((e && e.message) || e) + '（检查 URL/key 是否正确、supabase-js 是否可加载）';
     renderCloudStatus();
+    /* 自动重试：3s → 10s → 30s，最多 3 次（成功后清零；手动保存重连会重置计数） */
+    const delays = [3000, 10000, 30000];
+    const n = (cloud.initRetryN || 0);
+    if (n < delays.length){
+      cloud.initRetryN = n + 1;
+      clearTimeout(cloud.initRetryTimer);
+      cloud.initRetryTimer = setTimeout(() => { try { cloudInit(); } catch(_){} }, delays[n]);
+    }
   }
 }
 
@@ -5657,6 +5716,7 @@ async function openCloudConfig(){
   cloud.cfg.pushDebounceMs = picked.debounce;
   cloud.cfg.realtime = picked.realtime;
   cloud.channel = null; cloud.client = null;
+  cloud.initRetryN = 0; clearTimeout(cloud.initRetryTimer);
   toast(picked.url && picked.key ? '云同步配置已保存，正在重连…' : '已切换为纯本地模式', 'ok');
   try { await cloudInit(); } catch(e){}
 }
@@ -5665,6 +5725,11 @@ async function openCloudConfig(){
 function refreshCloudRowUI(){
   try { renderCloudStatus(); } catch(e){}
 }
+
+/* 页面启动入口（放在文件最末尾：cloud 是后置 const，必须在全部定义之后执行，
+   否则 init 内引用 cloud 会 TDZ 崩溃 —— 此前导致云端永不自动连接、
+   新设备种子自动载入失败两个隐蔽 bug） */
+init();
 </script>
 </body>
 </html>
