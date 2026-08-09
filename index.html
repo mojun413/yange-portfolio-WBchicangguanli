@@ -10,6 +10,8 @@
    现代 SaaS 仪表盘风格：留白 / 圆角 / 柔影 / 玻璃顶栏 / 暗色侧栏
    ============================================================ */
 :root{
+  --page-maxw:1600px;          /* 主区最大宽度（页面全宽上限，可微调；超宽屏居中） */
+  --page-pad:12px;             /* 主区左右留白（可微调；留一点点白整体更协调） */
   --bg:#f3f4f8;
   --bg-grid: radial-gradient(1200px 600px at 80% -10%, rgba(79,70,229,.05), transparent 60%);
   --panel:#ffffff;
@@ -140,7 +142,7 @@ label.fl{display:block;font-size:12px;color:var(--muted);margin:0 0 4px 2px}
 .check input{width:16px;height:16px;accent-color:var(--accent);flex:0 0 auto}
 
 /* ===================== 面板 / 区块 ===================== */
-.wrap{padding:0 0 96px;margin:0}
+.wrap{padding:0 var(--page-pad) 96px;margin:0 auto;max-width:var(--page-maxw)}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:0 0 18px;overflow:hidden}
 .panel:first-child{margin-top:0}
 .panel:last-child{margin-bottom:18px}
@@ -506,12 +508,12 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
   .side-toggle{display:inline-flex}
   .app{display:block}
   .main{display:block}
-  .wrap{display:block;padding:14px 14px 70px}
+  .wrap{display:block;padding:0 var(--page-pad) 70px}
   .topbar-in{padding:12px 14px}
   .page.active{display:block}
 }
 @media (max-width:640px){
-  .wrap{padding:0 12px 60px}
+  .wrap{padding:0 var(--page-pad) 60px}
   .topbar-in{padding:10px 12px}
   .page-title-current{font-size:16px}
   .cards{grid-template-columns:repeat(2,1fr);gap:10px}
