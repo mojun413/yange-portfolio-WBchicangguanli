@@ -643,7 +643,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v43 · 2026-08-09 17:34</div>
+      <div class="sf-ver" id="sfVer">v44 · 2026-08-09 18:07</div>
     </div>
   </aside>
 
@@ -654,7 +654,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v43</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v44</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -884,7 +884,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v43 · 2026-08-09 17:34 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v44 · 2026-08-09 18:07 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -930,12 +930,13 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v43';
-const APP_BUILD   = '2026-08-09 17:34';
+const APP_VERSION = 'v44';
+const APP_BUILD   = '2026-08-09 18:07';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
   minRefreshSec : 5,                     // 允许的最小刷新间隔
+  quoteTickSec : 2,                      // 行情秒级 ticker 间隔（秒，可调 1-10）：所有标的实时股价/净值常驻刷新
   /* defaultFee 已废弃：新建交易按费率自动计算（设置里改股票/场内ETF/场外基金三档费率） */
   accent : '#2563eb',                    // 默认主题色
   upColor : '#e23b3b',                   // 涨（红）
@@ -1678,10 +1679,102 @@ async function refreshQuotes(silent){
         ? '行情源连不上（' + unreachable + ' 项）。可能是网络/广告拦截插件挡了 qt.gtimg.cn，点「行情自检」查看详情'
         : failed + ' 个标的行情获取失败，其余数据不受影响', 'warn');
     }
-    renderAll();
+    /* 自动刷新（silent）：价格已由秒级 ticker 覆盖，这里只增量更新，避免全量重建打断操作；
+       手动刷新：完整渲染（含名称/结构变化） */
+    if (silent && typeof updateLivePrices === 'function') updateLivePrices();
+    else renderAll();
   }
 }
 function setStatus(html, isHtml){ const el = $('#status'); if (isHtml) el.innerHTML = html; else el.textContent = html; }
+
+/* ============================ 行情秒级 ticker（v44）============================
+   原理：独立于「自动刷新」慢循环的轻量行情轮询。
+   - 批量拉取全部持仓 + 自选标的行情（一次请求，CONFIG.quoteTickSec 秒一次）
+   - 只增量更新页面上的价格数字（live 卡 / 自选卡 / 持仓表价格列 / 总览 KPI），
+     不重建表格结构 → 不打断滚动、输入、展开态；其余数据（统计/清仓/仓位）随数据变化才刷新
+   - document.hidden 时自动暂停，回到页面立即补一拍 */
+let ticking = false;
+async function tickQuotes(){
+  if (ticking || document.hidden) return;
+  const syms = new Set();
+  state.holdings.forEach(h => syms.add(quoteSymbol(h)));
+  watchList.forEach(w => syms.add(watchSym(w)));
+  if (!syms.size) return;
+  ticking = true;
+  try {
+    const map = await fetchQuotes([...syms]);
+    let changed = false;
+    state.holdings.forEach(h => {
+      const q = map[quoteSymbol(h)];
+      if (!q || q.err) return;
+      const cur = state.quotes[qkey(h)];
+      if (cur && cur.manual) return;
+      if (cur && cur.price === q.price && cur.pct === q.pct) return;  /* 无变化跳过（省渲染） */
+      state.quotes[qkey(h)] = q; changed = true;
+    });
+    watchList.forEach(w => {
+      const k = watchSym(w);
+      const q = map[k];
+      if (!q || q.err) return;
+      const cur = watchQuotes[k];
+      if (cur && cur.price === q.price && cur.pct === q.pct) return;
+      watchQuotes[k] = q; changed = true;
+    });
+    if (changed) updateLivePrices();
+  } catch (e) { /* 网络抖动静默忽略，下一拍自动重试 */ }
+  finally { ticking = false; }
+}
+/* 增量更新所有价格数字（不重建结构） */
+function updateLivePrices(){
+  /* 1) 总览实时行情卡（lc-price / lc-pct） */
+  document.querySelectorAll('.live-card [data-q]').forEach(el => {
+    const q = state.quotes[el.dataset.q];
+    if (!q || !isFinite(q.price)) return;
+    if (el.classList.contains('lc-price')){
+      el.textContent = price4(q.price);
+      el.classList.remove('dim');
+    } else if (el.classList.contains('lc-pct') && isFinite(q.pct)){
+      const arrow = q.pct > 0 ? '▲' : (q.pct < 0 ? '▼' : '·');
+      const cName = q.pct > 0 ? 'up' : (q.pct < 0 ? 'down' : 'flat');
+      el.className = 'lc-pct ' + cName;
+      el.innerHTML = '<span class="arrow">' + arrow + '</span>' + (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%';
+    }
+  });
+  /* 2) 盯盘自选卡（watch-card 已有 data-code） */
+  const byCode = {};
+  watchList.forEach(w => byCode[w.code] = w);
+  document.querySelectorAll('.watch-card').forEach(card => {
+    const w = byCode[card.dataset.code]; if (!w) return;
+    const q = watchQuotes[watchSym(w)];
+    if (!q || !isFinite(q.price)) return;
+    const upN = isFinite(q.pct) && q.pct > 0, downN = isFinite(q.pct) && q.pct < 0;
+    const clsN = upN ? 'up' : (downN ? 'down' : 'flat');
+    const priceEl = card.querySelector('.mc-price'), pctEl = card.querySelector('.mc-pct');
+    if (priceEl){ priceEl.innerHTML = isFinite(q.price) ? price4(q.price) : '<span class="dim">—</span>'; }
+    if (pctEl){
+      pctEl.className = 'mc-pct ' + clsN;
+      pctEl.innerHTML = isFinite(q.pct)
+        ? (upN ? '▲' : (downN ? '▼' : '·')) + (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%'
+        : '<span class="dim">—</span>';
+    }
+    card.className = 'watch-card ' + clsN;
+  });
+  /* 3) 持仓表价格列（q-price/q-mv/q-fpnl/q-roi/q-pct，data-q=qkey） */
+  const qmap = new Map(state.holdings.map(h => [qkey(h), h]));
+  document.querySelectorAll('td[data-q]').forEach(td => {
+    const h = qmap.get(td.dataset.q); if (!h) return;
+    const c = calcHolding(h); if (!isFinite(c.price)) return;
+    const clsN = cls(c.pct);
+    if (td.classList.contains('q-price')){ td.textContent = price4(c.price); td.className = 'mono q-price ' + clsN; }
+    else if (td.classList.contains('q-mv')){ td.textContent = money(c.mv); }
+    else if (td.classList.contains('q-fpnl')){ td.textContent = isFinite(c.floatPnl) ? sign2(c.floatPnl) : '—'; td.className = 'mono q-fpnl ' + cls(c.floatPnl); }
+    else if (td.classList.contains('q-roi')){ td.textContent = pct2(c.roi); td.className = 'mono q-roi ' + cls(c.roi); }
+    else if (td.classList.contains('q-pct')){ td.textContent = pct2(c.pct); td.className = 'mono q-pct ' + clsN; }
+  });
+  /* 4) 总览 KPI 卡（若总览可见）：轻量重算聚合值 */
+  const ov = document.getElementById('page-overview');
+  if (ov && ov.classList.contains('active') && typeof renderOverview === 'function') renderOverview();
+}
 
 /* ============================ 成本核算（移动加权平均 + 摊薄成本） ============================ */
 function calcHolding(h){
@@ -2209,15 +2302,16 @@ function renderLive(){
     const pct = isFinite(q.pct) ? q.pct : NaN;
     const name = h.name || h.code;
     let priceHtml, pctHtml;
+    const dq = 'data-q="' + qkey(h) + '"';
     if (!isFinite(price)){
-      priceHtml = '<div class="lc-price dim">—</div>';
+      priceHtml = '<div class="lc-price dim" ' + dq + '>—</div>';
       pctHtml = '<div class="lc-noquote">净值</div>';
     } else {
-      priceHtml = '<div class="lc-price">' + price4(price) + '</div>';
+      priceHtml = '<div class="lc-price" ' + dq + '>' + price4(price) + '</div>';
       if (isFinite(pct)){
         const arrow = pct > 0 ? '▲' : (pct < 0 ? '▼' : '·');
         const cName = pct > 0 ? 'up' : (pct < 0 ? 'down' : 'flat');
-        pctHtml = '<div class="lc-pct ' + cName + '"><span class="arrow">' + arrow + '</span>' + (pct > 0 ? '+' : '') + pct.toFixed(2) + '%</div>';
+        pctHtml = '<div class="lc-pct ' + cName + '" ' + dq + '><span class="arrow">' + arrow + '</span>' + (pct > 0 ? '+' : '') + pct.toFixed(2) + '%</div>';
       } else {
         pctHtml = '<div class="lc-noquote">净值</div>';
       }
@@ -2749,12 +2843,12 @@ function renderHoldings(){
       '<td class="l"><span class="tag ' + effType(h.code, h.type) + '">' + typeLabel(h.code, h.type) + '</span></td>' +
       '<td class="mono">' + shr(c.shares) + '</td>' +
       '<td class="mono">' + (c.shares > 0 ? '<span class="' + (c.spreadAvg < 0 ? 'neg-cost' : '') + '">' + price4(c.spreadAvg) + '</span>' : '—') + '</td>' +
-      '<td class="mono ' + cls(c.pct) + '">' + price4(c.price) + '</td>' +
-      '<td class="mono">' + money(c.mv) + '</td>' +
+      '<td class="mono q-price ' + cls(c.pct) + '" data-q="' + qkey(h) + '">' + price4(c.price) + '</td>' +
+      '<td class="mono q-mv" data-q="' + qkey(h) + '">' + money(c.mv) + '</td>' +
       '<td class="mono' + ((c.shares > 0 && c.spreadCost < 0) ? ' neg-cost' : '') + '">' + (c.shares > 0 ? money(c.spreadCost) : '—') + '</td>' +
-      '<td class="mono ' + cls(c.floatPnl) + '">' + (isFinite(c.floatPnl) ? sign2(c.floatPnl) : '—') + '</td>' +
-      '<td class="mono ' + cls(c.roi) + '">' + pct2(c.roi) + '</td>' +
-      '<td class="mono ' + cls(c.pct) + '">' + pct2(c.pct) + '</td>' +
+      '<td class="mono q-fpnl ' + cls(c.floatPnl) + '" data-q="' + qkey(h) + '">' + (isFinite(c.floatPnl) ? sign2(c.floatPnl) : '—') + '</td>' +
+      '<td class="mono q-roi ' + cls(c.roi) + '" data-q="' + qkey(h) + '">' + pct2(c.roi) + '</td>' +
+      '<td class="mono q-pct ' + cls(c.pct) + '" data-q="' + qkey(h) + '">' + pct2(c.pct) + '</td>' +
       '<td class="l tref-td">' + tRefCell(h, c) + '</td>' +
       '<td class="l"><button class="btn-ghost btn-sm" data-act="editHold" data-id="' + h.id + '">编辑</button>' +
         '<button class="btn-ghost btn-sm" data-act="delHold" data-id="' + h.id + '">删除</button></td></tr>';
@@ -5338,12 +5432,18 @@ function loadDemo(){
 }
 
 /* ============================ 定时器 / 启动 ============================ */
-let timer = null;
+let timer = null, tickTimer = null;
 function setupTimer(){
   clearInterval(timer); timer = null;
   if (!state.settings.autoRefresh) return;
   const sec = Math.max(CONFIG.minRefreshSec, Number(state.settings.refreshSec) || CONFIG.defaultRefreshSec);
   timer = setInterval(() => { if (!document.hidden) refreshQuotes(true); }, sec * 1000);
+}
+/* 行情秒级 ticker：独立于「自动刷新」开关，价格/净值常驻秒级更新（可 CONFIG.quoteTickSec 调） */
+function setupTick(){
+  clearInterval(tickTimer); tickTimer = null;
+  const sec = Math.max(1, CONFIG.quoteTickSec || 2);
+  tickTimer = setInterval(() => { tickQuotes(); }, sec * 1000);
 }
 function applySettingsToUI(){
   document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
@@ -5367,10 +5467,15 @@ function init(){
   renderAll();
   if (state.holdings.length) refreshQuotes(true);
   setupTimer();
+  setupTick();                 /* 行情秒级 ticker：价格/净值常驻刷新 */
   /* 盯盘看板：首次拉取 + 每 60 秒自动刷新 */
   refreshMonitor(true);
   setInterval(() => { refreshMonitor(true); }, 60000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && state.settings.autoRefresh) refreshQuotes(true); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    if (state.settings.autoRefresh) refreshQuotes(true);
+    tickQuotes();              /* 回到页面立即补一拍行情 */
+  });
   /* 顶栏显示内嵌初始数据快照时间（数据已在本机维护；腾讯文档同步已停用） */
   try {
     const meta = (typeof YANGEDATA_RAW !== 'undefined' && YANGEDATA_RAW.meta) || {};
