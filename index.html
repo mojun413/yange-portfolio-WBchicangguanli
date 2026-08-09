@@ -54,7 +54,7 @@ body{
 
 /* 左侧导航栏：暗色金融质感 + 金色品牌点缀 */
 .sidebar{
-  width:240px;flex-shrink:0;position:sticky;top:0;align-self:stretch;min-height:100vh;z-index:40;overflow-y:auto;
+  width:240px;flex-shrink:0;position:sticky;top:0;height:100vh;z-index:40;overflow-y:auto;
   display:flex;flex-direction:column;
   background:linear-gradient(180deg,#0e1320 0%,#0b0f1a 100%);
   color:#c7d2e2;border-right:1px solid rgba(255,255,255,.05);
@@ -151,7 +151,7 @@ label.fl{display:block;font-size:12px;color:var(--muted);margin:0 0 4px 2px}
 .panel-title .bar{width:4px;height:16px;border-radius:3px;background:linear-gradient(180deg,var(--accent),var(--gold))}
 .panel-sub{font-size:12.5px;color:var(--muted)}
 .panel-body{padding:16px 18px}
-.panel-body.tight{padding:0}
+.panel-body.tight{padding:0 12px}
 
 /* ===================== 面板内联筛选条 ===================== */
 .filterbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -2179,14 +2179,19 @@ function jsonpGet(url, timeout){
   });
 }
 
-/* 拉取全部行业板块（分页，JSONP 绕过浏览器跨域限制）。
+/* 拉取全部板块（分页，JSONP 绕过浏览器跨域限制）。
    东财 push2 接口不发送 Access-Control-Allow-Origin，直接 fetch 跨域会被浏览器拦截，
-   因此改用 JSONP（cb 回调）注入 <script> 拉取，可正常拿到全部板块行情（约 496 个）。 */
+   因此改用 JSONP（cb 回调）注入 <script> 拉取。
+   三系列并行：行业板块（m:90+t:2，约 496）+ 概念板块（m:90+t:3，约 800+）+ 地域板块（m:90+t:1，约 30+）。 */
 async function fetchMonitorBlocks(){
+  /* [fs 参数, 起始页, 页数] —— 行业 5 页、概念 9 页、地域 1 页 */
+  const series = [ ['m:90+t:2', 1, 5], ['m:90+t:3', 1, 9], ['m:90+t:1', 1, 1] ];
   const tasks = [];
-  for (let pn = 1; pn <= 5; pn++){
-    const url = MONITOR_EM_URL + '?pn=' + pn + '&pz=100&po=1&np=1&fltt=2&invt=2&fid=f3&fs=m:90+t:2&fields=f2,f3,f12,f14';
-    tasks.push(jsonpGet(url));
+  for (const [fs, pn0, pages] of series){
+    for (let pn = pn0; pn < pn0 + pages; pn++){
+      const url = MONITOR_EM_URL + '?pn=' + pn + '&pz=100&po=1&np=1&fltt=2&invt=2&fid=f3&fs=' + encodeURIComponent(fs) + '&fields=f2,f3,f12,f14';
+      tasks.push(jsonpGet(url));
+    }
   }
   const results = await Promise.all(tasks);
   const pages = [];
@@ -2251,7 +2256,7 @@ async function refreshMonitor(silent){
     }
     if (!blocks || !blocks.length) throw new Error('无数据');
     monitorData = blocks;
-    if (sub) sub.textContent = 'A股行业板块 ' + blocks.length + ' 个 · 每60秒自动刷新 · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
+    if (sub) sub.textContent = 'A股行业·概念·地域板块 ' + blocks.length + ' 个 · 每60秒自动刷新 · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
     renderMonitor();
   } catch (e) {
     if (!silent){
@@ -2263,7 +2268,8 @@ async function refreshMonitor(silent){
   }
 }
 
-/* 渲染盯盘看板（排序 + 搜索过滤） */
+/* 渲染盯盘看板（排序 + 搜索过滤；无搜索时最多显示 MAX_MONITOR_CARDS 张，防移动端卡顿） */
+const MAX_MONITOR_CARDS = 200;
 function renderMonitor(){
   const grid = document.getElementById('monitorGrid');
   if (!grid) return;
@@ -2282,10 +2288,11 @@ function renderMonitor(){
     if (eb) return -1;
     return (a - b) * dir;
   });
+  const limited = !kw ? list.slice(0, MAX_MONITOR_CARDS) : list;
   if (!list.length){
     grid.innerHTML = '<div class="dim" style="padding:14px">没有匹配的板块' + (kw ? '：「' + esc(monitorFilter) + '」' : '') + '</div>';
   } else {
-    grid.innerHTML = list.map(b => {
+    grid.innerHTML = limited.map(b => {
       const upN = isFinite(b.pct) && b.pct > 0;
       const downN = isFinite(b.pct) && b.pct < 0;
       const clsN = upN ? 'up' : (downN ? 'down' : 'flat');
@@ -2303,7 +2310,8 @@ function renderMonitor(){
   const foot = document.getElementById('monitorFoot');
   if (foot){
     foot.innerHTML =
-      '<span>显示 <b class="mf-num">' + list.length + '</b> / ' + monitorData.length + ' 板块</span>' +
+      '<span>显示 <b class="mf-num">' + (kw ? list.length : Math.min(list.length, MAX_MONITOR_CARDS)) + '</b> / ' + monitorData.length + ' 板块' +
+        (!kw && list.length > MAX_MONITOR_CARDS ? '（搜索可看全部）' : '') + '</span>' +
       '<span><b style="color:var(--up)">▲ ' + upC + '</b> · <b style="color:var(--down)">▼ ' + downC + '</b> · <span class="dim">— ' + flatC + '</span></span>' +
       '<span class="dim">排序：' + ({pct:'涨跌幅', name:'名称', price:'点位'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升' : '降') + '）</span>';
   }
