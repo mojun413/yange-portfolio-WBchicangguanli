@@ -254,7 +254,9 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 @media (max-width:980px){ .an-grid{grid-template-columns:1fr} }
 
 /* ===================== 表格 ===================== */
-.table-wrap{width:100%;overflow-x:auto;overflow-y:auto;max-height:66vh;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.table-wrap{width:100%;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+  /* 自适应高度：min-height 保证一次能看到约 10 个标的（约 540px），max-height 不超过视口剩余空间 */
+  min-height:540px;max-height:calc(100vh - 220px)}
 /* 表格表头吸顶：th sticky 在 .table-wrap 滚动容器内固定在顶部（配合上面的 max-height + overflow-y） */
 .table-wrap thead th{position:sticky;top:0;z-index:2}
 .table-wrap .fix-tb thead th{top:0}
