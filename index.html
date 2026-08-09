@@ -79,12 +79,12 @@ body{
 .nav-item.active::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;border-radius:0 3px 3px 0;background:var(--gold-2);box-shadow:0 0 8px rgba(251,191,36,.7)}
 .nav-item.active .ico{opacity:1;transform:scale(1.05)}
 .nav-sep{height:1px;background:rgba(255,255,255,.07);margin:9px 8px}
-.side-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:#7c8aa5;line-height:1.7}
-.side-foot .sf-t{color:#aeb9cd;font-weight:600;margin-bottom:3px;font-size:11.5px;letter-spacing:.3px}
+.side-foot{padding:12px 18px 14px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:#7c8aa5;line-height:1.5}
+.side-foot .sf-t{color:#aeb9cd;font-weight:600;margin-bottom:3px;font-size:11px;letter-spacing:.3px}
 .side-foot a{color:#7fb0ff;text-decoration:none}
 .side-foot a:hover{text-decoration:underline}
-.side-foot .sf-status{color:#93c5fd;font-size:11px;margin-top:4px;word-break:break-all}
-.side-foot .sf-snap{color:#7c8aa5;font-size:10.5px;margin-top:3px;word-break:break-all;cursor:pointer}
+.side-foot .sf-status{color:#93c5fd;font-size:11px;margin-top:3px;word-break:break-all}
+.side-foot .sf-snap{color:#7c8aa5;font-size:10.5px;margin-top:2px;word-break:break-all;cursor:pointer}
 
 /* 分页：默认隐藏，激活显示 */
 .page{display:none}
@@ -392,6 +392,64 @@ th.sorted .si{opacity:1}
 .empty .big{font-size:15px;color:var(--text);font-weight:600;margin-bottom:6px}
 .empty .acts{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 
+/* ===================== 访问密码门禁 ===================== */
+.access-lock{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(1000px 500px at 85% -10%, rgba(79,70,229,.20), transparent 60%),
+    radial-gradient(800px 400px at -10% 110%, rgba(245,158,11,.12), transparent 55%),
+    linear-gradient(160deg,#0d1220,#171e33 55%,#0b0f1a);
+  padding:20px;transition:opacity .35s ease}
+.access-lock.fade{opacity:0;pointer-events:none}
+.al-card{width:min(400px,100%);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:34px 28px 26px;text-align:center;backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);box-shadow:0 24px 60px rgba(0,0,0,.45);
+  animation:alIn .45s cubic-bezier(.22,1,.36,1)}
+@keyframes alIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.al-ico{width:62px;height:62px;margin:0 auto 14px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  font-size:27px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;
+  box-shadow:0 10px 26px rgba(79,70,229,.4);animation:alPulse 2.4s ease-in-out infinite}
+@keyframes alPulse{0%,100%{box-shadow:0 10px 26px rgba(79,70,229,.4)}50%{box-shadow:0 10px 36px rgba(79,70,229,.68)}}
+.al-title{color:#fff;font-size:19px;font-weight:800;letter-spacing:.5px}
+.al-sub{color:#93a0b8;font-size:12.5px;margin:6px 0 18px;line-height:1.6}
+.al-input-wrap{position:relative}
+.al-input-wrap input{width:100%;box-sizing:border-box;padding:13px 42px 13px 14px;border-radius:12px;
+  border:1px solid rgba(255,255,255,.16);background:rgba(13,18,32,.65);color:#fff;font-size:15px;letter-spacing:1.5px;
+  outline:none;transition:.2s}
+.al-input-wrap input:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(99,102,241,.28)}
+.al-input-wrap input::placeholder{letter-spacing:0;color:#5b6784}
+.al-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;opacity:.55;padding:6px;line-height:1}
+.al-eye:hover{opacity:1}
+.al-err{min-height:20px;font-size:12px;color:#f87171;margin:8px 0 0;text-align:left}
+.al-remember{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#aab6cc;margin:10px 2px 16px;cursor:pointer;user-select:none;text-align:left}
+.al-remember input{accent-color:var(--accent)}
+.al-btn{width:100%;padding:12px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 8px 22px rgba(79,70,229,.35);transition:.18s}
+.al-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.al-btn:active{transform:translateY(0)}
+.al-forgot{display:block;margin:14px auto 0;background:none;border:none;color:#7fb0ff;font-size:12px;cursor:pointer;text-decoration:underline;opacity:.85;padding:0}
+.al-forgot:hover{opacity:1}
+.al-load{color:#c7d2e4;font-size:13px}
+.al-spin{width:34px;height:34px;margin:0 auto 12px;border-radius:50%;border:3px solid rgba(255,255,255,.15);
+  border-top-color:var(--accent-2);animation:alSpin 1s linear infinite}
+@keyframes alSpin{to{transform:rotate(360deg)}}
+.pwd-field{margin:0 0 12px;text-align:left}
+.pwd-field .t{font-size:12px;color:var(--muted);margin-bottom:5px}
+.pwd-field input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+  font-size:14px;background:var(--panel-2);outline:none}
+.pwd-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+/* ===================== 页面底部 / 关于 ===================== */
+.page-foot{margin-top:26px;padding:14px 0 22px;text-align:center;font-size:11px;color:var(--muted);line-height:1.8}
+.page-foot b{color:var(--text);font-weight:600}
+.about-box{margin-top:16px;border:1px dashed var(--line);border-radius:12px;overflow:hidden;background:var(--panel-2)}
+.about-box summary{cursor:pointer;padding:12px 14px;font-size:13px;font-weight:600;color:var(--text);
+  list-style:none;position:relative;user-select:none;border-radius:12px}
+.about-box summary::-webkit-details-marker{display:none}
+.about-box summary::after{content:"▾";position:absolute;right:14px;color:var(--muted);transition:transform .2s}
+.about-box[open] summary::after{transform:rotate(180deg)}
+.about-box .ab-body{padding:2px 14px 14px;font-size:12px;color:var(--muted);line-height:1.95}
+.about-box .ab-body b{color:var(--text)}
+
 /* ===================== 弹窗 ===================== */
 .mask{position:fixed;inset:0;background:rgba(15,19,32,.45);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
 .modal{background:#fff;border-radius:18px;max-width:520px;width:100%;box-shadow:var(--shadow-lg);overflow:hidden;max-height:86vh;display:flex;flex-direction:column;animation:modalin .22s cubic-bezier(.22,1,.36,1)}
@@ -482,6 +540,28 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
 })();
 </script></head>
 <body>
+<!-- ============ 访问密码门禁（新设备校验；无密码自动放行） ============ -->
+<div id="accessLock" class="access-lock" role="dialog" aria-label="访问验证">
+  <div class="al-card">
+    <div class="al-load" id="alLoad">
+      <div class="al-spin"></div>
+      <div>安全校验中…</div>
+    </div>
+    <div class="al-form" id="alForm" style="display:none">
+      <div class="al-ico">🔒</div>
+      <div class="al-title">访问验证</div>
+      <div class="al-sub" id="alSub">此设备未授权，请输入访问密码</div>
+      <div class="al-input-wrap">
+        <input id="alPwd" type="password" placeholder="请输入访问密码" autocomplete="off" maxlength="32">
+        <button class="al-eye" id="alEye" title="显示 / 隐藏">👁</button>
+      </div>
+      <div class="al-err" id="alErr"></div>
+      <label class="al-remember"><input type="checkbox" id="alRemember" checked> 记住此设备（下次免密码）</label>
+      <button class="al-btn" id="alBtn">进入</button>
+      <button class="al-forgot" id="alForgot">忘记密码？</button>
+    </div>
+  </div>
+</div>
 <div class="app">
 
   <!-- ===================== 左侧导航 ===================== -->
@@ -502,8 +582,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a class="nav-item" data-page="settings" href="javascript:void(0)"><span class="ico">⚙️</span>设置</a>
     </nav>
     <div class="side-foot">
-      <div class="sf-t">数据源</div>
-      <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">腾讯文档「养鹅Ⅱ6813」</a>
+      <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
     </div>
@@ -753,16 +832,24 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
                 <button class="btn-sm" id="btnCloudForce" title="以本机数据为准，强制覆盖云端（恢复误覆盖时用）">本机覆盖云端</button>
                 <button class="btn-sm" id="btnCloudSql" title="复制建表 SQL，在 Supabase SQL Editor 里执行一次">建表 SQL</button>
               </div></div>
+            <div class="setting-row"><div><div class="t">访问密码</div><div class="d" id="pwdRowDesc">未设置 — 任何设备打开页面即可访问</div></div>
+              <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnPwdSet" title="新设备打开页面需输入密码；已授权设备自动放行">设置 / 修改密码</button></div></div>
+            <details class="about-box" id="aboutBox">
+              <summary>关于本工具 · 数据说明与免责声明</summary>
+              <div class="ab-body">
+                配置云端数据库（Supabase）后，数据将<b>实时同步到云端</b>，手机 / 电脑打开同一页面即共享一份数据，一处修改处处同步；未配置时自动使用本机 localStorage（键前缀 <span class="mono">pm_</span>）。<br>
+                建仓 / 加减仓 / 记分红 / 每日操作均在本页录入，自动联动所有汇总（总览 / 持仓明细 / 清仓结算 / 交易统计 / 现金流）。腾讯文档同步已停用，内嵌数据即初始快照；点「恢复初始数据」可重置。<br>
+                行情来自腾讯行情 / 天天基金公开接口，仅供个人记账参考，<b>不构成任何投资建议</b>。
+              </div>
+            </details>
           </div>
         </div>
       </section>
 
-      <div class="hint" style="text-align:center;margin-top:22px">
-        配置云端数据库（Supabase）后，数据将<b>实时同步到云端</b>，手机 / 电脑打开同一页面即共享一份数据，一处修改处处同步；未配置时自动使用本机 localStorage（键前缀 <span class="mono">pm_</span>）。<br>
-        云端同步：上方「云端同步（Supabase）」行可配置 URL / key、立即同步、复制建表 SQL（首次需在 Supabase SQL Editor 执行一次并确认 anon 有读写权限）。<br>
-        数据已在本机维护：建仓 / 加减仓 / 记分红 / 每日操作均在本页录入，自动联动所有汇总（总览 / 持仓明细 / 清仓结算 / 交易统计 / 现金流）。腾讯文档同步已停用，内嵌数据即初始快照；点「恢复初始数据」可重置。<br>
-        行情来自腾讯行情 / 天天基金公开接口，仅供个人记账参考，不构成任何投资建议。
-      </div>
+      <footer class="page-foot">
+        <b>养鹅持仓管理 v1.0.0</b> · 行情数据来自腾讯行情 / 天天基金公开接口 · 仅供个人记账参考，不构成投资建议<br>
+        数据说明与使用帮助见「设置 → 关于本工具」
+      </footer>
     </div>
   </main>
 </div>
@@ -871,6 +958,7 @@ function initNav(){
   link('btnDiag2', () => { diagnose().catch(e => toast('自检失败：' + e.message, 'err')); });
   link('btnImportYangE2', () => importYangE2());
   link('btnSettings2', () => openSettings());
+  link('btnPwdSet', () => { openPwdSettings().catch(e => toast(e.message, 'err')); });
   /* --- 云端同步（Supabase）--- */
   $('#btnCloudCfg') && ($('#btnCloudCfg').onclick = () => { openCloudConfig().catch(e => toast('配置失败：' + e.message, 'err')); });
   $('#btnCloudSync') && ($('#btnCloudSync').onclick = () => {
@@ -1015,6 +1103,187 @@ const persist = {
   trades   : () => save('trades',   state.trades),
   settings : () => save('settings', state.settings)
 };
+
+/* ============================ 访问密码门禁 ============================ */
+/* 纯 JS SHA-256（仅接受 ASCII 可见字符，密码约束同），不依赖 WebCrypto，浏览器 / Node 均可用 */
+function sha256Hex(ascii){
+  function rightRotate(value, amount){ return (value >>> amount) | (value << (32 - amount)); }
+  const mathPow = Math.pow, maxWord = mathPow(2, 32), lp = 'length';
+  let i, j, result = '';
+  const words = [], asciiBitLength = ascii[lp] * 8;
+  let hash = sha256Hex.h = sha256Hex.h || [];
+  const k = sha256Hex.k = sha256Hex.k || [];
+  let primeCounter = k[lp];
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++){
+    if (!isComposite[candidate]){
+      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+    }
+  }
+  let s = ascii + '\x80';
+  while (s[lp] % 64 - 56) s += '\x00';
+  for (i = 0; i < s[lp]; i++){
+    j = s.charCodeAt(i);
+    if (j >> 8) return '';   // ASCII only（设置密码时已约束）
+    words[i >> 2] |= j << (((3 - i) % 4) * 8);
+  }
+  words[words[lp]] = ((asciiBitLength / maxWord) | 0);
+  words[words[lp]] = (asciiBitLength);
+  for (j = 0; j < words[lp];){
+    const w = words.slice(j, j += 16);
+    const oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (i = 0; i < 64; i++){
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const a = hash[0], e = hash[4];
+      const temp1 = hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ ((~e) & hash[6]))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+            w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0);
+      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (i = 0; i < 8; i++){
+    for (j = 3; j + 1; j--){
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? 0 : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+/* 密码合法性：4-32 位可见 ASCII（字母/数字/符号），不含中文与空格 */
+function validPwd(p){ return typeof p === 'string' && /^[\x21-\x7E]{4,32}$/.test(p); }
+/* 云端轻量拉取密码摘要（只取 accessPwdHash，不干扰正式云同步 cloudInit） */
+async function fetchCloudPwdHash(){
+  try {
+    const c = (typeof cloud !== 'undefined' && cloud.cfg) ? cloud.cfg : {};
+    if (!c.enabled || !c.supabaseUrl || !c.supabaseKey) return '';
+    const url = c.supabaseUrl + '/rest/v1/' + (c.table || 'app_state') + '?select=data&limit=1';
+    const r = await fetch(url, { headers: { apikey: c.supabaseKey, Authorization: 'Bearer ' + c.supabaseKey } });
+    if (!r.ok) return '';
+    const rows = await r.json();
+    if (!rows || !rows.length || !rows[0].data) return '';
+    return String(rows[0].data.accessPwdHash || '');
+  } catch (e) { return ''; }
+}
+/* 移除门禁遮罩（fade 动画后隐藏） */
+function hideAccessLock(){
+  const lock = document.getElementById('accessLock');
+  if (!lock) return;
+  lock.classList.add('fade');
+  setTimeout(() => { lock.style.display = 'none'; }, 320);
+}
+/* 门禁主流程：已授权设备放行；无密码放行；有密码显示输入界面 */
+function accessGate(){
+  const lock = document.getElementById('accessLock');
+  if (!lock) return;
+  (async () => {
+    try {
+      /* 1) 常用设备（本会话或永久授权）直接放行 */
+      if (sessionStorage.getItem(K('accessGranted')) || localStorage.getItem(K('accessGranted'))){ hideAccessLock(); return; }
+      /* 2) 收集密码摘要：本机优先，未设置时尝试云端（新设备靠云同步拿到） */
+      let hash = '';
+      try { hash = localStorage.getItem(K('accessPwdHash')) || ''; } catch(e){}
+      if (!hash) hash = await fetchCloudPwdHash();
+      if (!hash){ hideAccessLock(); return; }   /* 无密码记录 → 放行 */
+      /* 3) 有密码 → 展示输入界面 */
+      const load = document.getElementById('alLoad'), form = document.getElementById('alForm');
+      if (load) load.style.display = 'none';
+      if (form){ form.style.display = ''; bindAccessLock(hash); }
+      const pwd = document.getElementById('alPwd');
+      if (pwd) setTimeout(() => pwd.focus(), 60);
+    } catch (e) {
+      hideAccessLock();   /* 安全失败：异常一律放行，避免锁死页面 */
+    }
+  })();
+}
+/* 密码门输入交互绑定（一次性；哈希在闭包内） */
+function bindAccessLock(hash){
+  const pwd = document.getElementById('alPwd'), err = document.getElementById('alErr'),
+    eye = document.getElementById('alEye'), btn = document.getElementById('alBtn'),
+    rem = document.getElementById('alRemember'), fgt = document.getElementById('alForgot');
+  const showErr = m => { if (err){ err.textContent = m || ''; } if (pwd) pwd.focus(); };
+  const tryEnter = () => {
+    const v = pwd ? pwd.value : '';
+    if (!v){ showErr('请输入访问密码'); return; }
+    if (sha256Hex(v) !== hash){ showErr('密码不正确，请重试'); if (pwd){ pwd.value = ''; } return; }
+    try {
+      if (rem && rem.checked) localStorage.setItem(K('accessGranted'), String(Date.now()));
+      else sessionStorage.setItem(K('accessGranted'), '1');
+    } catch(e){ try { sessionStorage.setItem(K('accessGranted'), '1'); } catch(e2){} }
+    hideAccessLock();
+  };
+  if (btn) btn.onclick = tryEnter;
+  if (pwd) pwd.onkeydown = e => { if (e.key === 'Enter') tryEnter(); };
+  if (eye) eye.onclick = () => { if (!pwd) return; pwd.type = pwd.type === 'password' ? 'text' : 'password'; };
+  if (fgt) fgt.onclick = () => {
+    dialog({ title: '忘记密码？', bodyHTML:
+      '访问密码以加密摘要存储（不可反推），本机无法自助找回。<br><br>' +
+      '① 若仍有已授权设备：打开网页 → <b>设置 → 访问密码</b> → 输入当前密码后修改或关闭。<br>' +
+      '② 若所有设备都无法进入：用电脑打开本页面，按 <b>F12 → Application → Local Storage</b>，删除键 ' +
+      '<span class="mono">' + K('accessPwdHash') + '</span> 与 <span class="mono">' + K('accessGranted') + '</span>，刷新即可重置。',
+      buttons: [{ label: '知道了', value: true }] });
+  };
+}
+/* 设置页「访问密码」行状态描述 + 按钮文案联动 */
+function syncPwdRowUI(){
+  const el = document.getElementById('pwdRowDesc'), btn = document.getElementById('btnPwdSet');
+  let on = false;
+  try { on = !!localStorage.getItem(K('accessPwdHash')); } catch(e){}
+  if (el) el.textContent = on ? '已开启 — 新设备需输入密码；已授权设备自动免密' : '未设置 — 任何设备打开页面即可访问';
+  if (btn) btn.textContent = on ? '修改 / 关闭密码' : '设置访问密码';
+}
+/* 设置 / 修改 / 关闭访问密码 */
+async function openPwdSettings(){
+  let cur = '';
+  try { cur = localStorage.getItem(K('accessPwdHash')) || ''; } catch(e){}
+  const body =
+    '<div class="pwd-field"><div class="t">新密码（4-32 位，字母 / 数字 / 符号；留空 = 关闭密码）</div>' +
+      '<input type="password" id="p_new" maxlength="32" placeholder="' + (cur ? '输入新密码' : '设置访问密码') + '" autocomplete="new-password"></div>' +
+    '<div class="pwd-field"><div class="t">确认新密码</div>' +
+      '<input type="password" id="p_new2" maxlength="32" autocomplete="new-password"></div>' +
+    (cur ? '<div class="pwd-field"><div class="t">当前密码（修改 / 关闭时需验证）</div>' +
+      '<input type="password" id="p_cur" maxlength="32" placeholder="输入当前密码" autocomplete="current-password"></div>' : '');
+  let picked = null;
+  const p = dialog({ title: cur ? '修改访问密码' : '设置访问密码', bodyHTML: body, buttons: [
+    { label: '取消', value: null },
+    { label: '保存', value: true, cls: 'btn-primary', before: m => {
+        const v = id => { const el = m.querySelector('#' + id); return el ? el.value : ''; };
+        try {
+          const n1 = v('p_new'), n2 = v('p_new2'), c = v('p_cur');
+          if (n1 || n2){
+            if (n1 !== n2) throw new Error('两次输入的新密码不一致');
+            if (!validPwd(n1)) throw new Error('密码需为 4-32 位字母 / 数字 / 符号，不含中文与空格');
+            if (cur && sha256Hex(c) !== cur) throw new Error('当前密码不正确');
+            picked = { hash: sha256Hex(n1) };
+          } else {
+            if (cur && sha256Hex(c) !== cur) throw new Error('关闭密码需输入正确的当前密码');
+            picked = { hash: '' };
+          }
+        } catch (e) { toast(e.message, 'err'); return false; }
+        return true;
+      } } ] });
+  const ok = await p;
+  if (!ok || !picked) return;
+  try {
+    if (picked.hash) localStorage.setItem(K('accessPwdHash'), picked.hash);
+    else localStorage.removeItem(K('accessPwdHash'));
+  } catch(e){}
+  /* 云端：密码摘要随下次云推送上传（cloudPush 的 snap 已含 accessPwdHash 字段） */
+  try { if (typeof scheduleCloudPush === 'function') scheduleCloudPush(); } catch(e){}
+  syncPwdRowUI();
+  toast(picked.hash ? '访问密码已' + (cur ? '修改' : '设置') : '访问密码已关闭', 'ok');
+}
 
 /* ============================ 代码 / 市场 ============================ */
 /* 号段 -> 交易所（已按腾讯行情接口实测校准）
@@ -4909,6 +5178,8 @@ function applySettingsToUI(){
   if (oGen && !oGen.dataset.userTouched){ oGen.checked = true; $('#o_txBox').style.display = ''; }
 }
 function init(){
+  accessGate();                 /* 访问密码门禁：新设备未授权时锁定（无密码自动放行） */
+  syncPwdRowUI();               /* 设置页「访问密码」行状态 */
   applySettingsToUI();
   initNav();
   bind();
@@ -5559,6 +5830,7 @@ async function cloudPush(){
       v: 1,
       holdings: state.holdings, dailyOps: state.dailyOps, trades: state.trades,
       settings: state.settings, externalClosed: state.externalClosed || [],
+      accessPwdHash: (() => { try { return localStorage.getItem(K('accessPwdHash')) || ''; } catch(e){ return ''; } })(),
       savedAt: Date.now()
     };
     const { data: ups, error } = await cloud.client.from(cloud.cfg.table)
