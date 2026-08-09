@@ -159,7 +159,7 @@ label.fl{display:block;font-size:12px;color:var(--muted);margin:0 0 4px 2px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:0 0 18px;overflow:hidden}
 .panel:first-child{margin-top:0}
 .panel:last-child{margin-bottom:18px}
-.panel-head{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid rgba(0,0,0,.04);flex-wrap:wrap}
+.panel-head{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:none;flex-wrap:wrap}
 .panel-title{font-weight:700;font-size:16px;display:flex;align-items:center;gap:9px}
 .panel-title .bar{width:4px;height:16px;border-radius:3px;background:linear-gradient(180deg,var(--accent),var(--gold))}
 .panel-sub{font-size:12.5px;color:var(--muted)}
@@ -208,7 +208,7 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .monitor-bar .mb-search input:focus{background:#fff;border-color:var(--accent);box-shadow:var(--ring)}
 .monitor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:5px;padding:2px}
 /* 盯盘自选分类 tab（全部 / 个股 / ETF） */
-.watch-cats{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;border:none;outline:none;background:transparent;padding:0}
+.watch-cats{display:flex;align-items:center;gap:6px;margin:2px 0 10px;flex-wrap:wrap;border:none;outline:none;background:transparent;padding:0}
 .watch-cats .wc{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);cursor:pointer;user-select:none;transition:.15s;line-height:1.5}
 .watch-cats .wc b{font-size:11px;font-weight:700;min-width:16px;text-align:center;background:rgba(120,130,160,.12);border-radius:999px;padding:0 4px;line-height:1.6}
 .watch-cats .wc:hover{color:var(--text);border-color:#c9d2e3}
@@ -655,7 +655,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v50 · 2026-08-09 19:52</div>
+      <div class="sf-ver" id="sfVer">v51 · 2026-08-09 20:14</div>
     </div>
   </aside>
 
@@ -666,7 +666,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v50</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v51</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -901,7 +901,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v50 · 2026-08-09 19:52 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v51 · 2026-08-09 20:14 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -947,8 +947,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v50';
-const APP_BUILD   = '2026-08-09 19:52';
+const APP_VERSION = 'v51';
+const APP_BUILD   = '2026-08-09 20:14';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2642,12 +2642,20 @@ function bindKlineCross(svg, rows){
   const n = rows.length, cw = (W - padL - padR) / n;
   const cross = svg.querySelector('#klCross'), vl = svg.querySelector('#klVL'),
     hl = svg.querySelector('#klHL'), dot = svg.querySelector('#klDot');
-  const info = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const info = document.createElementNS(SVGNS, 'g');
   info.id = 'klInfo';
-  info.innerHTML = '<rect width="210" height="62" rx="6" fill="rgba(255,255,255,.94)" stroke="#e2e8f0"/>' +
-    '<text id="klInfoT" x="8" y="15" font-size="10.5" fill="#334155"></text>';
+  info.setAttribute('style', 'display:none');
+  const infoRect = document.createElementNS(SVGNS, 'rect');
+  infoRect.setAttribute('width', '210'); infoRect.setAttribute('height', '78');
+  infoRect.setAttribute('rx', '6'); infoRect.setAttribute('fill', 'rgba(255,255,255,.96)');
+  infoRect.setAttribute('stroke', '#e2e8f0');
+  info.appendChild(infoRect);
+  const infoT = document.createElementNS(SVGNS, 'text');
+  infoT.setAttribute('x', '8'); infoT.setAttribute('y', '15');
+  infoT.setAttribute('font-size', '10.5'); infoT.setAttribute('fill', '#334155');
+  info.appendChild(infoT);
   svg.insertBefore(info, svg.querySelector('#klCross'));
-  const infoT = info.querySelector('#klInfoT');
   const hide = () => { if (cross) cross.style.display = 'none'; if (info) info.style.display = 'none'; };
   svg.addEventListener('mousemove', e => {
     const rect = svg.getBoundingClientRect();
@@ -2667,16 +2675,25 @@ function bindKlineCross(svg, rows){
     if (ix + 210 > 720 - 4) ix = cx - 222;
     if (info) info.setAttribute('transform', 'translate(' + ix + ',' + iy + ')');
     if (infoT){
+      while (infoT.firstChild) infoT.removeChild(infoT.firstChild);
       const prev = i > 0 ? rows[i - 1].close : r.open;
       const d = prev > 0 ? (r.close - prev) / prev * 100 : 0;
       const dC = d > 0 ? 'var(--up)' : (d < 0 ? 'var(--down)' : 'var(--flat)');
       const maV = k => { if (i + 1 < k) return '—'; let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].close; return (s / k).toFixed(2); };
-      infoT.innerHTML =
-        '<tspan x="8" dy="0" font-weight="700">' + esc(String(r.date)) + '</tspan>' +
-        '<tspan x="118" fill="' + dC + '" font-weight="700">' + (d >= 0 ? '+' : '') + d.toFixed(2) + '%</tspan>' +
-        '<tspan x="8" dy="14">开 <tspan font-weight="700">' + r.open.toFixed(2) + '</tspan>  高 <tspan font-weight="700" fill="var(--up)">' + r.high.toFixed(2) + '</tspan>  低 <tspan font-weight="700" fill="var(--down)">' + r.low.toFixed(2) + '</tspan>  收 <tspan font-weight="700">' + r.close.toFixed(2) + '</tspan></tspan>' +
-        '<tspan x="8" dy="14">量 <tspan font-weight="700">' + fmtVol(r.vol) + '</tspan>  MA5 <tspan font-weight="700">' + maV(5) + '</tspan>  MA10 <tspan font-weight="700">' + maV(10) + '</tspan></tspan>' +
-        '<tspan x="8" dy="14">MA20 <tspan font-weight="700">' + maV(20) + '</tspan>  MA60 <tspan font-weight="700">' + maV(60) + '</tspan>';
+      const mk = (txt, x, fill, dy, wt) => {
+        const t = document.createElementNS(SVGNS, 'tspan');
+        t.setAttribute('x', x); if (dy !== null) t.setAttribute('dy', dy);
+        if (fill) t.setAttribute('fill', fill); if (wt) t.setAttribute('font-weight', wt);
+        t.textContent = txt; return t;
+      };
+      infoT.appendChild(mk(String(r.date), 8, null, 0, 700));
+      infoT.appendChild(mk((d >= 0 ? '+' : '') + d.toFixed(2) + '%', 118, dC, 0, 700));
+      infoT.appendChild(mk('开 ' + r.open.toFixed(2), 8, null, 14, null));
+      infoT.appendChild(mk('高 ' + r.high.toFixed(2), null, 'var(--up)', null, 700));
+      infoT.appendChild(mk('低 ' + r.low.toFixed(2), null, 'var(--down)', null, 700));
+      infoT.appendChild(mk('收 ' + r.close.toFixed(2), null, null, null, 700));
+      infoT.appendChild(mk('量 ' + fmtVol(r.vol) + '  MA5 ' + maV(5) + '  MA10 ' + maV(10), 8, null, 14, null));
+      infoT.appendChild(mk('MA20 ' + maV(20) + '  MA60 ' + maV(60), 8, null, 14, null));
     }
   });
   svg.addEventListener('mouseleave', hide);
@@ -2800,12 +2817,19 @@ function bindMinuteCross(svg, rows, preClose){
   const n = rows.length, cw = (W - padL - padR) / n;
   const cross = svg.querySelector('#klCross'), vl = svg.querySelector('#klVL'),
     hl = svg.querySelector('#klHL'), dot = svg.querySelector('#klDot');
-  const info = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const info = document.createElementNS(SVGNS, 'g');
   info.id = 'klInfo';
-  info.innerHTML = '<rect width="212" height="62" rx="6" fill="rgba(255,255,255,.94)" stroke="#e2e8f0"/>' +
-    '<text id="klInfoT" x="8" y="15" font-size="10.5" fill="#334155"></text>';
-  svg.insertBefore(info, svg.querySelector('#klCross'));
-  const infoT = info.querySelector('#klInfoT');
+  info.setAttribute('style', 'display:none');
+  const infoRect = document.createElementNS(SVGNS, 'rect');
+  infoRect.setAttribute('width', '212'); infoRect.setAttribute('height', '78');
+  infoRect.setAttribute('rx', '6'); infoRect.setAttribute('fill', 'rgba(255,255,255,.96)');
+  infoRect.setAttribute('stroke', '#e2e8f0');
+  info.appendChild(infoRect);
+  const infoT = document.createElementNS(SVGNS, 'text');
+  infoT.setAttribute('x', '8'); infoT.setAttribute('y', '15');
+  infoT.setAttribute('font-size', '10.5'); infoT.setAttribute('fill', '#334155');
+  info.appendChild(infoT);
   const T = t => t.length >= 4 ? t.slice(0, 2) + ':' + t.slice(2, 4) : t;
   const hide = () => { if (cross) cross.style.display = 'none'; if (info) info.style.display = 'none'; };
   svg.addEventListener('mousemove', e => {
@@ -2825,14 +2849,21 @@ function bindMinuteCross(svg, rows, preClose){
     if (ix + 212 > 720 - 4) ix = cx - 224;
     if (info) info.setAttribute('transform', 'translate(' + ix + ',' + iy + ')');
     if (infoT){
+      while (infoT.firstChild) infoT.removeChild(infoT.firstChild);
       const d = preClose > 0 ? (r.price - preClose) / preClose * 100 : 0;
       const dC = d > 0 ? 'var(--up)' : (d < 0 ? 'var(--down)' : 'var(--flat)');
-      infoT.innerHTML =
-        '<tspan x="8" dy="0" font-weight="700">' + T(r.t) + '</tspan>' +
-        '<tspan x="118" fill="' + dC + '" font-weight="700">' + (d >= 0 ? '+' : '') + d.toFixed(2) + '%</tspan>' +
-        '<tspan x="8" dy="14">价格 <tspan font-weight="700">' + r.price.toFixed(2) + '</tspan>  均价 <tspan font-weight="700" fill="#e0a83e">' + r.avg.toFixed(2) + '</tspan></tspan>' +
-        '<tspan x="8" dy="14">量 <tspan font-weight="700">' + fmtVol(r.vol) + '</tspan>  累计 ' + fmtVol(r.cum) + '手</tspan>' +
-        '<tspan x="8" dy="14">额 <tspan font-weight="700">¥' + (isFinite(r.amt) ? (r.amt >= 1e8 ? (r.amt / 1e8).toFixed(2) + '亿' : (r.amt >= 1e4 ? (r.amt / 1e4).toFixed(1) + '万' : String(Math.round(r.amt)))) : '—') + '</tspan></tspan>';
+      const mk = (txt, x, fill, dy, wt) => {
+        const t = document.createElementNS(SVGNS, 'tspan');
+        t.setAttribute('x', x); if (dy !== null) t.setAttribute('dy', dy);
+        if (fill) t.setAttribute('fill', fill); if (wt) t.setAttribute('font-weight', wt);
+        t.textContent = txt; return t;
+      };
+      infoT.appendChild(mk(T(r.t), 8, null, 0, 700));
+      infoT.appendChild(mk((d >= 0 ? '+' : '') + d.toFixed(2) + '%', 118, dC, 0, 700));
+      infoT.appendChild(mk('价格 ' + r.price.toFixed(2), 8, null, 14, 700));
+      infoT.appendChild(mk('  均价 ' + r.avg.toFixed(2), null, '#e0a83e', null, 700));
+      infoT.appendChild(mk('量 ' + fmtVol(r.vol) + '  累计 ' + fmtVol(r.cum) + '手', 8, null, 14, null));
+      infoT.appendChild(mk('额 ¥' + (isFinite(r.amt) ? (r.amt >= 1e8 ? (r.amt / 1e8).toFixed(2) + '亿' : (r.amt >= 1e4 ? (r.amt / 1e4).toFixed(1) + '万' : String(Math.round(r.amt)))) : '—'), 8, null, 14, null));
     }
   });
   svg.addEventListener('mouseleave', hide);
@@ -2949,7 +2980,7 @@ function showKlineDialog(name, sym){
       schedule('min');
     });
   };
-  load('day');
+  load('min');
 }
 
 /* 总览 6 张卡片金额隐藏（小眼睛）：每张卡独立开关，掩码 = 首个字符 ***** 尾字符 */
