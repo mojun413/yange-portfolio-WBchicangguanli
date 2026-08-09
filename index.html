@@ -266,6 +266,9 @@ tr.clickable:hover{background:#f6f8fd}
 tr.expanded{background:#f3f7ff}
 .sub-row td{background:#e8edf6;padding:0;border-bottom:1px solid var(--line-2)}
 .sub-box{padding:14px 16px}
+.tref-box{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.tref-item{flex:1 1 230px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font-size:13px}
+.tref-lb{font-weight:600;color:var(--muted);font-size:12px;white-space:nowrap}
 .name-cell{display:flex;flex-direction:column;gap:1px;line-height:1.3}
 .name-cell .n{font-weight:600}
 .name-cell .c{font-size:11.5px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
@@ -2321,6 +2324,38 @@ function renderHoldings(){
     (sc ? '已按「' + sc.label + '」' + (sortDir === 'asc' ? '升序' : '降序') : '点表头可排序');
 }
 
+/* 做T参考：最近一次加仓 / 最近一次减仓的成交单价 vs 实时净值（现价）的差价与比例。
+   做T/波段的核心判断就是「我最近那笔买/卖与现在的差距」——差得越多，T 的空间越大。
+   涨红跌绿：现价高于成交价 = 红（▲），低于 = 绿（▼）。 */
+function tRefBlock(h, c, q){
+  const rows = (c.rows || []).filter(t => !t.dividend);
+  const lastBuy  = rows.filter(t => t.side === 'buy').slice(-1)[0];   // 最近一次加仓
+  const lastSell = rows.filter(t => t.side === 'sell').slice(-1)[0];  // 最近一次减仓
+  const price = Number(q && q.price);
+  if (!isFinite(price)) return '';   // 行情未获取：不显示（meta 行已提示）
+  const cell = (label, t) => {
+    if (!t) return '';
+    const tp = Number(t.price);
+    if (!isFinite(tp) || tp <= 0) return '';
+    const diff = price - tp;
+    const pct = diff / tp * 100;
+    const cls = diff >= 0 ? 'up' : 'down';
+    const arrow = diff >= 0 ? '▲' : '▼';
+    const tip = t.side === 'buy'
+      ? (diff >= 0 ? '现价高于最近加仓成本，减仓做T有空间' : '现价低于最近加仓成本，减仓会亏损')
+      : (diff >= 0 ? '现价高于最近减仓价，接回成本偏高' : '现价低于最近减仓价，可考虑接回做T');
+    return '<div class="tref-item"><span class="tref-lb">' + label + '</span>' +
+      '<span class="mono" style="color:var(--muted)">' + price4(tp) + '</span>' +
+      '<span class="dim">→</span><span class="mono" style="font-weight:600">' + price4(price) + '</span>' +
+      '<span class="mono ' + cls + '" style="font-weight:600">' + arrow + ' ' + sign2(diff) +
+        '（' + (diff >= 0 ? '+' : '') + pct.toFixed(2) + '%）</span>' +
+      '<span class="dim" style="font-size:11px;flex-basis:100%">' + tip + '</span></div>';
+  };
+  const b = cell('最近加仓', lastBuy) + cell('最近减仓', lastSell);
+  if (!b) return '';
+  return '<div class="tref-box">' + b + '</div>';
+}
+
 function subPanel(h, c){
   let flow = '<div class="dim" style="padding:6px 0">暂无交易流水</div>';
   if (c.rows.length){
@@ -2383,7 +2418,7 @@ function subPanel(h, c){
             (q.navDate ? ' · 净值日期 ' + esc(q.navDate) : '') + (q.gzsj ? ' · 估值时间 ' + esc(q.gzsj) : '')
         : '昨收 ' + price4(q.preClose) + (isFinite(q.high) ? ' · 最高 ' + price4(q.high) + ' · 最低 ' + price4(q.low) : '')) +
        ' · 累计手续费 ' + n2(c.fees))) + '</div>';
-  return '<div class="sub-box">' + meta +
+  return '<div class="sub-box">' + meta + tRefBlock(h, c, q) +
     '<div class="form-grid g-tx" style="margin-bottom:12px">' +
       '<div class="field"><label class="fl">日期</label><input type="date" data-f="date" value="' + todayStr() + '"></div>' +
       '<div class="field"><label class="fl">价格</label><input type="number" step="0.0001" min="0" data-f="price" value="' + (isFinite(c.price) ? c.price : '') + '"></div>' +
