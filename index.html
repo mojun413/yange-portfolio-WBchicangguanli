@@ -89,6 +89,7 @@ body{
 /* 分页：默认隐藏，激活显示 */
 .page{display:none}
 .page.active{display:flex;flex-direction:column;flex:1;min-height:0;background:var(--panel);
+  margin:0 auto;max-width:1400px;width:100%;
   padding:18px 22px 22px;overflow:hidden;animation:pagein .3s cubic-bezier(.22,1,.36,1)}
 @keyframes pagein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
