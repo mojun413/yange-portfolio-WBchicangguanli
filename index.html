@@ -517,6 +517,12 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
 .sidebar.collapsed .nav-item.active::before{width:3px}
 
 /* ===================== 响应式 ===================== */
+/* 盯盘看板 = 左右双栏（盯盘自选 | 每日操作）；≤1280 单列堆叠（平板/手机：盯盘上、操作下） */
+.monitor-split{display:grid;grid-template-columns:1fr;gap:0;align-items:start}
+.monitor-split .ms-col{min-width:0}
+@media (min-width:1281px){
+  .monitor-split{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+}
 @media (max-width:1280px){
   .cards{grid-template-columns:repeat(3,1fr)}
   .g-holding{grid-template-columns:repeat(4,1fr)}
@@ -625,7 +631,6 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
     </div>
     <nav class="side-nav" id="sideNav">
       <a class="nav-item active" data-page="overview" href="javascript:void(0)"><span class="ico">📊</span><span class="nav-txt">总览</span></a>
-      <a class="nav-item" data-page="ops" href="javascript:void(0)"><span class="ico">📝</span><span class="nav-txt">每日操作</span></a>
       <a class="nav-item" data-page="monitor" href="javascript:void(0)"><span class="ico">📡</span><span class="nav-txt">盯盘看板</span></a>
       <a class="nav-item" data-page="settle" href="javascript:void(0)"><span class="ico">🧾</span><span class="nav-txt">清仓结算</span></a>
       <a class="nav-item" data-page="trades" href="javascript:void(0)"><span class="ico">⚡</span><span class="nav-txt">做T / 波段</span></a>
@@ -638,7 +643,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v42 · 2026-08-09 17:23</div>
+      <div class="sf-ver" id="sfVer">v43 · 2026-08-09 17:34</div>
     </div>
   </aside>
 
@@ -649,7 +654,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v42</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v43</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -711,8 +716,10 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       </section>
 
       <!-- ========== 页：盯盘看板（独立分类） ========== -->
-      <section class="page" id="page-monitor">
-        <div class="panel">
+            <section class="page" id="page-monitor">
+        <div class="monitor-split">
+          <div class="ms-col">
+<div class="panel">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>盯盘看板</div>
             <div class="panel-sub" id="monitorSub">自选标的 · 每60秒自动刷新 · 红涨绿跌</div>
@@ -733,6 +740,38 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
           <div class="panel-body tight">
             <div class="monitor-grid" id="monitorGrid"></div>
             <div class="monitor-foot" id="monitorFoot"></div>
+          </div>
+        </div>
+          </div>
+          <div class="ms-col">
+<div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><span class="bar"></span>每日操作记录</div>
+            <div class="panel-sub" id="opSub"></div>
+          </div>
+          <div class="panel-body" style="border-bottom:1px solid var(--line-2);background:var(--panel-2)">
+            <div class="form-grid g-op">
+              <div class="field"><label class="fl">日期</label><input id="o_date" type="date"></div>
+              <div class="field"><label class="fl">标的</label>
+                <div class="target-search">
+                  <input id="o_targetSearch" type="text" placeholder="输入名称 / 代码搜索…" autocomplete="off">
+                  <select id="o_target"></select>
+                </div>
+              </div>
+              <div class="field"><label class="fl">操作描述</label><input id="o_text" placeholder="例：早盘冲高分批减仓 1/3，留底仓"></div>
+              <div class="form-actions"><button class="btn-primary" id="btnAddOp">记录</button></div>
+            </div>
+            <div style="margin-top:10px"><label class="check"><input type="checkbox" id="o_gen"> 同时生成一笔交易（联动写入持仓流水，自动同步进汇总）</label></div>
+            <div class="form-grid g-op2" id="o_txBox" style="display:none;margin-top:10px">
+              <div class="field"><label class="fl">方向</label><select id="o_side"><option value="buy">买入 / 加仓</option><option value="sell">卖出 / 减仓</option></select></div>
+              <div class="field"><label class="fl">成交价</label><input id="o_price" type="number" step="0.0001" min="0"></div>
+              <div class="field"><label class="fl">股数/份额</label><input id="o_shares" type="number" step="0.01" min="0"></div>
+              <div class="field"><label class="fl">手续费</label><input id="o_fee" type="number" step="0.01" min="0" data-auto-fee="1" placeholder="自动计算"></div>
+              <div class="field"><label class="fl">自定义代码（标的选“其它”时填）</label><input id="o_code" placeholder="如 sz000001 或 000001"></div>
+            </div>
+          </div>
+          <div class="panel-body tight"><div class="table-wrap" id="opTable"></div></div>
+        </div>
           </div>
         </div>
       </section>
@@ -796,37 +835,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       </section>
 
       <!-- ========== 页：每日操作 ========== -->
-      <section class="page" id="page-ops">
-        <div class="panel">
-          <div class="panel-head">
-            <div class="panel-title"><span class="bar"></span>每日操作记录</div>
-            <div class="panel-sub" id="opSub"></div>
-          </div>
-          <div class="panel-body" style="border-bottom:1px solid var(--line-2);background:var(--panel-2)">
-            <div class="form-grid g-op">
-              <div class="field"><label class="fl">日期</label><input id="o_date" type="date"></div>
-              <div class="field"><label class="fl">标的</label>
-                <div class="target-search">
-                  <input id="o_targetSearch" type="text" placeholder="输入名称 / 代码搜索…" autocomplete="off">
-                  <select id="o_target"></select>
-                </div>
-              </div>
-              <div class="field"><label class="fl">操作描述</label><input id="o_text" placeholder="例：早盘冲高分批减仓 1/3，留底仓"></div>
-              <div class="form-actions"><button class="btn-primary" id="btnAddOp">记录</button></div>
-            </div>
-            <div style="margin-top:10px"><label class="check"><input type="checkbox" id="o_gen"> 同时生成一笔交易（联动写入持仓流水，自动同步进汇总）</label></div>
-            <div class="form-grid g-op2" id="o_txBox" style="display:none;margin-top:10px">
-              <div class="field"><label class="fl">方向</label><select id="o_side"><option value="buy">买入 / 加仓</option><option value="sell">卖出 / 减仓</option></select></div>
-              <div class="field"><label class="fl">成交价</label><input id="o_price" type="number" step="0.0001" min="0"></div>
-              <div class="field"><label class="fl">股数/份额</label><input id="o_shares" type="number" step="0.01" min="0"></div>
-              <div class="field"><label class="fl">手续费</label><input id="o_fee" type="number" step="0.01" min="0" data-auto-fee="1" placeholder="自动计算"></div>
-              <div class="field"><label class="fl">自定义代码（标的选“其它”时填）</label><input id="o_code" placeholder="如 sz000001 或 000001"></div>
-            </div>
-          </div>
-          <div class="panel-body tight"><div class="table-wrap" id="opTable"></div></div>
-        </div>
-      </section>
-
+      
       <!-- ========== 页：交易统计 ========== -->
       <section class="page" id="page-stats">
         <div class="panel">
@@ -875,7 +884,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v42 · 2026-08-09 17:23 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v43 · 2026-08-09 17:34 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -884,6 +893,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">多设备实时共享一份数据；未配置时仅本机 localStorage</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
                 <button class="btn-sm" id="btnCloudCfg" title="填写 Supabase 项目的 URL 与 anon key">云同步设置</button>
+                <button class="btn-sm" id="btnDevNames" title="给各设备起名（如我的平板），跨设备共享">设备命名</button>
                 <button class="btn-sm" id="btnCloudSync" title="立即拉取云端（冲突按较新时间胜出）">立即同步</button>
                 <button class="btn-sm" id="btnCloudForce" title="以本机数据为准，强制覆盖云端（恢复误覆盖时用）">本机覆盖云端</button>
                 <button class="btn-sm" id="btnCloudSql" title="复制建表 SQL，在 Supabase SQL Editor 里执行一次">建表 SQL</button>
@@ -920,8 +930,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v42';
-const APP_BUILD   = '2026-08-09 17:23';
+const APP_VERSION = 'v43';
+const APP_BUILD   = '2026-08-09 17:34';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1021,6 +1031,7 @@ function initNav(){
   link('btnPwdSet', () => { openPwdSettings().catch(e => toast(e.message, 'err')); });
   /* --- 云端同步（Supabase）--- */
   $('#btnCloudCfg') && ($('#btnCloudCfg').onclick = () => { openCloudConfig().catch(e => toast('配置失败：' + e.message, 'err')); });
+  $('#btnDevNames') && ($('#btnDevNames').onclick = () => { openDeviceNames().catch(e => toast('设备命名失败：' + e.message, 'err')); });
   $('#btnCloudSync') && ($('#btnCloudSync').onclick = () => {
     if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl){ toast('未配置云端——先点「云同步设置」', 'warn'); return; }
     toast('正在同步云端…', 'info');
@@ -5836,6 +5847,33 @@ const cloud = {
 };
 /* 设备唯一标识（持久化，用于区分本设备写入与远程写入） */
 try { cloud.deviceId = localStorage.getItem(K('deviceId')) || (localStorage.setItem(K('deviceId'), uid()), localStorage.getItem(K('deviceId'))); } catch(e){ cloud.deviceId = 'local'; }
+/* 设备名映射：{ deviceId: 自定义名 }。本机 localStorage，随云快照跨设备共享——
+   在设置页「设备命名」里给各设备起名（如"我的平板"），其他设备拉取后也能显示友好名。 */
+let deviceNameMap = {};
+try { deviceNameMap = JSON.parse(localStorage.getItem(K('devnames')) || '{}') || {}; } catch(e){ deviceNameMap = {}; }
+function persistDevNames(){ try { localStorage.setItem(K('devnames'), JSON.stringify(deviceNameMap)); } catch(e){} }
+/* 自动识别设备类型（UA 推断）：未自定义名时的默认展示名 */
+function autoDeviceName(){
+  const ua = navigator.userAgent || '';
+  if (/iPad/.test(ua)) return 'iPad';
+  if (/Android/.test(ua) && /Mobile/i.test(ua)) return 'Android 手机';
+  if (/Android/.test(ua)) return 'Android 平板';
+  if (/iPhone/.test(ua)) return 'iPhone';
+  if (/Windows/.test(ua)) return 'Windows 电脑';
+  if (/Macintosh/.test(ua)) return 'Mac';
+  if (/Linux/.test(ua)) return 'Linux';
+  return '其他设备';
+}
+/* 设备名：自定义名优先；无自定义时本设备显示自动识别名，其他设备显示短码 */
+function deviceDisplayName(id){ return deviceNameMap[id] || ''; }
+function knownDevices(){
+  /* 已知设备列表：[{id, name}] —— 本机映射 + 云端最近写入设备（去重） */
+  const seen = {};
+  Object.keys(deviceNameMap).forEach(k => { if (k) seen[k] = deviceNameMap[k]; });
+  if (cloud.deviceId && !seen[cloud.deviceId]) seen[cloud.deviceId] = '';
+  if (cloud.state.lastDevice && !seen[cloud.state.lastDevice]) seen[cloud.state.lastDevice] = '';
+  return Object.keys(seen).map(id => ({ id, name: seen[id] }));
+}
 /* 设置页「云端同步」里保存的 URL / Key 可覆盖内置默认值（localStorage 优先）
    详细设置：pushDebounceMs（防抖推送间隔）、realtime（实时订阅开关） */
 try {
@@ -5867,10 +5905,13 @@ function fmtDT(ts){
 }
 /* 时间戳格式化：HH:mm:ss */
 function fmtHM(ts){ return fmtDT(ts).split(' ')[1] || '—'; }
-/* 设备可读化：本设备 / 设备xxxxxx */
+/* 设备可读化：自定义名 > 本设备自动识别名 > 设备短码 */
 function deviceLabel(id){
   if (!id) return '—';
-  return id === cloud.deviceId ? '本设备' : ('设备 ' + String(id).slice(0, 6));
+  const nm = deviceNameMap[id];
+  if (nm) return nm + (id === cloud.deviceId ? '（本设备）' : '');
+  if (id === cloud.deviceId) return autoDeviceName() + '（本设备）';
+  return '设备 ' + String(id).slice(0, 6);
 }
 /* 相对时间：x 分钟前 / x 小时前 / x 天前 / 时间 */
 function fmtAgo(ts){
@@ -6000,6 +6041,8 @@ async function cloudPush(){
       v: 1,
       holdings: state.holdings, dailyOps: state.dailyOps, trades: state.trades,
       settings: state.settings, externalClosed: state.externalClosed || [],
+      watchlist: watchList || [],                    /* 盯盘自选标的（云同步） */
+      devices: Object.assign({}, deviceNameMap),     /* 设备名映射（跨设备共享友好名） */
       accessPwdHash: (() => { try { return localStorage.getItem(K('accessPwdHash')) || ''; } catch(e){ return ''; } })(),
       savedAt: Date.now()
     };
@@ -6049,6 +6092,18 @@ function applyCloudSnapshot(snap){
   if (Array.isArray(snap.trades))   state.trades = snap.trades;
   if (snap.settings)                state.settings = Object.assign({}, DEFAULT_SETTINGS, snap.settings);
   if (Array.isArray(snap.externalClosed)) state.externalClosed = snap.externalClosed;
+  if (Array.isArray(snap.watchlist)){          /* 盯盘自选标的：随快照整体同步 */
+    watchList = snap.watchlist;
+    persistWatch();
+    if (typeof renderWatch === 'function') renderWatch();
+  }
+  if (snap.devices && typeof snap.devices === 'object'){  /* 设备名映射：只并入本地没有的（不覆盖本地自定义） */
+    let changed = false;
+    for (const k in snap.devices){
+      if (snap.devices[k] && !deviceNameMap[k]){ deviceNameMap[k] = snap.devices[k]; changed = true; }
+    }
+    if (changed) persistDevNames();
+  }
   cloud.lastSavedAt = snap.savedAt || Date.now();
   cloud.state.localAt = cloud.lastSavedAt;
   persist.holdings(); persist.dailyOps(); persist.trades(); persist.settings(); saveExtClosed();
@@ -6202,6 +6257,41 @@ begin
 end $$;`;
 
 /* 设置页「云端同步」配置弹窗：URL / anon key 可改，保存后覆盖内置值并重连 */
+/* 设备命名弹窗：给已知设备起友好名（如"我的平板"），随云快照跨设备共享 */
+async function openDeviceNames(){
+  const rows = knownDevices();
+  if (!rows.length){ toast('暂无设备记录', 'err'); return; }
+  const body =
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">为各设备命名（如「我的平板」「办公室电脑」）。留空恢复默认识别名；保存后同步到云端，其他设备也会显示这些名字。</div>' +
+    '<div style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">' +
+    rows.map(d => {
+      const isSelf = d.id === cloud.deviceId;
+      const auto = isSelf ? autoDeviceName() : ('设备 ' + String(d.id).slice(0, 6));
+      return '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="font-size:11px;color:var(--muted);width:108px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(d.id) + '">' + esc(auto) + '</span>' +
+        '<input class="dn-input" data-dev="' + esc(d.id) + '" value="' + esc(d.name || '') + '" placeholder="自定义名称…" style="flex:1;min-width:0">' +
+        (isSelf ? '<span style="font-size:11px;color:var(--accent);flex-shrink:0">本设备</span>' : '') +
+      '</div>';
+    }).join('') + '</div>';
+  const ok = await dialog({ title: '设备命名', bodyHTML: body, buttons: [
+    { label: '关闭', value: null },
+    { label: '保存全部', value: true, cls: 'btn-primary', before: () => {
+      let n = 0;
+      document.querySelectorAll('.dn-input').forEach(inp => {
+        const id = inp.getAttribute('data-dev');
+        const v = inp.value.trim();
+        if (!id) return;
+        if (v){ if (deviceNameMap[id] !== v){ deviceNameMap[id] = v; n++; } }
+        else if (deviceNameMap[id]){ delete deviceNameMap[id]; n++; }
+      });
+      if (n){ persistDevNames(); if (typeof scheduleCloudPush === 'function') scheduleCloudPush(); }
+      renderCloudStatus();
+      toast(n ? '已保存 ' + n + ' 个设备名（同步中）' : '无改动');
+    } }
+  ]});
+  return ok;
+}
+
 async function openCloudConfig(){
   let picked = null;
   const st = cloud.state;
