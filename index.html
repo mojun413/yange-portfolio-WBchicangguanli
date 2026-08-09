@@ -655,7 +655,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v52 · 2026-08-09 20:21</div>
+      <div class="sf-ver" id="sfVer">v53.1 · 2026-08-09 23:18</div>
     </div>
   </aside>
 
@@ -666,11 +666,11 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v52</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.1</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
-          <button id="btnRefresh" class="btn-primary btn-sm" title="手动全量刷新行情（含名称/估值校正）；股价/净值本身已每 2 秒自动刷新">刷新行情</button>
+          <button id="btnRefresh" class="btn-primary btn-sm" title="手动全量刷新行情（含名称/估值校正）；交易时段内股价/净值本身已每 2 秒自动刷新，休市自动暂停">刷新行情</button>
           <label class="check" style="margin:0 4px"><input type="checkbox" id="chkAuto"> 自动</label>
           <button id="btnExport" class="btn-sm">导出</button>
           <button id="btnImport" class="btn-sm">导入</button>
@@ -692,7 +692,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
         <div class="panel" style="margin-top:14px">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>实时行情</div>
-            <div class="panel-sub" id="liveSub">每2秒自动刷新 · 红涨绿跌 · 默认按涨跌幅排序</div>
+            <div class="panel-sub" id="liveSub">交易时段每 2 秒自动刷新并联动重算 · 休市自动暂停 · 红涨绿跌 · 默认按涨跌幅排序</div>
           </div>
           <div class="panel-body tight"><div class="live-grid" id="liveGrid"></div></div>
         </div>
@@ -734,7 +734,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
 <div class="panel">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>盯盘看板</div>
-            <div class="panel-sub" id="monitorSub">自选标的 · 每60秒自动刷新 · 红涨绿跌</div>
+            <div class="panel-sub" id="monitorSub">自选标的 · 交易时段每 60 秒自动刷新 · 休市自动暂停 · 红涨绿跌</div>
             <div class="spacer"></div>
             <div class="mb-search"><input id="watchInput" type="text" placeholder="代码/名称 添加自选（如 002517 / 512000）" autocomplete="off"></div>
             <button class="btn-sm" id="btnWatchAdd" title="将输入的代码加入自选">＋ 添加</button>
@@ -901,18 +901,18 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v52 · 2026-08-09 20:21 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.1 · 2026-08-09 23:18 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
             <div class="setting-row"><div><div class="t">账户偏好</div><div class="d">主题色、涨跌色、刷新间隔、自动刷新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnSettings2">打开设置</button></div></div>
-            <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">多设备实时共享一份数据；未配置时仅本机 localStorage</div></div>
+            <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">每日 15:05 自动同步一次，其余时间手动「本机覆盖云端」；未配置时仅本机 localStorage</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
                 <button class="btn-sm" id="btnCloudCfg" title="填写 Supabase 项目的 URL 与 anon key">云同步设置</button>
                 <button class="btn-sm" id="btnDevNames" title="给各设备起名（如我的平板），跨设备共享">设备命名</button>
-                <button class="btn-sm" id="btnCloudSync" title="立即拉取云端（冲突按较新时间胜出）">立即同步</button>
-                <button class="btn-sm" id="btnCloudForce" title="以本机数据为准，强制覆盖云端（恢复误覆盖时用）">本机覆盖云端</button>
+                <button class="btn-sm" id="btnCloudSync" title="智能同步：与云端比对，较新的一方胜出（每日 15:05 自动执行的就是这个）">立即同步</button>
+                <button class="btn-primary btn-sm" id="btnCloudForce" title="日常手动同步方式：以本机数据为准，强制覆盖云端">本机覆盖云端</button>
                 <button class="btn-sm" id="btnCloudSql" title="复制建表 SQL，在 Supabase SQL Editor 里执行一次">建表 SQL</button>
               </div></div>
             <div class="setting-row"><div><div class="t">访问密码</div><div class="d" id="pwdRowDesc">未设置 — 任何设备打开页面即可访问</div></div>
@@ -947,13 +947,18 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v52';
-const APP_BUILD   = '2026-08-09 20:21';
+const APP_VERSION = 'v53.1';
+const APP_BUILD   = '2026-08-09 23:18';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
   minRefreshSec : 5,                     // 允许的最小刷新间隔
-  quoteTickSec : 2,                      // 行情秒级 ticker 间隔（秒，可调 1-10）：所有标的实时股价/净值常驻刷新
+  quoteTickSec : 2,                      // 行情秒级 ticker 间隔（秒，可调 1-10）：交易时段内实时股价/净值刷新频率
+  /* ===== 交易时段控制（v53.1）=====
+     非交易时间完全停止行情轮询（零请求、零渲染），交易时段内按 quoteTickSec 秒刷新并联动重算。
+     A股：上午 09:15（集合竞价）–11:30，下午 13:00–15:05（收盘后留 5 分钟宽限，确保拿到收盘价）。 */
+  tradingHours : { amStart: '09:15', amEnd: '11:30', pmStart: '13:00', pmEnd: '15:05' },
+  cloudDailySyncAt : '15:05',            // 每日自动云同步时刻（收盘后一次）；其余时间只手动「本机覆盖云端」
   /* defaultFee 已废弃：新建交易按费率自动计算（设置里改股票/场内ETF/场外基金三档费率） */
   accent : '#2563eb',                    // 默认主题色
   upColor : '#e23b3b',                   // 涨（红）
@@ -990,7 +995,7 @@ const CONFIG = {
 };
 
 /* ============================ 导航（侧栏 + 分页） ============================ */
-const PAGE_TITLES = { overview:'总览', monitor:'盯盘看板', settle:'清仓结算', trades:'做T / 波段', ops:'每日操作', stats:'交易统计', position:'仓位管理', settings:'设置' };
+const PAGE_TITLES = { overview:'总览', monitor:'盯盘看板', settle:'清仓结算', trades:'做T / 波段', stats:'交易统计', position:'仓位管理', settings:'设置' };
 function switchPage(page){
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
@@ -1197,10 +1202,28 @@ function load(key, def){
   try { const raw = localStorage.getItem(K(key)); return raw ? JSON.parse(raw) : def; }
   catch (e) { console.warn('读取失败', key, e); return def; }
 }
+/* ===== 数据变更驱动渲染（v53.1）=====
+   页面只在「修改了数据 / 新增了交易记录」时才整体重绘；行情价格变化一律走增量更新
+   （updateLivePrices），不重建 DOM —— 避免每 2 秒打断滚动、输入焦点与展开态。
+   dataRev          : 数据版本号，核心数据每次落盘 +1
+   markDataChanged(): 打脏标记 + 500ms 兜底重绘（调用方若已 renderAll 则不重复渲染） */
+const CORE_DATA_KEYS = { holdings:1, dailyOps:1, trades:1, settings:1, externalClosed:1 };
+let dataRev = 0, lastDataChangeAt = 0, lastRenderAllAt = 0, dirtyRenderTimer = null;
+function markDataChanged(){
+  dataRev++;
+  lastDataChangeAt = Date.now();
+  clearTimeout(dirtyRenderTimer);
+  dirtyRenderTimer = setTimeout(() => {
+    /* 兜底：数据改了但调用方漏了重绘 → 这里补一次；已重绘过则跳过，避免双重渲染 */
+    if (lastRenderAllAt >= lastDataChangeAt) return;
+    if (typeof renderAll === 'function') renderAll();
+  }, 500);
+}
 function save(key, val){
   try { localStorage.setItem(K(key), JSON.stringify(val)); }
   catch (e) { toast('本地存储写入失败：' + e.message, 'err'); }
-  /* 云端同步钩子：本地持久化后触发防抖推送（未启用云同步时无操作） */
+  if (CORE_DATA_KEYS[key]) markDataChanged();     /* 只有核心数据变更才触发全量重绘 */
+  /* 云端同步钩子：本地持久化后打「待同步」标记（v53.1 起不再自动推送，见 scheduleCloudPush） */
   if (typeof scheduleCloudPush === 'function') scheduleCloudPush();
 }
 
@@ -1665,6 +1688,8 @@ async function refreshQuotes(silent){
           state.quotes[qkey(h)] = { err: '行情获取失败：' + e.message, unreachable: true };
       });
     }
+    /* 顺带做一次节假日自证（手动刷新也能纠正「今日休市」标记） */
+    try { probeHoliday(map); } catch (e) {}
     // 先落盘一轮，再对"代码不存在"的做市场前缀纠错重试
     all.forEach(h => {
       const q = map[quoteSymbol(h)];
@@ -1690,7 +1715,10 @@ async function refreshQuotes(silent){
     refreshing = false;
     $('#btnRefresh').disabled = false;
     const t = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-    setStatus('最后刷新 <b>' + t + '</b>' + (failed ? ' · <span style="color:var(--warn)">' + failed + ' 项失败</span>' : ''), true);
+    const ph = (typeof marketPhase === 'function') ? marketPhase() : 'open';
+    setStatus('最后刷新 <b>' + t + '</b>' +
+      (ph !== 'open' ? ' · ' + marketPhaseLabel(ph) + '（已暂停自动刷新）' : '') +
+      (failed ? ' · <span style="color:var(--warn)">' + failed + ' 项失败</span>' : ''), true);
     if (failed && !silent){
       toast(unreachable
         ? '行情源连不上（' + unreachable + ' 项）。可能是网络/广告拦截插件挡了 qt.gtimg.cn，点「行情自检」查看详情'
@@ -1704,6 +1732,90 @@ async function refreshQuotes(silent){
 }
 function setStatus(html, isHtml){ const el = $('#status'); if (isHtml) el.innerHTML = html; else el.textContent = html; }
 
+/* ============================ 交易时段判定（v53.1）============================
+   目标：非交易时间**完全不刷新**（零请求、零渲染），交易时间内每 quoteTickSec 秒刷新并联动重算。
+   判定规则：
+   1) 周六 / 周日 → 休市
+   2) 工作日按 CONFIG.tradingHours：09:15–11:30（含集合竞价）/ 13:00–15:05（收盘后 5 分钟宽限，确保拿到收盘价）
+   3) 法定节假日本地无日历表 → 用「行情自证」：交易时段内拉到行情后，若所有 A股/ETF 标的
+      返回的行情时间戳日期都不是今天，判定为今日休市，当天不再轮询（跨天自动重置）。
+      场外基金（jj 前缀）净值日期天然滞后，不参与判定。 */
+const MARKET = { holidayOn: '', phase: '' };
+function ymdOf(d){ const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()); }
+function hm2min(s, dft){ const m = String(s || '').match(/^(\d{1,2}):(\d{2})$/); return m ? (+m[1]) * 60 + (+m[2]) : dft; }
+/* 'weekend' | 'holiday' | 'pre'(开盘前) | 'open'(交易中) | 'noon'(午休) | 'closed'(已收盘) */
+function marketPhase(now){
+  const d = now || new Date();
+  const day = d.getDay();
+  if (day === 0 || day === 6) return 'weekend';
+  if (MARKET.holidayOn && MARKET.holidayOn === ymdOf(d)) return 'holiday';
+  const th = CONFIG.tradingHours || {};
+  const a1 = hm2min(th.amStart, 555), a2 = hm2min(th.amEnd, 690);
+  const p1 = hm2min(th.pmStart, 780), p2 = hm2min(th.pmEnd, 905);
+  const t = d.getHours() * 60 + d.getMinutes();
+  if (t >= a1 && t <= a2) return 'open';
+  if (t >= p1 && t <= p2) return 'open';
+  if (t < a1) return 'pre';
+  if (t > a2 && t < p1) return 'noon';
+  return 'closed';
+}
+function isTradingTime(now){ return marketPhase(now) === 'open'; }
+function marketPhaseLabel(ph){
+  return ({ weekend:'周末休市', holiday:'今日休市', pre:'未开盘', open:'交易中', noon:'午间休市', closed:'已收盘' })[ph] || '休市';
+}
+/* 下次开盘的自然语言描述（用于休市提示） */
+function nextOpenText(now){
+  const d = now || new Date();
+  const th = CONFIG.tradingHours || {};
+  const ph = marketPhase(d);
+  if (ph === 'pre')  return '今日 ' + (th.amStart || '09:15') + ' 开盘';
+  if (ph === 'noon') return '今日 ' + (th.pmStart || '13:00') + ' 恢复交易';
+  const n = new Date(d.getTime());
+  do { n.setDate(n.getDate() + 1); } while (n.getDay() === 0 || n.getDay() === 6);
+  const diffDay = Math.round((new Date(n.getFullYear(), n.getMonth(), n.getDate()) -
+                              new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+  const wk = ['日','一','二','三','四','五','六'][n.getDay()];
+  const when = diffDay === 1 ? '明天' : ((n.getMonth() + 1) + '月' + n.getDate() + '日（周' + wk + '）');
+  return when + ' ' + (th.amStart || '09:15') + ' 开盘';
+}
+/* 节假日自证：所有 A股/ETF 标的的行情时间戳都不是今天 → 今日休市 */
+function probeHoliday(map){
+  const today = ymdOf(new Date()).replace(/-/g, '');
+  let has = 0, fresh = 0;
+  Object.keys(map || {}).forEach(k => {
+    if (String(k).slice(0, 2) === 'jj') return;          /* 场外基金净值日期天然滞后，不参与判定 */
+    const q = map[k];
+    if (!q || q.err) return;
+    const dt = String(q.time || '').replace(/\D/g, '').slice(0, 8);
+    if (dt.length === 8){ has++; if (dt === today) fresh++; }
+  });
+  if (has >= 1 && fresh === 0){ MARKET.holidayOn = ymdOf(new Date()); return true; }
+  if (fresh > 0) MARKET.holidayOn = '';
+  return false;
+}
+/* 市场状态 UI：总览副标题 + 侧栏状态行（仅在阶段变化时重写，避免高频抖动） */
+function renderMarketStatus(force){
+  const ph = marketPhase();
+  const changed = ph !== MARKET.phase;
+  if (!changed && !force) return ph;
+  MARKET.phase = ph;
+  const open = ph === 'open';
+  const sub = document.getElementById('liveSub');
+  if (sub){
+    sub.textContent = open
+      ? ('交易中 · 每 ' + (CONFIG.quoteTickSec || 2) + ' 秒自动刷新并联动重算 · 红涨绿跌 · 默认按涨跌幅排序')
+      : (marketPhaseLabel(ph) + ' · 已暂停自动刷新（' + nextOpenText() + '） · 红涨绿跌 · 默认按涨跌幅排序');
+  }
+  const msub = document.getElementById('monitorSub');
+  if (msub && !open && watchList.length){
+    msub.textContent = '自选 ' + watchList.length + ' 个 · ' + marketPhaseLabel(ph) + '，已暂停自动刷新 · 红涨绿跌';
+  }
+  if (!open && typeof setStatus === 'function'){
+    setStatus(marketPhaseLabel(ph) + ' · 行情已暂停 · ' + nextOpenText(), false);
+  }
+  return ph;
+}
+
 /* ============================ 行情秒级 ticker（v44）============================
    原理：独立于「自动刷新」慢循环的轻量行情轮询。
    - 批量拉取全部持仓 + 自选标的行情（一次请求，CONFIG.quoteTickSec 秒一次）
@@ -1711,8 +1823,11 @@ function setStatus(html, isHtml){ const el = $('#status'); if (isHtml) el.innerH
      不重建表格结构 → 不打断滚动、输入、展开态；其余数据（统计/清仓/仓位）随数据变化才刷新
    - document.hidden 时自动暂停，回到页面立即补一拍 */
 let ticking = false;
-async function tickQuotes(){
+async function tickQuotes(force){
   if (ticking || document.hidden) return;
+  /* v53.1：非交易时间完全不刷新（零请求）。force=true 仅供手动刷新/自检穿透 */
+  if (!force && !isTradingTime()){ renderMarketStatus(); return; }
+  renderMarketStatus();          /* 阶段切换（休市→交易中）时同步副标题文案 */
   const syms = new Set();
   state.holdings.forEach(h => syms.add(quoteSymbol(h)));
   watchList.forEach(w => syms.add(watchSym(w)));
@@ -1720,6 +1835,8 @@ async function tickQuotes(){
   ticking = true;
   try {
     const map = await fetchQuotes([...syms]);
+    /* 节假日自证：若所有 A股/ETF 行情时间戳都不是今天 → 标记今日休市，当天不再轮询 */
+    if (!force && probeHoliday(map)){ renderMarketStatus(true); return; }
     let changed = false;
     state.holdings.forEach(h => {
       const q = map[quoteSymbol(h)];
@@ -1738,6 +1855,11 @@ async function tickQuotes(){
       watchQuotes[k] = q; changed = true;
     });
     if (changed) updateLivePrices();
+    /* 交易时段内每拍都刷新「实时」时间戳，让用户确认行情是活的 */
+    if (typeof setStatus === 'function'){
+      setStatus('交易中 · 实时 <b>' + new Date().toLocaleTimeString('zh-CN', { hour12: false }) +
+                '</b> · 每 ' + (CONFIG.quoteTickSec || 2) + ' 秒', true);
+    }
   } catch (e) { /* 网络抖动静默忽略，下一拍自动重试 */ }
   finally { ticking = false; }
 }
@@ -1788,9 +1910,27 @@ function updateLivePrices(){
     else if (td.classList.contains('q-roi')){ td.textContent = pct2(c.roi); td.className = 'mono q-roi ' + cls(c.roi); }
     else if (td.classList.contains('q-pct')){ td.textContent = pct2(c.pct); td.className = 'mono q-pct ' + clsN; }
   });
-  /* 4) 总览 KPI 卡（若总览可见）：轻量重算聚合值 */
-  const ov = document.getElementById('page-overview');
-  if (ov && ov.classList.contains('active') && typeof renderOverview === 'function') renderOverview();
+  /* 4) 持仓表「合计」行（data-agg）：市值 / 浮动盈亏 / 收益率随现价联动重算 */
+  if (typeof openAggregate === 'function' && document.querySelector('td[data-agg]')){
+    const agg = openAggregate();
+    const aggRoi = agg.cost > 0 && isFinite(agg.floatPnl) ? agg.floatPnl / agg.cost * 100 : NaN;
+    document.querySelectorAll('td[data-agg]').forEach(td => {
+      const k = td.dataset.agg;
+      if (k === 'mv')        td.innerHTML = '<b>' + money(agg.mv) + '</b>';
+      else if (k === 'fpnl'){ td.innerHTML = '<b>' + (isFinite(agg.floatPnl) ? sign2(agg.floatPnl) : '—') + '</b>'; td.className = 'mono ' + cls(agg.floatPnl); td.dataset.agg = 'fpnl'; }
+      else if (k === 'roi'){  td.textContent = pct2(aggRoi); td.className = 'mono ' + cls(aggRoi); td.dataset.agg = 'roi'; }
+    });
+  }
+  /* 5) 当前可见页的派生数据联动重算（只算看得见的，避免打断其它页的操作）
+        - 总览：KPI 卡（总资产/浮动盈亏/收益率/回笼率…）
+        - 仓位管理：仓位占比依赖实时市值（内部有输入框焦点保护）
+        清仓结算 / 做T / 交易统计 由历史流水推导，与现价无关，无需重算。 */
+  const active = document.querySelector('.page.active');
+  const pid = active ? active.id : '';
+  if (pid === 'page-overview' && typeof renderOverview === 'function') renderOverview();
+  else if (pid === 'page-position' && typeof renderPosition === 'function') renderPosition();
+  /* 总览 KPI 即使不在总览页也保持数据一致（下次切页无需等待） */
+  else if (typeof renderOverview === 'function' && document.getElementById('page-overview')) renderOverview();
 }
 
 /* ============================ 成本核算（移动加权平均 + 摊薄成本） ============================ */
@@ -2366,7 +2506,7 @@ const watchSym = w => {
 async function refreshMonitor(silent){
   if (monitorLoading) return;
   const sub = document.getElementById('monitorSub');
-  if (!watchList.length){ renderWatch(); if (sub) sub.textContent = '自选标的 · 每60秒自动刷新 · 红涨绿跌'; return; }
+  if (!watchList.length){ renderWatch(); if (sub) sub.textContent = '自选标的 · 交易时段每 60 秒自动刷新 · 休市自动暂停 · 红涨绿跌'; return; }
   monitorLoading = true;
   if (!silent && sub) sub.innerHTML = '<span class="spin"></span>正在拉取自选行情…';
   try {
@@ -2375,7 +2515,7 @@ async function refreshMonitor(silent){
     watchQuotes = map;
     renderWatch();
     const nf = syms.filter(s => { const q = map[s]; return !q || q.err || !isFinite(q.price); }).length;
-    if (sub) sub.textContent = '自选 ' + watchList.length + ' 个 · ' + (syms.length - nf) + ' 个有行情 · 每60秒自动刷新 · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
+    if (sub) sub.textContent = '自选 ' + watchList.length + ' 个 · ' + (syms.length - nf) + ' 个有行情 · ' + (isTradingTime() ? '交易时段每 60 秒自动刷新' : marketPhaseLabel(marketPhase()) + '，已暂停刷新') + ' · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
   } catch (e) {
     if (!silent){
       const grid = document.getElementById('monitorGrid');
@@ -2988,9 +3128,9 @@ const ICON_EYE_ON  = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><c
 const ICON_EYE_OFF = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
 function loadHidden(){ try { return JSON.parse(localStorage.getItem('pm_amountHidden') || '[]') || []; } catch(e){ return []; } }
 function saveHidden(arr){ try { localStorage.setItem('pm_amountHidden', JSON.stringify(arr)); } catch(e){} }
-/* 掩码：保留 ¥ / + / - 等前置符号，从首个数字起 首数字 + ***** + 尾数字
+/* 掩码：保留 ¥ / + / - 等前置符号，从首个数字起 首数字 + (N-2个*) + 尾数字
    （长度≤2 或数字部分≤1 不掩码，避免 "—"/"13"/"+%" 被误伤）
-   例：¥80454.93 → ¥8*****3  ·  +1,234.56 → +1*****6  ·  8.46% → 8*****% */
+   例：¥80454.93 → ¥8******3（6个* = "0454." 共6字符） ·  +1,234.56 → +1*****6（5个*） */
 function maskAmount(s){
   if (s == null) return '';
   const t = String(s).trim();
@@ -2999,7 +3139,7 @@ function maskAmount(s){
   const prefix = m[1] || '';
   const num = m[2] || '';
   if (num.length <= 1) return s;                 // 数字部分太短不掩
-  return prefix + num[0] + '*****' + num[num.length - 1];
+  return prefix + num[0] + '*'.repeat(Math.max(0, num.length - 2)) + num[num.length - 1];
 }
 /* 把一段说明文字里的金额（¥/符号/百分号）同步掩码，避免副标题泄露真实数值 */
 function maskSub(s){
@@ -3010,7 +3150,7 @@ function maskSub(s){
 function maskExtraDigits(html){
   return String(html == null ? '' : html)
     .replace(/([¥+\-]?\s*)([\d][\d,]*\.?\d*)(%?)/g, function(m, pre, num, suf){
-      return pre + '*****' + suf;
+      return pre + '*'.repeat(num.length) + suf;
     });
 }
 /* 单卡金额隐藏开关：供小眼睛点击与脚本调用（卡片 key = 其标题文本） */
@@ -3273,10 +3413,10 @@ function renderHoldings(){
     '<td class="mono">' + shr(agg.shares) + '</td>' +
     '<td class="mono dim">—</td>' +
     '<td class="mono dim">—</td>' +
-    '<td class="mono"><b>' + money(agg.mv) + '</b></td>' +
-    '<td class="mono' + (agg.cost < 0 ? ' neg-cost' : '') + '"><b>' + money(agg.cost) + '</b></td>' +
-    '<td class="mono ' + cls(agg.floatPnl) + '"><b>' + (isFinite(agg.floatPnl) ? sign2(agg.floatPnl) : '—') + '</b></td>' +
-    '<td class="mono ' + cls(aggRoi) + '">' + pct2(aggRoi) + '</td>' +
+    '<td class="mono" data-agg="mv"><b>' + money(agg.mv) + '</b></td>' +
+    '<td class="mono' + (agg.cost < 0 ? ' neg-cost' : '') + '" data-agg="cost"><b>' + money(agg.cost) + '</b></td>' +
+    '<td class="mono ' + cls(agg.floatPnl) + '" data-agg="fpnl"><b>' + (isFinite(agg.floatPnl) ? sign2(agg.floatPnl) : '—') + '</b></td>' +
+    '<td class="mono ' + cls(aggRoi) + '" data-agg="roi">' + pct2(aggRoi) + '</td>' +
     '<td class="mono dim">—</td><td class="mono dim">—</td><td class="l"></td></tr></tfoot>';
 
   html += '</table>';
@@ -3885,6 +4025,7 @@ function syncSettleUI(){
 
 /* ============================ 渲染入口 ============================ */
 function renderAll(){
+  lastRenderAllAt = Date.now();   /* v53.1：记录全量重绘时刻，供 markDataChanged 兜底判重 */
   renderOverview(); renderHoldings(); renderSettlement(); renderOps(); renderTrades(); renderStats(); renderPosition(); refreshTargetSelect();
   document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
 }
@@ -4911,6 +5052,7 @@ async function doImport(ev){
 }
 function saveExtClosed(){
   try { localStorage.setItem(K('externalClosed'), JSON.stringify(state.externalClosed || [])); } catch(e){}
+  if (typeof markDataChanged === 'function') markDataChanged();
   if (typeof scheduleCloudPush === 'function') scheduleCloudPush();
 }
 function normHolding(h){
@@ -5844,18 +5986,30 @@ function loadDemo(){
 }
 
 /* ============================ 定时器 / 启动 ============================ */
-let timer = null, tickTimer = null;
+let timer = null, tickTimer = null, marketTimer = null;
+/* 慢循环全量校正（名称回填 / 基金估值增强）：v53.1 起仅交易时段运行，且恒为 silent —
+   silent 只做增量更新，绝不触发全量重渲染（页面只在数据被修改时才整体重绘）。 */
 function setupTimer(){
   clearInterval(timer); timer = null;
   if (!state.settings.autoRefresh) return;
   const sec = Math.max(CONFIG.minRefreshSec, Number(state.settings.refreshSec) || CONFIG.defaultRefreshSec);
-  timer = setInterval(() => { if (!document.hidden) refreshQuotes(true); }, sec * 1000);
+  timer = setInterval(() => {
+    if (document.hidden) return;
+    if (!isTradingTime()) return;            /* 非交易时间不刷新 */
+    refreshQuotes(true);
+  }, sec * 1000);
 }
-/* 行情秒级 ticker：独立于「自动刷新」开关，价格/净值常驻秒级更新（可 CONFIG.quoteTickSec 调） */
+/* 行情秒级 ticker：仅交易时段运行（休市零请求），价格变化时联动重算所有派生数据 */
 function setupTick(){
   clearInterval(tickTimer); tickTimer = null;
   const sec = Math.max(1, CONFIG.quoteTickSec || 2);
   tickTimer = setInterval(() => { tickQuotes(); }, sec * 1000);
+  /* 市场阶段看门狗：每 30 秒检查开/收盘切换，及时更新提示；跨天自动清除节假日标记 */
+  clearInterval(marketTimer); marketTimer = null;
+  marketTimer = setInterval(() => {
+    if (MARKET.holidayOn && MARKET.holidayOn !== ymdOf(new Date())) MARKET.holidayOn = '';
+    renderMarketStatus();
+  }, 30000);
 }
 function applySettingsToUI(){
   document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
@@ -5877,17 +6031,23 @@ function init(){
   initNav();
   bind();
   renderAll();
+  renderMarketStatus(true);    /* 市场阶段提示：交易中 / 休市 + 下次开盘时间 */
+  /* 首屏拉一次行情：休市时也拉（用收盘价把页面填满），之后由 ticker 按交易时段严格控制 */
   if (state.holdings.length) refreshQuotes(true);
   setupTimer();
-  setupTick();                 /* 行情秒级 ticker：价格/净值常驻刷新 */
-  /* 盯盘看板：首次拉取 + 每 60 秒自动刷新 */
+  setupTick();                 /* 行情秒级 ticker：仅交易时段每 2 秒刷新并联动重算 */
+  /* 盯盘看板：首屏拉一次；之后每 60 秒仅在交易时段刷新（休市零请求） */
   refreshMonitor(true);
-  setInterval(() => { refreshMonitor(true); }, 60000);
+  setInterval(() => { if (!document.hidden && isTradingTime()) refreshMonitor(true); }, 60000);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
+    renderMarketStatus(true);
+    if (!isTradingTime()) return;   /* 休市回到页面不发任何请求 */
     if (state.settings.autoRefresh) refreshQuotes(true);
     tickQuotes();              /* 回到页面立即补一拍行情 */
   });
+  /* 云同步（v53.1）：每日 15:05 自动同步一次；其余时间只手动「本机覆盖云端」 */
+  try { setupCloudDailySync(); } catch(e){}
   /* 顶栏显示内嵌初始数据快照时间（数据已在本机维护；腾讯文档同步已停用） */
   try {
     const meta = (typeof YANGEDATA_RAW !== 'undefined' && YANGEDATA_RAW.meta) || {};
@@ -6382,7 +6542,7 @@ function autoDeviceName(){
   return '其他设备';
 }
 /* 设备名：自定义名优先；无自定义时本设备显示自动识别名，其他设备显示短码 */
-function deviceDisplayName(id){ return deviceNameMap[id] || ''; }
+/* deviceDisplayName 已移除（死代码，与 deviceLabel 功能重叠且零调用） */
 function knownDevices(){
   /* 已知设备列表：[{id, name}] —— 本机映射 + 云端最近写入设备（去重） */
   const seen = {};
@@ -6411,7 +6571,9 @@ try {
    remoteSavedAt: 云端快照内 savedAt（最后写入方设备的本地时间，ms）
    lastDevice   : 云端最后写入方设备 id（区分本机 / 其他设备）
    localAt      : 本机数据最后保存时刻（ms） */
-cloud.state = { connecting: false, offline: false, lastSyncAt: 0, everTried: false, errMsg: '', remoteAt: 0, remoteSavedAt: 0, lastDevice: '', localAt: 0 };
+cloud.state = { connecting: false, offline: false, lastSyncAt: 0, everTried: false, errMsg: '', remoteAt: 0, remoteSavedAt: 0, lastDevice: '', localAt: 0,
+  /* v53.1：pending=本机待同步改动数；dailyAt=最近一次每日定时同步时刻；remoteNewer=云端有其他设备更新（仅提示不自动覆盖） */
+  pending: 0, pendingSince: 0, dailyAt: 0, remoteNewer: false };
 /* 时间戳格式化：YYYY-MM-DD HH:mm:ss（本地时区） */
 function fmtDT(ts){
   if (!ts) return '—';
@@ -6465,9 +6627,11 @@ function renderCloudStatus(){
     color = 'var(--warn)';
     tip = st.errMsg || '连接失败，自动重试。';
   } else {
-    badge = '☁️ 云同步已连接' + (st.lastSyncAt ? ' · ' + fmtHM(st.lastSyncAt) : '');
-    color = 'var(--accent)';
-    tip = '多设备实时共享一份数据。\n' +
+    badge = '☁️ 云同步已连接' + (st.lastSyncAt ? ' · ' + fmtHM(st.lastSyncAt) : '') +
+            (st.pending ? ' · 待同步 ' + st.pending : '');
+    color = st.pending ? 'var(--warn)' : 'var(--accent)';
+    tip = '同步策略：每日 ' + (CONFIG.cloudDailySyncAt || '15:05') + ' 自动同步一次；其余时间手动「本机覆盖云端」。\n' +
+      (st.pending ? '本机有 ' + st.pending + ' 项改动待同步。\n' : '') +
       '最近同步：' + (st.lastSyncAt ? fmtDT(st.lastSyncAt) : '—') +
       '\n云端数据：' + (remoteT ? fmtDT(remoteT) : '—') + '（' + deviceLabel(st.lastDevice) + '）' +
       '\n本机数据：' + (localT ? fmtDT(localT) : '—');
@@ -6495,7 +6659,13 @@ function renderCloudStatus(){
         (st.offline && st.errMsg ? '<br><span style="color:var(--warn)">⚠ ' + esc(st.errMsg) + '</span>' : '') +
         '<br>📅 云端数据：<b>' + (remoteT ? fmtDT(remoteT) : '—') + '</b>（' + deviceLabel(st.lastDevice) + '，' + (rs ? fmtAgo(rs) : '—') + '）' +
         ' ｜ 本机数据：<b>' + (localT ? fmtDT(localT) : '—') + '</b>' +
-        (diff ? ' ｜ ' + diff : '');
+        (diff ? ' ｜ ' + diff : '') +
+        /* v53.1：同步策略说明 + 待同步改动提示 */
+        '<br>🕒 策略：每日 <b>' + (CONFIG.cloudDailySyncAt || '15:05') + '</b> 自动同步一次' +
+        (st.dailyAt ? '（今日已于 ' + fmtHM(st.dailyAt) + ' 完成）' : '') +
+        '，其余时间请手动点「<b>本机覆盖云端</b>」' +
+        (st.pending ? '<br><span style="color:var(--warn)">✎ 本机有 <b>' + st.pending + '</b> 项改动待同步（自 ' + fmtHM(st.pendingSince) + '）</span>' : '') +
+        (st.remoteNewer ? '<br><span style="color:var(--warn)">↓ 云端有其他设备的更新，未自动覆盖本机；确认后点「立即同步」拉取</span>' : '');
     }
   }
 }
@@ -6527,17 +6697,66 @@ function loadSupabaseJS(){
   });
 }
 
-/* 本地持久化后触发：记录保存时间 → 防抖推送云端
-   suppressPush=true（应用云端快照 / 自动载入种子期间）→ 不盖章、不推送，
-   避免「刚载入的种子/云端数据」被误判为本机更新而反向覆盖云端 */
+/* ===== 本地持久化钩子（v53.1 策略变更）=====
+   旧行为：改动后防抖 600ms 自动推送云端。
+   新行为：**不再自动推送**，只记录保存时间并累计「待同步」计数；真正的上云时机有两个——
+     ① 每日 CONFIG.cloudDailySyncAt（默认 15:05，A股收盘后）自动同步一次；
+     ② 其余任意时间由用户手动点「本机覆盖云端」（或「立即同步」按较新时间胜出）。
+   suppressPush=true（应用云端快照 / 载入初始种子期间）→ 不盖章、不计数，
+   避免「刚载入的数据」被误判为本机新改动。 */
 function scheduleCloudPush(){
   if (cloud.suppressPush) return;
   if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl) return;
   try { localStorage.setItem(K('savedAt'), String(Date.now())); } catch(e){}
   cloud.lastSavedAt = Date.now();
   cloud.state.localAt = Date.now();
-  clearTimeout(cloud.pushTimer);
-  cloud.pushTimer = setTimeout(cloudPush, cloud.cfg.pushDebounceMs || 600);
+  cloud.state.pending = (cloud.state.pending || 0) + 1;
+  if (!cloud.state.pendingSince) cloud.state.pendingSince = Date.now();
+  clearTimeout(cloud.pushTimer); cloud.pushTimer = null;   /* 明确取消旧版自动推送 */
+  try { renderCloudStatus(); } catch(e){}
+}
+/* 清空「待同步」计数（推送成功 / 应用云端快照后调用） */
+function clearCloudPending(){ cloud.state.pending = 0; cloud.state.pendingSince = 0; cloud.state.remoteNewer = false; }
+
+/* ===== 每日定时云同步（v53.1）=====
+   每日 CONFIG.cloudDailySyncAt（默认 15:05，收盘后）自动同步一次；
+   若该时刻页面没打开而错过，下次打开页面（且已过该时刻）自动补做一次。
+   同步方式 = 智能同步 cloudPull()：本机较新 → 推上云端；云端较新 → 拉下来应用。 */
+function dailySyncDate(){ try { return localStorage.getItem(K('cloudDailyOn')) || ''; } catch(e){ return ''; } }
+function setDailySyncDate(v){ try { localStorage.setItem(K('cloudDailyOn'), v); } catch(e){} }
+async function cloudDailySync(reason){
+  if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl) return false;
+  const today = ymdOf(new Date());
+  if (dailySyncDate() === today) return false;         /* 今天已同步过 */
+  setDailySyncDate(today);                             /* 先占位，避免并发重复触发 */
+  try {
+    if (!cloud.client) await cloudInit();
+    else await cloudPull();
+    cloud.state.dailyAt = Date.now();
+    cloud.state.lastSyncAt = Date.now();
+    clearCloudPending();
+    renderCloudStatus();
+    toast('每日定时云同步完成（' + (CONFIG.cloudDailySyncAt || '15:05') +
+          (reason === 'catchup' ? ' · 错过后补做' : '') + '）', 'ok');
+    return true;
+  } catch(e){
+    setDailySyncDate('');                              /* 失败释放占位，下一次检查重试 */
+    console.warn('每日定时云同步失败', e);
+    return false;
+  }
+}
+function setupCloudDailySync(){
+  clearInterval(cloud.dailyTimer); cloud.dailyTimer = null;
+  const at = hm2min(CONFIG.cloudDailySyncAt, 905);
+  const check = () => {
+    if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl) return;
+    const d = new Date();
+    if (d.getHours() * 60 + d.getMinutes() < at) return;
+    if (dailySyncDate() === ymdOf(d)) return;
+    cloudDailySync((d.getHours() * 60 + d.getMinutes()) > at + 2 ? 'catchup' : 'ontime');
+  };
+  cloud.dailyTimer = setInterval(check, 30000);        /* 30 秒粒度，够准且不耗资源 */
+  setTimeout(check, 4000);                             /* 打开页面时补检（覆盖错过 15:05 的场景） */
 }
 
 /* 全量快照推送到云端（单行 id=1，upsert 覆盖）
@@ -6577,6 +6796,7 @@ async function cloudPush(){
     cloud.state.connecting = false;
     cloud.state.errMsg = '';
     cloud.retryN = 0;
+    clearCloudPending();          /* v53.1：推送成功 → 清空「待同步」计数 */
     renderCloudStatus();
   } catch(e){
     console.warn('云端推送失败', e);
@@ -6625,6 +6845,7 @@ function applyCloudSnapshot(snap){
   cloud.state.localAt = cloud.lastSavedAt;
   persist.holdings(); persist.dailyOps(); persist.trades(); persist.settings(); saveExtClosed();
   cloud.suppressPush = false;
+  if (typeof clearCloudPending === 'function') clearCloudPending();   /* v53.1：已与云端一致 */
   /* 本地时间戳对齐云端（不顶高），下次比较两设备同源不打架 */
   try { localStorage.setItem(K('savedAt'), String(snap.savedAt || Date.now())); } catch(e){}
   if (typeof applySettingsToUI === 'function') applySettingsToUI();
@@ -6661,7 +6882,10 @@ async function cloudPull(){
   } catch(e){ console.warn('云端拉取失败', e); setCloudStatus('云同步离线（自动重试）', 'var(--warn)'); }
 }
 
-/* Realtime 订阅：其他设备写入云端 → 自动拉取并应用（本设备写入忽略） */
+/* Realtime 订阅（v53.1 语义变更）：其他设备写入云端 → **只提示不自动覆盖本机**。
+   原因：新策略下同步时机由「每日 15:05 自动 + 其余时间手动本机覆盖云端」控制，
+   若继续自动应用远端快照，用户本机正在录入的数据会被其他设备悄悄覆盖。
+   这里只更新状态徽标并提示，是否拉取由用户点「立即同步」决定。 */
 function cloudSubscribe(){
   if (!cloud.client || cloud.channel) return;
   cloud.channel = cloud.client
@@ -6678,9 +6902,11 @@ function cloudSubscribe(){
             cloud.state.remoteSavedAt = remoteSavedAt;
             cloud.state.lastDevice = rec.device_id || '';
             if (remoteSavedAt > (cloud.lastSavedAt || 0) && remoteSavedAt > lastLocalSaveAt()){
-              applyCloudSnapshot(rec.data);
-              cloud.state.localAt = lastLocalSaveAt();
-              toast('检测到其他设备更新，已实时同步', 'ok');
+              /* v53.1：只提示，不自动覆盖本机 */
+              if (!cloud.state.remoteNewer){
+                cloud.state.remoteNewer = true;
+                toast('云端有其他设备的更新（' + deviceLabel(rec.device_id || '') + '）。未自动覆盖本机，需要时点「立即同步」拉取', 'warn');
+              }
             }
             renderCloudStatus();
           } catch(e){}
