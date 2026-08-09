@@ -206,7 +206,14 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .monitor-bar .mb-search{flex:1;min-width:140px;max-width:280px}
 .monitor-bar .mb-search input{width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px;background:var(--panel-2);color:var(--text)}
 .monitor-bar .mb-search input:focus{background:#fff;border-color:var(--accent);box-shadow:var(--ring)}
-.monitor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:9px;max-height:440px;overflow-y:auto;padding:2px}
+.monitor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;max-height:440px;overflow-y:auto;padding:2px}
+/* 盯盘自选分类 tab（全部 / 个股 / ETF） */
+.watch-cats{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.watch-cats .wc{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);cursor:pointer;user-select:none;transition:.15s;line-height:1.5}
+.watch-cats .wc b{font-size:11px;font-weight:700;min-width:16px;text-align:center;background:rgba(120,130,160,.12);border-radius:999px;padding:0 4px;line-height:1.6}
+.watch-cats .wc:hover{color:var(--text);border-color:#c9d2e3}
+.watch-cats .wc.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.3)}
+.watch-cats .wc.active b{background:rgba(255,255,255,.22);color:#fff}
 .monitor-card{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:9px 10px;display:flex;flex-direction:column;gap:1px;transition:border-color .15s, transform .15s, box-shadow .15s;cursor:default}
 .monitor-card:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px)}
 .monitor-card .mc-name{font-size:12.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
@@ -215,14 +222,14 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .monitor-card.up{border-color:#f3c9c9;background:#fff7f7}
 .monitor-card.down{border-color:#c6e8d3;background:#f4fcf7}
 /* 自选标的卡片（盯盘看板）：带移除按钮 + 点击看 K 线 */
-.watch-card{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:9px 10px;display:flex;flex-direction:column;gap:1px;transition:border-color .15s, transform .15s, box-shadow .15s;cursor:pointer}
+.watch-card{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:6px 8px;display:flex;flex-direction:column;gap:0;transition:border-color .15s, transform .15s, box-shadow .15s;cursor:pointer}
 .watch-card:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px)}
-.watch-card .mc-name{font-size:12.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;padding-right:14px}
-.watch-card .mc-pct{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.3px;line-height:1.05}
-.watch-card .mc-price{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.3}
+.watch-card .mc-name{font-size:11.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35;padding-right:12px}
+.watch-card .mc-pct{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.2px;line-height:1.2}
+.watch-card .mc-price{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.35}
 .watch-card.up{border-color:#f3c9c9;background:#fff7f7}
 .watch-card.down{border-color:#c6e8d3;background:#f4fcf7}
-.watch-card .watch-del{position:absolute;top:4px;right:4px;width:18px;height:18px;line-height:14px;text-align:center;border:none;background:transparent;color:var(--muted);font-size:14px;border-radius:5px;cursor:pointer;padding:0}
+.watch-card .watch-del{position:absolute;top:2px;right:2px;width:16px;height:16px;line-height:12px;text-align:center;border:none;background:transparent;color:var(--muted);font-size:13px;border-radius:4px;cursor:pointer;padding:0}
 .watch-card .watch-del:hover{background:rgba(229,72,77,.12);color:var(--up)}
 .monitor-card.flat{border-color:var(--line-2)}
 .monitor-card.mc-top{border-width:2px}
@@ -648,7 +655,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v47 · 2026-08-09 19:16</div>
+      <div class="sf-ver" id="sfVer">v48 · 2026-08-09 19:27</div>
     </div>
   </aside>
 
@@ -659,7 +666,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v47</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v48</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -743,6 +750,11 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <button class="btn-sm" id="btnMonitorReset" title="恢复默认排序（涨跌幅降序）">重置排序</button>
           </div>
           <div class="panel-body tight">
+            <div class="watch-cats" id="watchCats">
+              <span class="wc active" data-c="all">全部 <b>0</b></span>
+              <span class="wc" data-c="stock">个股 <b>0</b></span>
+              <span class="wc" data-c="etf">ETF <b>0</b></span>
+            </div>
             <div class="monitor-grid" id="monitorGrid"></div>
             <div class="monitor-foot" id="monitorFoot"></div>
           </div>
@@ -889,7 +901,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v47 · 2026-08-09 19:16 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v48 · 2026-08-09 19:27 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -935,8 +947,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v47';
-const APP_BUILD   = '2026-08-09 19:16';
+const APP_VERSION = 'v48';
+const APP_BUILD   = '2026-08-09 19:27';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2343,6 +2355,7 @@ let watchQuotes = {};                    // sym -> quote（现价/涨跌幅）
 let monitorSortKey = 'pct';  // 'pct' | 'name' | 'price'
 let monitorSortDir = 'desc';
 let monitorLoading = false;
+let watchCat = 'all';        // 盯盘分类：'all' | 'stock' | 'etf'
 const persistWatch = () => save('watchlist', watchList);
 const watchSym = w => {
   const c = String(w.code || '').replace(/\D/g, '');
@@ -2377,6 +2390,20 @@ async function refreshMonitor(silent){
 function renderWatch(){
   const grid = document.getElementById('monitorGrid');
   if (!grid) return;
+  /* 分类计数：全部 / 个股 / ETF（ETF = 场内基金 isExchangeTraded） */
+  const cats = {
+    all: watchList.length,
+    etf: watchList.filter(w => isExchangeTraded(w.code)).length,
+    stock: watchList.length - watchList.filter(w => isExchangeTraded(w.code)).length
+  };
+  const catsEl = document.getElementById('watchCats');
+  if (catsEl){
+    catsEl.querySelectorAll('.wc').forEach(el => {
+      const b = el.querySelector('b');
+      if (b) b.textContent = cats[el.dataset.c] || 0;
+      el.classList.toggle('active', el.dataset.c === watchCat);
+    });
+  }
   if (!watchList.length){
     grid.innerHTML = '<div class="empty" style="padding:30px 16px"><div class="big">暂无自选标的</div>' +
       '<div style="font-size:12.5px;color:var(--muted)">在面板顶部输入代码 / 名称，点「＋ 添加」加入盯盘</div></div>';
@@ -2385,7 +2412,19 @@ function renderWatch(){
     return;
   }
   const dir = monitorSortDir === 'asc' ? 1 : -1;
-  const list = watchList.slice().sort((A, B) => {
+  const baseList = watchCat === 'all'
+    ? watchList
+    : watchList.filter(w => watchCat === 'etf' ? isExchangeTraded(w.code) : !isExchangeTraded(w.code));
+  if (!baseList.length){
+    grid.innerHTML = '<div class="empty" style="padding:26px 16px"><div class="big">该分类暂无标的</div>' +
+      '<div style="font-size:12.5px;color:var(--muted)">' + (watchCat === 'etf' ? '添加场内 ETF（如 512000 / 159915）后显示在这里' : '添加个股后显示在这里') + '</div></div>';
+    const foot = document.getElementById('monitorFoot');
+    if (foot){
+      foot.innerHTML = '<span>自选 <b class="mf-num">' + watchList.length + '</b> 个 · 当前分类 <b>0</b></span>';
+    }
+    return;
+  }
+  const list = baseList.slice().sort((A, B) => {
     if (monitorSortKey === 'name') return (A.name || A.code).localeCompare(B.name || B.code, 'zh-Hans-CN') * dir;
     const qa = watchQuotes[watchSym(A)], qb = watchQuotes[watchSym(B)];
     const a = monitorSortKey === 'price' ? (qa && qa.price) : (qa && qa.pct);
@@ -2417,7 +2456,7 @@ function renderWatch(){
   const foot = document.getElementById('monitorFoot');
   if (foot){
     foot.innerHTML =
-      '<span>自选 <b class="mf-num">' + watchList.length + '</b> 个</span>' +
+      '<span>自选 <b class="mf-num">' + watchList.length + '</b> 个' + (watchCat !== 'all' ? ' · 当前分类 <b>' + list.length + '</b>' : '') + '</span>' +
       '<span><b style="color:var(--up)">▲ ' + upC + '</b> · <b style="color:var(--down)">▼ ' + downC + '</b></span>' +
       '<span class="dim">排序：' + ({pct:'涨跌幅', name:'名称', price:'现价'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升' : '降') + '）</span>';
   }
@@ -4103,6 +4142,14 @@ function bind(){
   /* 盯盘看板（自选标的） */
   $('#btnMonitorRefresh').onclick = () => refreshMonitor(false);
   $('#btnMonitorReset').onclick = () => { monitorSortKey = 'pct'; monitorSortDir = 'desc'; renderWatch(); };
+  /* 自选分类 tab：全部 / 个股 / ETF */
+  const watchCatsEl = document.getElementById('watchCats');
+  if (watchCatsEl) watchCatsEl.onclick = e => {
+    const el = e.target.closest('.wc');
+    if (!el || el.dataset.c === watchCat) return;
+    watchCat = el.dataset.c;
+    renderWatch();
+  };
   $('#monitorSub').onclick = () => { cycleMonitorSort(); toast('已切换排序：' + ({pct:'涨跌幅', name:'名称', price:'现价'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升序' : '降序') + '）'); };
   /* 添加自选：按钮 / 回车 */
   $('#btnWatchAdd').onclick = () => addWatch();
