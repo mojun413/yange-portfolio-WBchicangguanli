@@ -580,6 +580,14 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="panel-title"><span class="bar"></span>盯盘看板</div>
             <div class="panel-sub" id="monitorSub">A股行业板块 · 每60秒自动刷新 · 红涨绿跌</div>
             <div class="spacer"></div>
+            <select id="monitorSortSel" class="btn-sm" title="选择排序方式（也可点上方标题循环切换）" style="height:auto;padding:5px 8px;font-size:12px">
+              <option value="pct-desc">涨跌幅 ↓</option>
+              <option value="pct-asc">涨跌幅 ↑</option>
+              <option value="name-asc">名称 A→Z</option>
+              <option value="name-desc">名称 Z→A</option>
+              <option value="price-desc">点位 ↓</option>
+              <option value="price-asc">点位 ↑</option>
+            </select>
             <button class="btn-sm" id="btnMonitorRefresh" title="手动刷新板块行情">刷新</button>
             <button class="btn-sm" id="btnMonitorReset" title="恢复默认排序（涨跌幅降序）">重置排序</button>
           </div>
@@ -2020,6 +2028,9 @@ function renderMonitor(){
       '<span><b style="color:var(--up)">▲ ' + upC + '</b> · <b style="color:var(--down)">▼ ' + downC + '</b> · <span class="dim">— ' + flatC + '</span></span>' +
       '<span class="dim">排序：' + ({pct:'涨跌幅', name:'名称', price:'点位'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升' : '降') + '）</span>';
   }
+  /* 排序下拉同步当前值（标题循环/重置后保持一致） */
+  const sortSel = document.getElementById('monitorSortSel');
+  if (sortSel) sortSel.value = monitorSortKey + '-' + monitorSortDir;
 }
 
 /* 盯盘看板：切换排序（点面板标题循环） */
@@ -3238,6 +3249,14 @@ function bind(){
   $('#btnMonitorReset').onclick = () => { monitorSortKey = 'pct'; monitorSortDir = 'desc'; renderMonitor(); };
   $('#monitorSearch').oninput = e => { monitorFilter = e.target.value; renderMonitor(); };
   $('#monitorSub').onclick = () => { cycleMonitorSort(); toast('已切换排序：' + ({pct:'涨跌幅', name:'名称', price:'点位'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升序' : '降序') + '）'); };
+  /* 排序下拉：直观选择排序方式（涨跌幅/名称/点位 × 升降序） */
+  $('#monitorSortSel') && ($('#monitorSortSel').onchange = e => {
+    const v = (e.target.value || '').split('-');
+    if (v.length === 2 && ['pct','name','price'].includes(v[0]) && ['asc','desc'].includes(v[1])){
+      monitorSortKey = v[0]; monitorSortDir = v[1];
+      renderMonitor();
+    }
+  });
   /* 6 张卡片金额隐藏小眼睛：事件委托（点 .cards 内任意 eye-btn → 单卡独立切换） */
   document.querySelector('.cards').addEventListener('click', e => {
     const btn = e.target.closest('.eye-btn');
