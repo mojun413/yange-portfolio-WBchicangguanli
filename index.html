@@ -742,7 +742,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.13 · 2026-08-10 12:37</div>
+      <div class="sf-ver" id="sfVer">v53.14 · 2026-08-10 13:03</div>
     </div>
   </aside>
 
@@ -753,7 +753,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.13</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.14</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1117,7 +1117,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.13 · 2026-08-10 12:37 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.14 · 2026-08-10 13:03 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1163,8 +1163,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.13';
-const APP_BUILD   = '2026-08-10 12:37';
+const APP_VERSION = 'v53.14';
+const APP_BUILD   = '2026-08-10 13:03';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1667,15 +1667,15 @@ function isExchangeTraded(code){
 }
 function fullCode(h){
   const c = String(h.code).replace(/\D/g, '');
-  if (effType(c, h.type) !== 'stock' && !isExchangeTraded(c)) return h.code;
+  if (effType(c, h.type, h.typeLocked) !== 'stock' && !isExchangeTraded(c)) return h.code;
   return (h.market || guessMarket(c)) + c;
 }
-function qkey(h){ return effType(h.code, h.type) + ':' + h.code; }
+function qkey(h){ return effType(h.code, h.type, h.typeLocked) + ':' + h.code; }
 /* 腾讯行情符号：股票/场内基金 sh600519·sz159915 / 场外基金 jj161725 / 港股 hk00700。
-   用权威类型 effType 判断（即使数据里 type 存错，行情也走正确接口） */
+   用权威类型 effType 判断（手动锁定类型优先，其次自动识别） */
 function quoteSymbol(h){
   const c = String(h.code).replace(/\D/g, '');
-  if (effType(c, h.type) === 'fund' && !isExchangeTraded(c)) return 'jj' + c;
+  if (effType(c, h.type, h.typeLocked) === 'fund' && !isExchangeTraded(c)) return 'jj' + c;
   return (h.market || guessMarket(c)) + c;
 }
 /* 同一标的的候选行情符号：主符号查不到时依次回退，命中后回写 market 持久化
@@ -1927,7 +1927,7 @@ async function refreshQuotes(silent){
       if (!q) return;
       if (q.err){ failed++; if (q.unreachable) unreachable++; return; }
       if (q.name && !/\uFFFD/.test(q.name) && (!h.name || h.name === h.code)) { h.name = q.name; persist.holdings(); }
-      if (effType(h.code, h.type) === 'fund' && !isExchangeTraded(h.code)) post.push(enhanceFundEstimate(h.code, q).then(nq => { state.quotes[qkey(h)] = nq; }));
+      if (effType(h.code, h.type, h.typeLocked) === 'fund' && !isExchangeTraded(h.code)) post.push(enhanceFundEstimate(h.code, q).then(nq => { state.quotes[qkey(h)] = nq; }));
     });
     if (post.length) await Promise.all(post);
     if (fixed && !silent) toast('已自动校正 ' + fixed + ' 个标的的交易所前缀', 'ok');
@@ -2595,8 +2595,13 @@ function returnAttribution(){
 /* ---------- 行业暴露 ---------- */
 function industryAgg(){
   const m = {}; let total = 0, unclassified = 0, n = 0;
+  /* 与「总览」持仓口径一致：只统计当前持仓（排除已清仓 closed / 零股被动清仓），
+     避免已清仓标的的残余碎股市值混入行业分布（如 0.05 的港股/海外等毛刺） */
   state.holdings.forEach(h => {
-    const c = calcHolding(h); if (!isFinite(c.mv) || c.mv <= 0) return;
+    if (h.closed) return;
+    const c = calcHolding(h);
+    if (c.shares <= 1e-8) return;
+    if (!isFinite(c.mv) || c.mv <= 0) return;
     const ind = (h.industry || '').trim() || '未分类';
     m[ind] = (m[ind] || 0) + c.mv; total += c.mv; n++;
     if (ind === '未分类') unclassified += c.mv;
@@ -2736,7 +2741,7 @@ async function fetchFundFlow(code){
 /* 仅对股票拉资金流；交易时段每 ~90s 刷新（休市零请求）。完成后刷新持仓卡 + 分析中心 */
 async function refreshFundFlows(){
   if (!isTradingTime()) return;
-  const stocks = state.holdings.filter(h => effType(h.code, h.type) === 'stock');
+  const stocks = state.holdings.filter(h => effType(h.code, h.type, h.typeLocked) === 'stock');
   for (const h of stocks){
     const ff = await fetchFundFlow(h.code);
     if (ff){ h.fundFlow = ff.today; h.fundFlow5 = ff.d5; h.fundFlowTs = ff.ts; try { persist.holdings(); } catch(e){} }
@@ -2818,7 +2823,7 @@ function checkAlerts(){
   });
   /* 主力净流出预警（仅股票，需有资金流数据；占持仓市值比例达阈值） */
   state.holdings.forEach(h => {
-    if (effType(h.code, h.type) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
+    if (effType(h.code, h.type, h.typeLocked) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
     const c = calcHolding(h); const mv = isFinite(c.mv) ? c.mv : 0;
     if (mv <= 0) return;
     const ratio = Math.abs(h.fundFlow) / mv * 100;
@@ -2974,7 +2979,7 @@ function renderAnalysis(){
   state.holdings.forEach(h => {
     if (h.closed) return;
     const c = calcHolding(h); if (c.shares <= 1e-8) return;
-    if (effType(h.code, h.type) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
+    if (effType(h.code, h.type, h.typeLocked) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
     const ratio = Math.abs(h.fundFlow) / mv * 100;
     if (ratio >= FUND_FLOW_WARN_PCT) disc += warnRow('🔻', '主力净流出：『' + esc(h.name || h.code) + '』' + fundFlowText(h) + '，占持仓市值 <b>' + ratio.toFixed(1) + '%</b>', 'danger');
   });
@@ -4116,7 +4121,7 @@ function toggleCardAmount(key){
    type='text' 首点升序（A→Z）；type='num' 首点降序（大→小）。缺值一律沉底。 */
 const HOLD_COLS = [
   { key:'name',     label:'名称 / 代码', cls:'l', type:'text', get:(h)   => (h.name || h.code || '') },
-  { key:'type',     label:'类型',        cls:'l', type:'text', get:(h)   => ({ stock:'1股票', etf:'2场内ETF', fund:'3场外基金' })[effType(h.code, h.type)] },
+  { key:'type',     label:'类型',        cls:'l', type:'text', get:(h)   => ({ stock:'1股票', etf:'2场内ETF', fund:'3场外基金' })[effType(h.code, h.type, h.typeLocked)] },
   { key:'shares',   label:'持股数',      cls:'',  type:'num',  get:(h,c) => c.shares },
   { key:'avgCost',  label:'成本价',      cls:'',  type:'num',  get:(h,c) => (c.shares > 0 ? c.spreadAvg : NaN) },
   { key:'price',    label:'现价',        cls:'',  type:'num',  get:(h,c) => c.price },
@@ -4151,7 +4156,7 @@ function sortHoldRows(rows){
 /* ============================ 清仓结算表排序 ============================ */
 const SETTLE_COLS = [
   { key:'name',  label:'名称 / 代码', cls:'l', type:'text', get:({h}) => h.name || h.code },
-  { key:'type',  label:'类型',         cls:'l', type:'text', get:({h}) => ({ stock:'1股票', etf:'2场内ETF', fund:'3场外基金' })[effType(h.code, h.type || 'stock')] },
+  { key:'type',  label:'类型',         cls:'l', type:'text', get:({h}) => ({ stock:'1股票', etf:'2场内ETF', fund:'3场外基金' })[effType(h.code, h.type || 'stock', h.typeLocked)] },
   { key:'first', label:'建仓',         cls:'l', type:'text', get:({s}) => s.firstDate || '' },
   { key:'last',  label:'清仓',         cls:'l', type:'text', get:({s}) => s.lastDate || '' },
   { key:'days',  label:'持股天数',     cls:'',  type:'num',  get:({s}) => s.days },
@@ -4322,7 +4327,7 @@ function renderHoldings(){
         '<span class="c">' + esc(fullCode(h).toUpperCase()) + '</span>' +
         conceptChipsHtml(h) +
         '</div></td>' +
-      '<td class="l hold-amt"><span class="tag ' + effType(h.code, h.type) + '">' + typeLabel(h.code, h.type) + '</span></td>' +
+      '<td class="l hold-amt"><span class="tag ' + effType(h.code, h.type, h.typeLocked) + '">' + typeLabel(h.code, h.type, h.typeLocked) + '</span></td>' +
       '<td class="mono hold-amt">' + shr(c.shares) + '</td>' +
       '<td class="mono hold-amt">' + (c.shares > 0 ? '<span class="' + (c.spreadAvg < 0 ? 'neg-cost' : '') + '">' + price4(c.spreadAvg) + '</span>' : '—') + '</td>' +
       '<td class="mono q-price hold-amt ' + cls(c.pct) + '" data-q="' + qkey(h) + '">' + price4(c.price) + '</td>' +
@@ -4503,7 +4508,7 @@ function subPanel(h, c){
   const q = state.quotes[qkey(h)] || {};
   const meta = '<div class="hint" style="margin:0 0 10px">' +
     (c.quoteErr ? '<span style="color:var(--warn)">⚠ ' + esc(c.quoteErr) + '</span>' :
-      ((effType(h.code, h.type) === 'fund' ? (q.estimated ? '盘中估算净值' : '最新单位净值') + ' ' + price4(q.price) +
+      ((effType(h.code, h.type, h.typeLocked) === 'fund' ? (q.estimated ? '盘中估算净值' : '最新单位净值') + ' ' + price4(q.price) +
             (isFinite(q.accNav) ? ' · 累计净值 ' + price4(q.accNav) : '') +
             (q.navDate ? ' · 净值日期 ' + esc(q.navDate) : '') + (q.gzsj ? ' · 估值时间 ' + esc(q.gzsj) : '')
         : '昨收 ' + price4(q.preClose) + (isFinite(q.high) ? ' · 最高 ' + price4(q.high) + ' · 最低 ' + price4(q.low) : '')) +
@@ -4647,7 +4652,7 @@ function renderStats(){
 function statsFromTx(){
   const rows = [];
   (state.holdings || []).forEach(h => {
-    const eff = effType(h.code, h.type || 'stock');
+    const eff = effType(h.code, h.type || 'stock', h.typeLocked);
     let buyCnt = 0, sellCnt = 0, buyAmt = 0, sellAmt = 0, buyShares = 0, sellShares = 0;
     (h.txs || []).forEach(t => {
       const p = Number(t.price) || 0, sh = Number(t.shares) || 0, f = Number(t.fee) || 0;
@@ -4701,23 +4706,24 @@ function renderPosition(){
     totalCost += cost;
     if (isFinite(mv)) totalMv += mv;
     let status = '空仓', badgeCls = 'tag-empty', ratio = NaN, statusRank = 1;
-    if (full > 0 && cost > 0){
-      ratio = cost / full * 100;
-      if (cost > full * 1.0001){ status = '超额'; badgeCls = 'tag-over'; statusRank = 7; }
-      else if (cost >= full){ status = '满仓'; badgeCls = 'tag-full'; statusRank = 6; }
+    /* 仓位状态按「当前市值」口径：仓位占比 = 当前市值 ÷ 满仓金额（v53.14 起，与用户要求一致） */
+    if (full > 0 && isFinite(mv) && mv > 0){
+      ratio = mv / full * 100;
+      if (mv > full * 1.0001){ status = '超额'; badgeCls = 'tag-over'; statusRank = 7; }
+      else if (mv >= full){ status = '满仓'; badgeCls = 'tag-full'; statusRank = 6; }
       else if (ratio >= 70){ status = '重仓'; badgeCls = 'tag-heavy'; statusRank = 5; }
       else if (ratio >= 30){ status = '半仓'; badgeCls = 'tag-half'; statusRank = 4; }
       else { status = '轻仓'; badgeCls = 'tag-light'; statusRank = 3; }
     } else if (c.shares <= 1e-8){ status = '空仓'; statusRank = 1; }
-    else { status = '—'; badgeCls = 'tag-empty'; statusRank = 2; }   // 成本≤0（已回本）：无仓位占比，不判定状态
+    else { status = '—'; badgeCls = 'tag-empty'; statusRank = 2; }   // 无行情：无法按市值判仓位，不判定状态
     if (status === '超额') overList.push(h);
-    return { h, cost, mv, full, ratio, status, statusRank, badgeCls, noQuote: !isFinite(price), totPct: (totalTarget > 0 && cost > 0) ? cost / totalTarget * 100 : NaN };
+    return { h, cost, mv, full, ratio, status, statusRank, badgeCls, noQuote: !isFinite(price), totPct: (totalTarget > 0 && isFinite(mv) && mv > 0) ? mv / totalTarget * 100 : NaN };
   });
   const rows = sortPosRows(rows0);
-  /* 顶部提醒：超额标的 + 总成本超总目标 */
+  /* 顶部提醒：超额标的 + 总市值超总目标 */
   const overText = overList.length ? ('⚠️ <b>' + overList.length + '</b> 个标的已<b>超额</b>：' + overList.map(x => esc(x.name || x.code)).join('、')) : '';
-  const totOverText = (totalTarget > 0 && totalCost > totalTarget)
-    ? (' · 总持仓成本 <b>' + money(totalCost) + '</b> 超过总目标 <b>' + money(totalTarget) + '</b>')
+  const totOverText = (totalTarget > 0 && totalMv > totalTarget)
+    ? (' · 总市值 <b>' + money(totalMv) + '</b> 超过总目标 <b>' + money(totalTarget) + '</b>')
     : '';
   $('#positionAlert').innerHTML = (overText || totOverText) ? '<div class="pos-alert">' + overText + totOverText + '</div>' : '';
   /* 表格（表头可排序：首点按默认方向，再点反向，第三点还原） */
@@ -4749,16 +4755,16 @@ function renderPosition(){
     '<td class="r"><b>' + money(totalCost) + '</b></td>' +
     '<td class="r"><b>' + money(totalMv) + '</b></td>' +
     '<td></td><td></td>' +
-    (colTotal ? '<td class="r"><b>' + (totalTarget > 0 ? (totalCost / totalTarget * 100).toFixed(1) + '%' : '—') + '</b></td>' : '') +
+    (colTotal ? '<td class="r"><b>' + (totalTarget > 0 ? (totalMv / totalTarget * 100).toFixed(1) + '%' : '—') + '</b></td>' : '') +
     '</tr></tfoot></table>';
   box.innerHTML = html;
   const chkPos = $('#chkPosShowClosed');
   if (chkPos){ chkPos.checked = !!state.settings.posShowClosed; }
   $('#posSub').textContent = base.length + ' 个标的' + (hiddenClosed ? '（' + hiddenClosed + ' 个已清仓已隐藏）' : '') + (showClosed && hiddenClosed ? ' · 已显示全部' : '');
-  /* 汇总文案 */
-  const sumLines = ['总满仓金额合计 <b>' + money(totalFull) + '</b> · 总持仓成本 <b>' + money(totalCost) + '</b> · 总市值(参考) <b>' + money(totalMv) + '</b>'];
+  /* 汇总文案（仓位占比按市值口径） */
+  const sumLines = ['总满仓金额合计 <b>' + money(totalFull) + '</b> · 总市值 <b>' + money(totalMv) + '</b> · 总持仓成本 <b>' + money(totalCost) + '</b>'];
   if (totalTarget > 0){
-    sumLines.push('总仓位目标 <b>' + money(totalTarget) + '</b> · 占用率 <b class="' + cls(totalCost - totalTarget) + '">' + (totalCost / totalTarget * 100).toFixed(1) + '%</b>');
+    sumLines.push('总仓位目标 <b>' + money(totalTarget) + '</b> · 占用率 <b class="' + cls(totalMv - totalTarget) + '">' + (totalMv / totalTarget * 100).toFixed(1) + '%</b>');
     if (totalFull > totalTarget) sumLines.push('<span style="color:var(--warn)">⚠ 单标的满仓合计 ' + money(totalFull) + ' 超过总目标 ' + money(totalTarget) + '，无法同时打满</span>');
   }
   if (overList.length) sumLines.push('<span style="color:#991b1b">⚠ ' + overList.length + ' 个标的已超额，请减仓或上调满仓金额</span>');
@@ -4795,20 +4801,21 @@ function renderPositionAnalysis(rows, agg){
   if (!rows.length){ box.innerHTML = ''; return; }
   const totalCost = agg.totalCost, totalMv = agg.totalMv, totalFull = agg.totalFull,
         totalTarget = agg.totalTarget, n = rows.length;
-  const posRows = rows.filter(r => r.cost > 0);                 // 负成本（已回本）不进分配图
-  const allocTotal = posRows.reduce((s, r) => s + r.cost, 0);
-  const sortedByCost = posRows.slice().sort((a, b) => b.cost - a.cost);
+  /* 仓位口径统一为「当前市值」（与仓位管理表一致，v53.14 起） */
+  const posRows = rows.filter(r => isFinite(r.mv) && r.mv > 0);     // 无市值（无行情）不进分配图
+  const allocTotal = posRows.reduce((s, r) => s + r.mv, 0);
+  const sortedByCost = posRows.slice().sort((a, b) => b.mv - a.mv);
   const top1 = sortedByCost[0];
-  const top1Share = allocTotal > 0 && top1 ? top1.cost / allocTotal * 100 : 0;
-  const top3Cost = sortedByCost.slice(0, 3).reduce((s, r) => s + r.cost, 0);
+  const top1Share = allocTotal > 0 && top1 ? top1.mv / allocTotal * 100 : 0;
+  const top3Cost = sortedByCost.slice(0, 3).reduce((s, r) => s + r.mv, 0);
   const top3SharePct = allocTotal > 0 ? top3Cost / allocTotal * 100 : 0;
   const overN = agg.overList.length;
   const fullN = rows.filter(r => r.status === '满仓' || r.status === '超额').length;
   const lightN = rows.filter(r => r.status === '轻仓').length;
-  const occ = totalTarget > 0 ? totalCost / totalTarget * 100 : NaN;
-  /* 类型分布（按成本） */
+  const occ = totalTarget > 0 ? totalMv / totalTarget * 100 : NaN;
+  /* 类型分布（按当前市值） */
   const typeAlloc = {}, typeNames = { stock: '股票', etf: '场内ETF', fund: '场外基金' };
-  rows.forEach(r => { const t = effType(r.h.code, r.h.type || 'stock'); typeAlloc[t] = (typeAlloc[t] || 0) + Math.max(0, r.cost); });
+  rows.forEach(r => { const t = effType(r.h.code, r.h.type || 'stock', r.h.typeLocked); typeAlloc[t] = (typeAlloc[t] || 0) + (isFinite(r.mv) ? Math.max(0, r.mv) : 0); });
   const typeKeys = Object.keys(typeAlloc).sort((a, b) => (typeAlloc[b] || 0) - (typeAlloc[a] || 0));
   /* 交易活跃度 */
   const tradeN = (state.trades || []).length;
@@ -4836,27 +4843,27 @@ function renderPositionAnalysis(rows, agg){
   if (isFinite(occ) && occ >= 100) advice.push({ cls: 'danger', ic: '⛔', text: '总仓位占用率已达 <b>' + occ.toFixed(0) + '%</b>，本金基本全部在场上、无现金缓冲——建议留出 10-20% 现金应对波动' });
   else if (isFinite(occ) && occ >= 80) advice.push({ cls: 'warn', ic: '⚠️', text: '总仓位占用率 <b>' + occ.toFixed(0) + '%</b>，接近满仓，加仓空间有限，优先去重/去超额' });
   else if (isFinite(occ) && occ < 50) advice.push({ cls: 'good', ic: '💡', text: '总仓位占用率仅 <b>' + occ.toFixed(0) + '%</b>，资金利用率偏低，可结合行情机会分批补仓' });
-  if (top1Share >= 40) advice.push({ cls: 'warn', ic: '⚠️', text: '单标的集中度过高：「' + esc(top1.h.name || top1.h.code) + '」占持仓成本 <b>' + top1Share.toFixed(0) + '%</b>（>40%），波动高度依赖单票，建议单标的占比控制在 25-30% 以内' });
+  if (top1Share >= 40) advice.push({ cls: 'warn', ic: '⚠️', text: '单标的集中度过高：「' + esc(top1.h.name || top1.h.code) + '」占当前市值 <b>' + top1Share.toFixed(0) + '%</b>（>40%），波动高度依赖单票，建议单标的占比控制在 25-30% 以内' });
   else if (top3SharePct >= 70) advice.push({ cls: 'warn', ic: '⚠️', text: '前 3 大持仓合计占 <b>' + top3SharePct.toFixed(0) + '%</b>，组合集中度偏高——若三者关联度高，风险并未真正分散' });
   if (fullN > 0) advice.push({ cls: 'note', ic: '📌', text: '<b>' + fullN + '</b> 个标的已打满/超额，无加仓空间，新增资金优先流向轻仓标的' });
-  if (lightN > 0) advice.push({ cls: 'note', ic: '📌', text: '<b>' + lightN + '</b> 个标的处于轻仓（成本 < 满仓 30%）——要么补到半仓以上形成有效仓位，要么考虑归并清仓，避免「僵尸持仓」' });
+  if (lightN > 0) advice.push({ cls: 'note', ic: '📌', text: '<b>' + lightN + '</b> 个标的处于轻仓（市值 < 满仓 30%）——要么补到半仓以上形成有效仓位，要么考虑归并清仓，避免「僵尸持仓」' });
   const stockShare = allocTotal > 0 ? (typeAlloc.stock || 0) / allocTotal * 100 : 0;
-  if (stockShare >= 50) advice.push({ cls: 'note', ic: '📌', text: '股票类成本占比 <b>' + stockShare.toFixed(0) + '%</b>，组合受权益市场单边波动影响较大，与基金的互补性一般' });
+  if (stockShare >= 50) advice.push({ cls: 'note', ic: '📌', text: '股票类市值占比 <b>' + stockShare.toFixed(0) + '%</b>，组合受权益市场单边波动影响较大，与基金的互补性一般' });
   if (tradeN >= 30) advice.push({ cls: 'note', ic: '🎯', text: '做T/波段台账 <b>' + tradeN + '</b> 笔，交易相当活跃——注意手续费与滑点摩擦，T 收益需稳定覆盖成本才有意义' });
   if (!advice.length) advice.push({ cls: 'good', ic: '✅', text: '当前组合结构健康：无超额、集中度适中、仓位与目标匹配，按既定计划执行即可' });
   /* ---------- 组装 HTML ---------- */
-  const guide = '当前组合共 <b>' + n + '</b> 个在持标的，投入本金合计 <b>' + money(totalCost) + '</b>' +
+  const guide = '当前组合共 <b>' + n + '</b> 个在持标的，当前市值合计 <b>' + money(totalMv) + '</b>（投入本金 ' + money(totalCost) + '）' +
     (totalTarget > 0 ? '（总目标 ' + money(totalTarget) + ' · 占用率 <b>' + occ.toFixed(1) + '%</b>）' : '') +
     '；前 1 大持仓占 <b>' + top1Share.toFixed(1) + '%</b>，前 3 大占 <b>' + top3SharePct.toFixed(1) + '%</b>；类型分布 ' +
     typeKeys.map(t => typeNames[t] + ' ' + (allocTotal > 0 ? (typeAlloc[t] / allocTotal * 100).toFixed(0) + '%' : '0%')).join(' / ') +
     '；做T台账 ' + tradeN + ' 笔。整体风格偏<b>' + riskTag + '</b>。';
-  /* 环形图 items：Top6 + 其他 */
-  const items = sortedByCost.slice(0, 6).map((r, i) => ({ label: r.h.name || r.h.code, value: r.cost, color: POS_PALETTE[i % POS_PALETTE.length] }));
+  /* 环形图 items：Top6 + 其他（按当前市值） */
+  const items = sortedByCost.slice(0, 6).map((r, i) => ({ label: r.h.name || r.h.code, value: r.mv, color: POS_PALETTE[i % POS_PALETTE.length] }));
   const otherCost = allocTotal - items.reduce((s, i) => s + i.value, 0);
   if (otherCost > 1) items.push({ label: '其他', value: otherCost, color: '#cbd5e1' });
   const legend = items.map((it, i) => '<span><i style="background:' + it.color + '"></i>' + esc(it.label) + '</span>').join('');
-  /* 占用率条形图 */
-  const barRows = rows.filter(r => r.full > 0 && r.cost > 0).slice().sort((a, b) => b.ratio - a.ratio);
+  /* 占用率条形图（按市值占比） */
+  const barRows = rows.filter(r => r.full > 0 && isFinite(r.mv) && r.mv > 0).slice().sort((a, b) => b.ratio - a.ratio);
   const barColor = { '超额': '#ef4444', '满仓': '#10b981', '重仓': '#f59e0b', '半仓': '#3b82f6', '轻仓': '#93c5fd' };
   const bars = barRows.map(r => {
     const w = Math.min(r.ratio, 160);
@@ -4872,11 +4879,11 @@ function renderPositionAnalysis(rows, agg){
     mkv('超额', overN) + mkv('满仓/超额', fullN);
   function mkv(k, v){ return '<div class="an-metric"><div class="m-k">' + k + '</div><div class="m-v' + (k === '超额' && overN > 0 ? '" style="color:var(--up)' : '') + '">' + v + '</div></div>'; }
   box.innerHTML =
-    '<div class="an-title">仓位综合分析 · 投资风格建议（按持仓成本口径）</div>' +
+    '<div class="an-title">仓位综合分析 · 投资风格建议（按当前市值口径）</div>' +
     '<div class="guide" style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:10px">' + guide + '</div>' +
     '<div class="an-grid">' +
-      '<div class="an-card"><h5>持仓成本分布</h5>' + (allocTotal > 0 ? posDonut(items) + '<div class="an-legend">' + legend + '</div>' : '<div class="empty" style="padding:8px">暂无正成本持仓，无法计算占比（成本≤0 的标的按「—」不占仓位）</div>') + '</div>' +
-      '<div class="an-card"><h5>单标的占用率（成本 / 满仓金额 · 竖线=满仓线）</h5>' + (barRows.length ? bars : '<div class="empty" style="padding:8px">尚未设置满仓金额</div>') + '</div>' +
+      '<div class="an-card"><h5>当前市值分布</h5>' + (allocTotal > 0 ? posDonut(items) + '<div class="an-legend">' + legend + '</div>' : '<div class="empty" style="padding:8px">暂无市值持仓（无行情），无法计算占比</div>') + '</div>' +
+      '<div class="an-card"><h5>单标的占用率（当前市值 / 满仓金额 · 竖线=满仓线）</h5>' + (barRows.length ? bars : '<div class="empty" style="padding:8px">尚未设置满仓金额或暂无行情</div>') + '</div>' +
       '<div class="an-card"><h5>组合指标</h5><div class="an-metrics">' + metrics + '</div>' +
         '<div class="an-style"><div class="st">🎯 ' + esc(styleLabel) + '</div><div class="sd">' + styleDesc + '</div></div>' +
       '</div>' +
@@ -4913,7 +4920,7 @@ function renderSettlement(){
   const body = sortedRows.map(({ h, s, isExternal }) =>
     '<tr' + (isExternal ? ' class="ext-closed"' : '') + '>' +
     '<td class="l"><div class="name-cell"><span class="n">' + esc(h.name || h.code) + '</span><span class="c">' + esc(h.code) + '</span></div></td>' +
-    '<td class="l"><span class="tag ' + effType(h.code, h.type || 'stock') + '">' + typeLabel(h.code, h.type || 'stock') + '</span></td>' +
+    '<td class="l"><span class="tag ' + effType(h.code, h.type || 'stock', h.typeLocked) + '">' + typeLabel(h.code, h.type || 'stock', h.typeLocked) + '</span></td>' +
     '<td class="mono l">' + esc(s.firstDate || '') + '</td>' +
     '<td class="mono l">' + esc(s.lastDate || s.firstDate || '') + '</td>' +
     '<td class="mono">' + (s.days > 0 ? s.days : '—') + '</td>' +
@@ -5054,6 +5061,8 @@ function findOrCreateHolding(codeRaw, type, name){
   if (!h){
     h = { id: uid(), type: realType, code: sp.code, name: name || sp.code,
           market: probed ? probed.market : sp.market, txs: [] };
+    /* 手动类型锁定：用户显式选的类型与自动识别不一致时以手动为准（随 holdings 云同步） */
+    if (realType && realType !== effType(sp.code, realType, false)) h.typeLocked = true;
     state.holdings.push(h); persist.holdings();
   } else if (probed && probed.market && h.market !== probed.market){
     h.market = probed.market; persist.holdings();
@@ -5513,9 +5522,9 @@ function bind(){
           '<div class="field"><label class="fl">名称</label><input id="e_name" value="' + esc(h.name || '') + '"></div>' +
           '<div class="field"><label class="fl">代码</label><input id="e_code" value="' + esc(h.code) + '"></div>' +
           '<div class="field"><label class="fl">类型</label><select id="e_type">' +
-            '<option value="stock"' + (effType(h.code, h.type) === 'stock' ? ' selected' : '') + '>股票</option>' +
-            '<option value="etf"' + (effType(h.code, h.type) === 'etf' ? ' selected' : '') + '>场内ETF</option>' +
-            '<option value="fund"' + (effType(h.code, h.type) === 'fund' ? ' selected' : '') + '>场外基金</option></select></div>' +
+            '<option value="stock"' + (effType(h.code, h.type, h.typeLocked) === 'stock' ? ' selected' : '') + '>股票</option>' +
+            '<option value="etf"' + (effType(h.code, h.type, h.typeLocked) === 'etf' ? ' selected' : '') + '>场内ETF</option>' +
+            '<option value="fund"' + (effType(h.code, h.type, h.typeLocked) === 'fund' ? ' selected' : '') + '>场外基金</option></select></div>' +
           '<div class="field"><label class="fl">市场（股票）</label><select id="e_mkt">' +
             ['','sh','sz','bj'].map(m => '<option value="' + m + '"' + (h.market === m ? ' selected' : '') + '>' + (m ? m.toUpperCase() : '自动') + '</option>').join('') + '</select></div>' +
           '<div class="field"><label class="fl">行业（自动识别·可手填）</label>' +
@@ -5545,7 +5554,10 @@ function bind(){
         if (!ok || !picked) return;
         const oldKey = qkey(h);
         h.name = picked.name || h.name;
+        /* 手动类型锁定：用户在弹窗里显式选择的类型 ≠ 自动识别类型 → 以手动为准（typeLocked 随 holdings 云同步）；
+           与自动识别一致 → 解锁，恢复自动判断 */
         h.type = picked.type || h.type;
+        h.typeLocked = !!((picked.type) && (picked.type !== effType(h.code, h.type, false)));
         h.market = picked.market || '';
         h.industry = picked.industry || '';
         h.concepts = Array.isArray(picked.concepts) ? picked.concepts : [];
@@ -5997,6 +6009,10 @@ function normHolding(h){
            fundFlow: isFinite(Number(h.fundFlow)) ? Number(h.fundFlow) : null,
            fundFlow5: isFinite(Number(h.fundFlow5)) ? Number(h.fundFlow5) : null,
            fundFlowTs: h.fundFlowTs || 0,
+           /* 仓位管理满仓金额 / 手动类型锁定 / 已清仓标记：必须随标的保留（云同步/截图导入不丢） */
+           fullAmount: Number(h.fullAmount) || 0,
+           typeLocked: !!h.typeLocked,
+           closed: !!h.closed,
            txs: Array.isArray(h.txs) ? h.txs.map(t => Object.assign({ id: t.id || uid() }, t)) : [] };
 }
 
@@ -7098,7 +7114,10 @@ function getFeeType(code, type){
 }
 /* 实际类型（显示 / 排序 / 去重统一口径）：历史数据 ETF 存的是 stock，
    用代码判定自动升级为 etf，保证三类标签在旧数据上也正确 */
-function effType(code, type){
+function effType(code, type, locked){
+  /* 手动锁定优先：用户在「编辑标的」里显式选择过类型（与自动识别不一致）时，
+     尊重用户录入的分类（如 512880 券商ETF 手动标为股票），自动识别仅作兜底 */
+  if (locked && (type === 'stock' || type === 'etf' || type === 'fund')) return type;
   const c = String(code || '').replace(/\D/g, '');
   /* 场内 ETF/LOF（15/16/18/50/51/52/56/58）→ etf，代码段权威优先 */
   if (isExchangeTraded(c)) return 'etf';
@@ -7113,8 +7132,8 @@ function effType(code, type){
   if (/^0\d{5}$/.test(c)) return (type === 'stock') ? 'stock' : 'fund';
   return (type === 'fund' || type === 'etf') ? type : 'stock';
 }
-function typeLabel(code, type){
-  return ({ stock:'股票', etf:'场内ETF', fund:'场外基金' })[effType(code, type)] || '股票';
+function typeLabel(code, type, locked){
+  return ({ stock:'股票', etf:'场内ETF', fund:'场外基金' })[effType(code, type, locked)] || '股票';
 }
 /* init() 调用已移至文件末尾（cloud 是后置 const，此处调用会 TDZ 崩溃导致云端永不自动连接） */
 function _parseYangE2(){
@@ -7418,7 +7437,7 @@ function allSettledRows(ignoreFilter){
   const result = settledRows(ignoreFilter);  // { rows, t, best, worst, allCount }
   /* 外部清仓只补充「交易流水未覆盖」的标的：同一 (类型,代码) 若已被流水清仓行
      展示（有完整买卖流水、盈亏更准确），则跳过外部行，避免列表重复。 */
-  const covered = new Set(result.rows.map(r => effType(r.h.code, r.h.type || 'stock') + ':' + r.h.code));
+  const covered = new Set(result.rows.map(r => effType(r.h.code, r.h.type || 'stock', r.h.typeLocked) + ':' + r.h.code));
   /* 外部清仓也应用与内部一致的时间筛选（按 initDate / 清仓日期） */
   const on = ignoreFilter ? false : settleActive();
   const { lo, hi } = ignoreFilter ? { lo: -Infinity, hi: Infinity } : settleBounds();
