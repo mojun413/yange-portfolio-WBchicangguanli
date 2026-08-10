@@ -109,8 +109,8 @@ body{
   -webkit-backdrop-filter:saturate(180%) blur(14px);
   border-bottom:1px solid var(--line);
 }
-/* v53.17：顶栏延申到主区宽度（原 max-width:1400px 居中在宽屏下右侧留白过多） */
-.topbar-in{max-width:var(--page-maxw);margin:0 auto;padding:12px 22px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-start}
+/* v53.18：顶栏横跨主区全宽（不再 max-width 居中，右端延申到底；平板/手机跟随断点内边距） */
+.topbar-in{padding:12px 22px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-start}
 .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;white-space:nowrap}
 .brand .dot{width:10px;height:10px;border-radius:3px;background:var(--accent)}
 .spacer{flex:1 1 auto}
@@ -753,7 +753,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.17 · 2026-08-10 14:00</div>
+      <div class="sf-ver" id="sfVer">v53.18 · 2026-08-10 14:14</div>
     </div>
   </aside>
 
@@ -764,7 +764,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.17</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.18</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1142,12 +1142,14 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.17 · 2026-08-10 14:00 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.18 · 2026-08-10 14:14 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
             <div class="setting-row"><div><div class="t">账户偏好</div><div class="d">主题色、涨跌色、刷新间隔、自动刷新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnSettings2">打开设置</button></div></div>
+            <div class="setting-row"><div><div class="t">移动端自动收起侧栏</div><div class="d">手机抽屉里点选栏目后自动收起；关闭后完全手动控制</div></div>
+              <div style="display:flex;gap:8px;justify-content:flex-end"><label class="check" style="margin:0"><input type="checkbox" id="chkAutoHideSidebar"> 自动收起</label></div></div>
             <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">每日 15:05 自动同步一次，其余时间手动「本机覆盖云端」；未配置时仅本机 localStorage</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
                 <button class="btn-sm" id="btnCloudCfg" title="填写 Supabase 项目的 URL 与 anon key">云同步设置</button>
@@ -1188,8 +1190,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.17';
-const APP_BUILD   = '2026-08-10 14:00';
+const APP_VERSION = 'v53.18';
+const APP_BUILD   = '2026-08-10 14:14';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1244,8 +1246,8 @@ function switchPage(page){
   const t = document.getElementById('pageTitleCurrent');
   if (t) t.textContent = PAGE_TITLES[page] || page;
   try { localStorage.setItem(K('page'), page); } catch(e){}
-  /* 移动端（≤640）：切页后自动收起抽屉（避免遮住内容区）；平板保留手动控制 */
-  if (window.innerWidth <= 640){
+  /* 移动端（≤640）：选择栏目后自动收起抽屉（可设置关闭，保留手动控制）；平板保留手动 */
+  if (window.innerWidth <= 640 && state.settings.autoHideSidebar){
     const sb = document.getElementById('sidebar');
     if (sb && sb.classList.contains('open')) sb.classList.remove('open');
   }
@@ -1347,12 +1349,14 @@ function shr(v){ if(!isFinite(v)) return '—'; return Number.isInteger(v) ? v.t
 function cls(v){ return !isFinite(v) || Math.abs(v) < 1e-9 ? 'flat' : (v > 0 ? 'up' : 'down'); }
 function price4(v){ if(!isFinite(v)) return '—'; return v.toFixed(v < 10 ? 4 : 2); }
 
+/* 弹窗停留时长（毫秒，可微调）：普通提示 5s、错误/警告 6.5s —— 保证看得清再消失 */
+const TOAST_MS = 5000, TOAST_ERR_MS = 6500;
 function toast(msg, type){
   const d = document.createElement('div');
   d.className = 'toast ' + (type || '');
   d.textContent = msg;
   $('#toasts').appendChild(d);
-  setTimeout(() => { d.style.transition = '.25s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 260); }, type === 'err' ? 4200 : 2600);
+  setTimeout(() => { d.style.transition = '.25s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 260); }, type === 'err' ? TOAST_ERR_MS : TOAST_MS);
 }
 
 /* ===== 版本标识 UI（构建脚本 _bump_version.py 自动递增版本号）=====
@@ -1438,6 +1442,8 @@ const DEFAULT_SETTINGS = {
   totalTarget: 0,
   /* 仓位管理表排序 + 是否显示已清仓标的（默认只显示当前持仓） */
   posSortKey: '', posSortDir: 'desc', posShowClosed: false,
+  /* 移动端侧栏：选择栏目后自动收起抽屉（可关，默认开；关闭后完全手动控制） */
+  autoHideSidebar: true,
   /* 祖训纪律引擎阈值（养鹅心法 · 买卖纪律页可编辑，改动自动联动到「预警与纪律」面板） */
   zuxun: { takeProfit: 8, stopShort: 5, stopMid: 10, shortDays: 30, heavyPct: 15, revertMax: 0.5 }
 };
@@ -5288,6 +5294,7 @@ function bind(){
   /* --- 顶栏 --- */
   $('#btnRefresh').onclick = () => refreshQuotes(false);
   $('#chkAuto').onchange = e => { state.settings.autoRefresh = e.target.checked; persist.settings(); setupTimer(); toast(e.target.checked ? '已开启自动刷新（' + state.settings.refreshSec + ' 秒）' : '已关闭自动刷新'); };
+  $('#chkAutoHideSidebar').onchange = e => { state.settings.autoHideSidebar = e.target.checked; persist.settings(); toast(e.target.checked ? '手机端点选栏目后将自动收起侧栏' : '已改为手动控制（点选栏目不再自动收起）'); };
   $('#btnExport').onclick = doExport;
   $('#btnImport').onclick = () => $('#fileInput').click();
   $('#fileInput').onchange = doImport;
@@ -6994,6 +7001,7 @@ function applySettingsToUI(){
   if (state.settings.upColor)   document.documentElement.style.setProperty('--up', state.settings.upColor);
   if (state.settings.downColor) document.documentElement.style.setProperty('--down', state.settings.downColor);
   $('#chkAuto').checked = !!state.settings.autoRefresh;
+  const _ah = $('#chkAutoHideSidebar'); if (_ah) _ah.checked = !!state.settings.autoHideSidebar;
   /* 手续费留空：autoFeeInputs/autoFeeOp 按费率自动算 */
   $('#h_date').value = todayStr();
   $('#o_date').value = todayStr();
