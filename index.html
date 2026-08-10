@@ -777,7 +777,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.4</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.5</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1170,7 +1170,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.4 · 2026-08-10 23:10 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.5 · 2026-08-10 23:55 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1229,8 +1229,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.4';
-const APP_BUILD   = '2026-08-10 23:10';
+const APP_VERSION = '1BK_V68.13.5';
+const APP_BUILD   = '2026-08-10 23:55';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -7254,11 +7254,16 @@ function init(){
   if (!state.holdings.length && typeof YANGEDATA_RAW !== 'undefined' && (YANGEDATA_RAW.t || []).length){
     try {
       /* 种子期抑制推送 + 时间戳归零：初始快照是「基线」不是「本机新数据」，
-         否则新设备会把种子误判为最新并推上云端，覆盖掉其它设备真正手工录的数据 */
+         否则新设备会把种子误判为最新并推上云端，覆盖掉其它设备真正手工录的数据。
+         1BK_V68.13.5：除 savedAt 外还归零 snapSavedAt（打开 5 秒后的每日快照会写它，
+         导致 lastLocalSaveAt 取 max 变成「现在」→ cloudPull 误判本地新 → 种子覆盖云端），
+         并置 seedBaseline 标记：首次云同步一律「云端优先」，绝不推送种子。 */
       cloud.suppressPush = true;
       const r = seedFromYangE();
       cloud.suppressPush = false;
+      cloud.seedBaseline = true;   /* 本浏览器无真实数据，仅种子 → 云端优先 */
       try { localStorage.setItem(K('savedAt'), '0'); } catch(e){}
+      try { localStorage.setItem(K('snapSavedAt'), '0'); } catch(e){}
       renderAll();
       if (state.holdings.length) refreshQuotes(true);
       const meta = YANGEDATA_RAW.meta || {};
@@ -7713,6 +7718,7 @@ const cloud = {
   cfg: CONFIG.cloudSync || {},
   client: null, channel: null,
   deviceId: '', lastSavedAt: 0, pushTimer: null, pushing: false,
+  seedBaseline: false,   /* 1BK_V68.13.5：本浏览器首次载入内嵌种子 → 云端优先，禁止种子覆盖云端 */
   sdkUrls: ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
             'https://unpkg.com/@supabase/supabase-js@2']
 };
@@ -8078,11 +8084,20 @@ async function cloudPull(){
     const { data, error } = await cloud.client.from(cloud.cfg.table).select('*').eq('id', 1).maybeSingle();
     if (error) throw error;
     if (!data || !data.data){
+      cloud.seedBaseline = false;   /* 云端空 → 首次上云推本地（种子），基线结束 */
       if (hasLocalData()) await cloudPush();   // 云端空 → 把本地推上去（首次上云）
       else { cloud.state.offline = false; cloud.state.errMsg = ''; renderCloudStatus(); }
       return;
     }
     const remote = data.data;
+    /* 1BK_V68.13.5：首次打开（本浏览器只有内嵌种子）→ 云端优先，无条件应用云端，绝不推送种子。
+       否则新设备/新浏览器会拿旧种子快照覆盖云端真实数据。应用成功后才退出基线态。 */
+    if (cloud.seedBaseline){
+      const ok = applyCloudSnapshot(remote);
+      cloud.seedBaseline = false;
+      if (ok){ toast('已从云端加载最新数据（首次打开 · 云端优先）', 'ok'); renderCloudStatus(); }
+      return;
+    }
     /* 记录云端数据时间戳（updated_at 服务器时间 / savedAt 写入方时间 / 来源设备） */
     cloud.state.remoteAt = (data.updated_at && Date.parse(data.updated_at)) || 0;
     cloud.state.remoteSavedAt = remote.savedAt || 0;
