@@ -662,7 +662,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.4 · 2026-08-10 09:01</div>
+      <div class="sf-ver" id="sfVer">v53.5 · 2026-08-10 09:15</div>
     </div>
   </aside>
 
@@ -673,7 +673,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.4</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.5</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -936,7 +936,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.4 · 2026-08-10 09:01 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.5 · 2026-08-10 09:15 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -982,8 +982,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.4';
-const APP_BUILD   = '2026-08-10 09:01';
+const APP_VERSION = 'v53.5';
+const APP_BUILD   = '2026-08-10 09:15';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2448,34 +2448,26 @@ function buildFlows(){
   return flows;
 }
 function returnAttribution(){
-  /* 与总览总收益恒等式闭合：总览 总收益 = Σ各标的(已实现+浮动)。
-     拆分口径（对齐用户定义）：
-       清仓净收益 = 已清仓标的的净收益（落袋为安）
-       持仓浮动收益 = 当前持仓按现价的浮动盈亏（实时随股价变动）
-       持仓减仓已实现 = 持仓期间做T/减仓已落袋部分（并入总收益，避免凭空蒸发） */
-  let closedR = 0, openR = 0, openFloat = 0;
-  state.holdings.forEach(h => {
-    const c = calcHolding(h);
-    const r = isFinite(c.realized) ? c.realized : 0;
-    const f = isFinite(c.floatPnl) ? c.floatPnl : 0;
-    if (c.shares > 1e-8){ openR += r; openFloat += f; }   /* 持仓中：减仓已实现 + 浮动 */
-    else { closedR += r; }                                  /* 已清仓：净收益 = 该标的已实现 */
-  });
-  const agg = openAggregate(), cf = cashflowStats();
-  const liquidatedNet = closedR;     /* 清仓净收益（= 已实现收益，落袋） */
-  const holdFloat    = openFloat;    /* 持仓浮动收益（实时） */
-  const holdReduced  = openR;        /* 持仓减仓已实现（做T/减仓落袋） */
-  const totalPnl = liquidatedNet + holdFloat + holdReduced;   /* 与总览总收益完全一致 */
+  /* 与总览「总收益」完全一致：总览 总收益 = 持仓浮盈 + 已清仓盈亏。
+     本函数直接复用总览的两个唯一数据源，保证面板数字 ≡ 总览数字（不重不漏）：
+       清仓净收益   = 清仓结算全量合计（allSettledRows(true).t.realized）≡ 总览「已清仓盈亏」卡
+       持仓浮动收益 = 当前持仓浮动盈亏（openAggregate().floatPnl）≡ 总览「持仓浮盈」卡（实时随价）
+       总收益       = 清仓净收益 + 持仓浮动收益 */
+  const agg = openAggregate();
+  const cf = cashflowStats();
+  const settle = allSettledRows(true);
+  const liquidatedNet = isFinite(settle.t.realized) ? settle.t.realized : 0;   /* 清仓净收益 = 清仓结算汇总 */
+  const holdFloat    = isFinite(agg.floatPnl) ? agg.floatPnl : 0;             /* 持仓浮动收益（实时） */
+  const totalPnl = liquidatedNet + holdFloat;   /* ≡ 总览 总收益 */
   const invCapital = cf.buyTotal - cf.sellTotal;
   return {
-    realized: liquidatedNet, floatPnl: holdFloat, holdReduced, liquidatedNet, holdFloat,
+    realized: liquidatedNet, floatPnl: holdFloat, liquidatedNet, holdFloat,
     divTotal: cf.divTotal || 0, totalPnl,
     buyTotal: cf.buyTotal, sellTotal: cf.sellTotal,
     invCapital, peakInvested: cf.peakInvested, netInvested: cf.netInvested,
-    netRoi:  invCapital > 0 ? totalPnl / invCapital * 100 : NaN,         /* 净投入收益率（分母=买入−卖出，不含分红） */
+    netRoi:  invCapital > 0 ? totalPnl / invCapital * 100 : NaN,          /* 净投入收益率（分母=买入−卖出，不含分红） */
     occRoi:  cf.peakInvested > 0 ? totalPnl / cf.peakInvested * 100 : NaN, /* 峰值占用收益率 */
-    simpleRoi: invCapital > 0 ? totalPnl / invCapital * 100 : NaN,    /* 兼容旧字段 = 净投入收益率 */
-    irr: xirr(buildFlows()),
+    simpleRoi: invCapital > 0 ? totalPnl / invCapital * 100 : NaN,        /* 兼容旧字段 = 净投入收益率 */
     mv: isFinite(agg.mv) ? agg.mv : 0
   };
 }
@@ -2760,23 +2752,21 @@ function renderAnalysis(){
   }
 
   /* 2) 收益归因 */
-  const irrTxt = isFinite(att.irr) ? (att.irr >= 0 ? '+' : '') + att.irr.toFixed(2) + '%' : '—';
   const netRoiTxt = isFinite(att.netRoi) ? (att.netRoi >= 0 ? '+' : '') + att.netRoi.toFixed(2) + '%' : '—';
   const occRoiTxt = isFinite(att.occRoi) ? (att.occRoi >= 0 ? '+' : '') + att.occRoi.toFixed(2) + '%' : '—';
   const attrHTML =
     '<div class="kpi-grid">' +
-    kpi2('总收益(与总览一致)', sign2(att.totalPnl), cls(att.totalPnl)) +
-    kpi2('清仓净收益(已实现)', sign2(att.liquidatedNet), cls(att.liquidatedNet)) +
+    kpi2('总收益(= 清仓净收益 + 持仓浮动)', sign2(att.totalPnl), cls(att.totalPnl)) +
+    kpi2('清仓净收益(已实现·落袋)', sign2(att.liquidatedNet), cls(att.liquidatedNet)) +
     kpi2('持仓浮动收益(实时)', sign2(att.holdFloat), cls(att.holdFloat)) +
-    (att.holdReduced ? kpi2('持仓减仓已实现', sign2(att.holdReduced), cls(att.holdReduced)) : '') +
     kpi2('累计分红(已摊入成本)', '+' + money(att.divTotal), '') +
     kpi2('净投入收益率', netRoiTxt, cls(att.netRoi)) +
     kpi2('峰值占用收益率', occRoiTxt, cls(att.occRoi)) +
-    kpi2('IRR(资金加权·年化)', irrTxt, cls(att.irr)) +
     '</div>' +
-    '<div class="an-note"><b>计算依据</b>：总收益 = 清仓净收益 + 持仓浮动收益（+ 持仓减仓已实现），与总览「总收益」<b>完全一致</b>（总览 = Σ各标的 已实现 + 浮动）。' +
-    '其中 <b>清仓净收益</b> = 已清仓标的的净收益（落袋为安）；<b>持仓浮动收益</b> = 当前持仓按现价计算的浮动盈亏，<b>实时随股价变动</b>；若持仓期间做过减仓/做T，减仓已实现收益单独列出（已并入总收益，不漏不重）。' +
-    '三种收益率分母不同：①<b>净投入收益率</b> = 总收益 ÷（累计买入 − 累计卖出净额，<b>不含分红</b>）；②<b>峰值占用收益率</b> = 总收益 ÷ 历史峰值占用本金；③<b>IRR</b> = 逐笔现金流（买入流出 / 卖出·分红流入 / 期末市值赎回）解出的资金加权年化收益率，体现加仓减仓的时机与体量。分红已摊入摊薄成本，不重复计。</div>';
+    '<div class="an-note"><b>计算依据</b>：<b>总收益 = 清仓净收益 + 持仓浮动收益</b>，与「总览」页的 <b>总收益</b> 完全一致（同一套算法、同一份数据，不重不漏）。' +
+    '① <b>清仓净收益</b> = 「清仓结算」页全量汇总里的「已清仓盈亏」合计（所有已清仓标的净收益，落袋为安）；' +
+    '② <b>持仓浮动收益</b> = 当前持仓按最新价算的浮动盈亏，<b>实时随股价变动</b>，与「总览」的「持仓浮盈」数字相同。' +
+    '分红已摊入摊薄成本，不重复计。两个收益率仅分母不同：<b>净投入收益率</b> = 总收益 ÷（累计买入 − 累计卖出净额，不含分红）；<b>峰值占用收益率</b> = 总收益 ÷ 历史上最多压进去的本金。</div>';
 
   /* 3) 行业暴露 */
   let sectorWarn = '';
