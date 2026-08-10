@@ -742,7 +742,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.12 · 2026-08-10 12:08</div>
+      <div class="sf-ver" id="sfVer">v53.13 · 2026-08-10 12:37</div>
     </div>
   </aside>
 
@@ -753,7 +753,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.12</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.13</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -911,23 +911,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
         <div class="panel">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>做 T / 做波段</div>
-            <div class="panel-sub">自动从交易明细同步 · 独立于持仓成本核算的短线台账</div>
-            <span style="flex:1"></span>
-            <button class="btn-sm" id="btnAutoTrade" title="扫描持仓的买卖流水，自动识别同日做T配对和多日波段配对（日常已自动同步，此按钮用于补录/复查）">自动识别</button>
-          </div>
-          <div class="panel-body" style="border-bottom:1px solid var(--line-2);background:var(--panel-2)">
-            <div class="form-grid g-trade">
-              <div class="field"><label class="fl">日期</label><input id="t_date" type="date"></div>
-              <div class="field"><label class="fl">类型</label><select id="t_type"><option value="T">做T</option><option value="swing">波段</option></select></div>
-              <div class="field"><label class="fl">代码</label><input id="t_code" placeholder="600519" autocomplete="off"></div>
-              <div class="field"><label class="fl">名称</label><input id="t_name" placeholder="自动回填"></div>
-              <div class="field"><label class="fl">股数</label><input id="t_shares" type="number" step="0.01" min="0"></div>
-              <div class="field"><label class="fl">买入价</label><input id="t_buy" type="number" step="0.0001" min="0"></div>
-              <div class="field"><label class="fl">卖出价</label><input id="t_sell" type="number" step="0.0001" min="0"></div>
-              <div class="field"><label class="fl">手续费</label><input id="t_fee" type="number" step="0.01" min="0"></div>
-              <div class="field"><label class="fl">备注</label><input id="t_note" placeholder="选填"></div>
-              <div class="form-actions"><button class="btn-primary" id="btnAddTrade">添加</button></div>
-            </div>
+            <div class="panel-sub">自动从交易明细同步 · 独立于持仓成本核算的短线台账 · 无需手动录入</div>
           </div>
           <div class="panel-body tight"><div class="table-wrap" id="tradeTable"></div></div>
         </div>
@@ -1021,8 +1005,17 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
           .deal-card{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;border-top:3px solid var(--accent)}
           .deal-card.up{border-top-color:var(--up)}
           .deal-card.down{border-top-color:var(--down)}
+          .deal-card.warn{border-top-color:var(--warn)}
           .deal-card .dc-t{font-size:13.5px;font-weight:700;margin-bottom:5px}
           .deal-card .dc-d{font-size:12.5px;color:var(--muted);line-height:1.6}
+          .deal-card .dc-d b{color:var(--text)}
+          /* 祖训阈值 inline-edit（点数字即可改） */
+          .deal-card .dc-edit{display:inline-block;min-width:34px;padding:1px 6px;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-weight:700;border:1px dashed transparent;cursor:pointer;transition:border-color .15s}
+          .deal-card .dc-edit:hover{border-color:var(--accent)}
+          .deal-card .dc-edit:focus{outline:none;border:1px solid var(--accent);background:#fff}
+          .deal-card .dc-edit.unit{padding-right:3px}
+          .deal-card .dc-edit.save-ok{background:var(--accent);color:#fff;border-color:var(--accent)}
+          .creed-edit-hint{font-size:11.5px;font-weight:400;color:var(--muted);opacity:.8;margin-left:auto}
           .deal-card .dc-d b{color:var(--text);font-weight:700}
           .veto-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:8px}
           .veto-item{display:flex;gap:9px;align-items:flex-start;background:#fff7f6;border:1px solid #fde2e0;border-radius:9px;padding:8px 11px;font-size:12.5px;line-height:1.55;color:var(--text)}
@@ -1063,13 +1056,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             </div>
 
             <div class="creed-sec">
-              <div class="creed-sec-t"><span class="dot"></span>买卖纪律 · 止盈 / 止损 / 卖出信号</div>
-              <div class="creed-deal">
-                <div class="deal-card up"><div class="dc-t">📈 止盈策略</div><div class="dc-d">持仓收益 <b>＞8%</b> 卖出 1/3，反复做 T，让利润奔跑又不失保护</div></div>
-                <div class="deal-card down"><div class="dc-t">🛑 止损策略</div><div class="dc-d">短线 <b>5%</b>、中线 <b>10%</b> 为止损点；仓位重且已有浮盈的，回撤到 <b>0%</b> 即止损</div></div>
-                <div class="deal-card"><div class="dc-t">🔁 ETF 卖出信号</div><div class="dc-d">连续上涨过后 · 天量天价 · 顶部放量滞涨</div></div>
-                <div class="deal-card"><div class="dc-t">🎯 个股卖出信号</div><div class="dc-d">股价远高价值 / 基本面改变 / 有更好选择；三者出现其一即卖，否则持股待涨</div></div>
-              </div>
+              <div class="creed-sec-t"><span class="dot"></span>买卖纪律 · 止盈 / 止损 / 卖出信号 <span class="creed-edit-hint">直接点数字即可编辑（自动联动到「预警与纪律」面板）</span></div>
+              <div class="creed-deal" id="zuxunDealCards"><!-- 由 renderZuxunDealCards() 动态渲染 --></div>
             </div>
 
             <div class="creed-sec">
@@ -1129,7 +1117,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.12 · 2026-08-10 12:08 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.13 · 2026-08-10 12:37 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1175,8 +1163,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.12';
-const APP_BUILD   = '2026-08-10 12:08';
+const APP_VERSION = 'v53.13';
+const APP_BUILD   = '2026-08-10 12:37';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1424,7 +1412,9 @@ const DEFAULT_SETTINGS = {
   /* 仓位管理：组合总目标金额（¥），0 表示未设置总目标限制 */
   totalTarget: 0,
   /* 仓位管理表排序 + 是否显示已清仓标的（默认只显示当前持仓） */
-  posSortKey: '', posSortDir: 'desc', posShowClosed: false
+  posSortKey: '', posSortDir: 'desc', posShowClosed: false,
+  /* 祖训纪律引擎阈值（养鹅心法 · 买卖纪律页可编辑，改动自动联动到「预警与纪律」面板） */
+  zuxun: { takeProfit: 8, stopShort: 5, stopMid: 10, shortDays: 30, heavyPct: 15, revertMax: 0.5 }
 };
 
 function load(key, def){
@@ -2160,6 +2150,7 @@ function updateLivePrices(){
   if (pid === 'page-overview' && typeof renderOverview === 'function') renderOverview();
   else if (pid === 'page-position' && typeof renderPosition === 'function') renderPosition();
   else if (pid === 'page-analysis' && typeof renderAnalysis === 'function') renderAnalysis();
+  else if (pid === 'page-creed' && typeof renderZuxunDealCards === 'function') renderZuxunDealCards();
   /* 总览 KPI 即使不在总览页也保持数据一致（下次切页无需等待） */
   else if (typeof renderOverview === 'function' && document.getElementById('page-overview')) renderOverview();
   checkAlerts();        /* 交易时段每拍检测止损/止盈破线（休市自动跳过） */
@@ -2352,93 +2343,6 @@ function syncAutoTrades(){
     if (n) persist.trades();
   } catch(e){ /* 静默：同步失败不影响页面 */ }
   return n;
-}
-
-/* --- 自动识别对话框 --- */
-async function openAutoTrade(){
-  const cands = autoDetectTrades();
-  if (!cands.length){ toast('没有发现新的做T / 波段配对。\n\n确认条件：同一标的、同一日期有等量买入+卖出（做T）\n或不同日期有等量买卖配对（波段）。', 'info'); return; }
-  /* 给每个候选加 id */
-  const rows = cands.map((c, i) => ({ ...c, i, use: true }));
-  let checkAll = true;
-
-  function renderCands(mask){
-    const q = s => mask.querySelector(s);
-    const okN = rows.filter(r => r.use).length;
-    const tn = rows.filter(r => r.type === 'T').length, sn = rows.length - tn;
-    const body = rows.map(r => {
-      const cr = calcTrade(r);
-      return '<tr class="' + (r.use ? '' : 'off') + '">' +
-        '<td><input type="checkbox" data-ci="' + r.i + '" style="width:auto;margin:0"' + (r.use ? ' checked' : '') + '></td>' +
-        '<td class="l mono">' + esc(r.date) + '</td>' +
-        '<td class="l"><span class="tag ' + (r.type === 'T' ? 't' : 'swing') + '">' + (r.type === 'T' ? '做T' : '波段') + '</span></td>' +
-        '<td class="l">' + esc(r.name) + ' <span class="dim mono">' + esc(r.code) + '</span></td>' +
-        '<td class="mono">' + shr(Number(r.shares)) + '</td>' +
-        '<td class="mono">' + price4(Number(r.buyPrice)) + '</td>' +
-        '<td class="mono">' + price4(Number(r.sellPrice)) + '</td>' +
-        '<td class="mono">' + n2(Number(r.fee || 0)) + '</td>' +
-        '<td class="mono ' + cls(cr.pnl) + '">' + sign2(cr.pnl) + '</td>' +
-        '<td class="mono ' + cls(cr.roi) + '">' + pct2(cr.roi) + '</td>' +
-        '<td class="l dim" style="font-size:12px">' + (r.note ? esc(r.note) : '—') + '</td></tr>';
-    }).join('');
-    q('#at_tbody').innerHTML = body;
-    q('#at_sum').innerHTML =
-      '共 <b>' + rows.length + '</b> 条候选（做T <b>' + tn + '</b> + 波段 <b>' + sn + '</b>），已选 <b id="at_sel">' + okN + '</b> 条';
-    q('#at_ok').disabled = okN === 0;
-
-    mask.querySelectorAll('input[data-ci]').forEach(cb => {
-      cb.onchange = () => { rows[Number(cb.dataset.ci)].use = cb.checked; renderCands(mask); };
-    });
-  }
-
-  const mask = document.createElement('div');
-  mask.className = 'mask';
-  mask.innerHTML =
-    '<div class="modal wide"><h3>自动识别做T / 波段配对</h3>' +
-      '<div class="mb" id="at_sum" style="font-size:13px;color:var(--muted)"></div>' +
-      '<div style="display:flex;gap:10px;margin-bottom:10px">' +
-        '<button class="btn-sm" id="at_all">全选</button>' +
-        '<button class="btn-sm" id="at_none">取消全选</button>' +
-        '<span class="hint">勾选要添加的记录，未勾选的不会导入。备注栏显示原始买卖日期（波段跨日时）。</span>' +
-      '</div>' +
-      '<div class="table-wrap fix-tb" style="max-height:40vh;overflow:auto;border:1px solid var(--line-2);border-radius:9px">' +
-        '<table><thead><tr><th style="width:34px"></th><th class="l">日期</th><th class="l">类型</th><th class="l">标的</th>' +
-        '<th>股数</th><th>买入价</th><th>卖出价</th><th>手续费</th><th>收益</th><th>收益率</th><th class="l">备注</th></tr></thead>' +
-        '<tbody id="at_tbody"></tbody></table></div>' +
-    '</div><div class="mf"><button id="at_cancel">取消</button>' +
-      '<button class="btn-primary" id="at_ok" disabled>确认导入选中项</button></div></div>';
-  document.body.appendChild(mask);
-  const qq = s => mask.querySelector(s);
-
-  const close = () => {
-    document.removeEventListener('keydown', onKey); mask.remove();
-  };
-  const onKey = e => { if (e.key === 'Escape') close(); };
-  document.addEventListener('keydown', onKey);
-  mask.addEventListener('mousedown', e => { if (e.target === mask) close(); });
-
-  qq('#at_all').onclick = () => { rows.forEach(r => r.use = true); renderCands(mask); };
-  qq('#at_none').onclick = () => { rows.forEach(r => r.use = false); renderCands(mask); };
-  qq('#at_cancel').onclick = close;
-  qq('#at_ok').onclick = () => {
-    const use = rows.filter(r => r.use);
-    if (!use.length) return;
-    use.forEach(r => {
-      state.trades.push({
-        id: uid(), date: r.date, type: r.type, code: r.code, name: r.name,
-        shares: r.shares, buyPrice: r.buyPrice, sellPrice: r.sellPrice,
-        fee: r.fee || 0, note: r.note
-      });
-    });
-    persist.trades();
-    const tn = use.filter(r => r.type === 'T').length, sn = use.length - tn;
-    close();
-    toast('已添加 ' + use.length + ' 条记录（做T ' + tn + ' + 波段 ' + sn + '）', 'ok');
-    renderAll();
-  };
-
-  renderCands(mask);
-  setTimeout(() => qq('#at_all').focus(), 30);
 }
 
 /* 清仓结算：针对「已全部卖出、持仓归零」的标的，汇总整段交易的最终盈亏 */
@@ -3042,10 +2946,12 @@ function renderAnalysis(){
     '<div class="an-table"><table class="tbl"><thead><tr><th class="l">行业</th><th>市值</th><th>占比</th><th></th></tr></thead><tbody>' +
     (indTable || '<tr><td colspan="4" class="dim">—</td></tr>') + '</tbody></table></div></div>' + sectorWarn;
 
-  /* 4) 预警与纪律 */
+  /* 4) 预警与纪律（只对「当前持仓」标的生效：排除已清仓 closed 标的） */
   let alertCardsHTML = '';
   state.holdings.forEach(h => {
+    if (h.closed) return;
     const c = calcHolding(h); const low = Number(h.alertLow) || 0, high = Number(h.alertHigh) || 0;
+    if (c.shares <= 1e-8) return;
     if (!low && !high) return;
     const price = isFinite(c.price) ? c.price : NaN;
     const stLow = low > 0 ? (isFinite(price) ? (price <= low ? '已破' : '监控中') : '—') : '—';
@@ -3064,19 +2970,22 @@ function renderAnalysis(){
     if (topH && topShare / agg.mv * 100 > SINGLE_WARN_PCT)
       disc += warnRow('⚠️', '单标的集中度：『' + esc(topH.name || topH.code) + '』占组合市值 <b>' + (topShare / agg.mv * 100).toFixed(0) + '%</b>（> ' + SINGLE_WARN_PCT + '%），波动高度依赖单票', 'warn');
   }
-  /* 主力净流出预警（仅股票） */
+  /* 主力净流出预警（仅股票、仅当前持仓） */
   state.holdings.forEach(h => {
+    if (h.closed) return;
+    const c = calcHolding(h); if (c.shares <= 1e-8) return;
     if (effType(h.code, h.type) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
-    const c = calcHolding(h); const mv = isFinite(c.mv) ? c.mv : 0; if (mv <= 0) return;
     const ratio = Math.abs(h.fundFlow) / mv * 100;
     if (ratio >= FUND_FLOW_WARN_PCT) disc += warnRow('🔻', '主力净流出：『' + esc(h.name || h.code) + '』' + fundFlowText(h) + '，占持仓市值 <b>' + ratio.toFixed(1) + '%</b>', 'danger');
   });
-  /* 概念异动预警（按东财题材标签聚合，成分股单日大幅波动） */
+  /* 概念异动预警（按东财题材标签聚合，成分股单日大幅波动；仅当前持仓） */
   const byC = {};
   state.holdings.forEach(h => {
+    if (h.closed) return;
+    const c = calcHolding(h); if (c.shares <= 1e-8) return;
     const cs = getConcepts(h);
     if (!cs.length) return;
-    const c = calcHolding(h); const pct = isFinite(c.pct) ? c.pct : NaN;
+    const pct = isFinite(c.pct) ? c.pct : NaN;
     if (!isFinite(pct)) return;
     cs.forEach(tag => { (byC[tag] = byC[tag] || []).push({ h, pct }); });
   });
@@ -3130,22 +3039,33 @@ function kpi2(label, val, clsN){ return '<div class="kpi-card"><div class="k">' 
    ② 止损：短线（持仓＜30天）5%、中线（≥30天）10%；
    ③ 重仓回撤：占组合 ≥ 15% 且曾有过浮盈、现浮盈回撤到 ≤ 0.5% → 0% 即止损。
    返回 [{ ic, txt, sev }]，由 renderAnalysis 渲染为预警行。 */
-const ZUXUN_SHORT_DAYS = 30;      // 持仓 ≥ 此天数视为中线（止损阈值 10%），否则短线（5%）
-const ZUXUN_TAKE_PROFIT = 8;      // 浮盈 ＞ 8% 卖 1/3
-const ZUXUN_STOP_SHORT = 5;       // 短线止损
-const ZUXUN_STOP_MID = 10;        // 中线止损
-const ZUXUN_HEAVY_PCT = 15;       // 重仓判定（与单标的集中度预警一致）
-const ZUXUN_REVERT_MAX = 0.5;     // 浮盈回撤到 ≤ 此值视为「回撤到 0%」
+/* ============================ 祖训纪律引擎（规则引擎） ============================
+   把「养鹅心法 · 投资祖训」的买卖纪律变成自动盯盘规则，按当前持仓实时检查：
+   ① 止盈：持仓浮盈 ＞ 阈值 → 卖出 1/3；
+   ② 止损：短线（持仓 ＜ 阈值天数）5%、中线（≥ 阈值天数）10%；
+   ③ 重仓回撤：占组合 ≥ 阈值 且曾有过浮盈、现浮盈回撤到 ≤ 阈值 → 0% 即止损。
+   所有阈值都可在「养鹅心法」页「买卖纪律」卡片里直接编辑，存 state.settings.zuxun，
+   改动自动联动到「预警与纪律」面板。
+   返回 [{ ic, txt, sev }]，由 renderAnalysis 渲染为预警行。 */
 function zuxunEngineChecks(){
   const out = [];
   const agg = openAggregate();
   const mvTotal = (isFinite(agg.mv) && agg.mv > 0) ? agg.mv : 0;
+  /* 读用户可编辑阈值（养鹅心法页可改，存 state.settings.zuxun；缺省取原硬编码默认值） */
+  const cfg = (state.settings && state.settings.zuxun) || {};
+  const takeProfit = Number(cfg.takeProfit) > 0 ? Number(cfg.takeProfit) : 8;
+  const stopShort = Number(cfg.stopShort) > 0 ? Number(cfg.stopShort) : 5;
+  const stopMid = Number(cfg.stopMid) > 0 ? Number(cfg.stopMid) : 10;
+  const shortDays = Number(cfg.shortDays) > 0 ? Number(cfg.shortDays) : 30;
+  const heavyPct = Number(cfg.heavyPct) > 0 ? Number(cfg.heavyPct) : 15;
+  const revertMax = Number.isFinite(Number(cfg.revertMax)) ? Number(cfg.revertMax) : 0.5;
   state.holdings.forEach(h => {
+    if (h.closed) return;                                // 已清仓标的跳过
     const c = calcHolding(h);
-    if (!isFinite(c.price) || c.shares <= 0) return;          // 无行情 / 已清仓跳过
-    const avg = c.avgCost;                                    // 移动平均成本（高抛不产生负成本，口径稳定）
-    if (!isFinite(avg) || avg <= 0) return;                   // 成本≤0（负成本）不适用
-    const rate = (c.price - avg) / avg * 100;                 // 浮盈率（相对成本价）
+    if (!isFinite(c.price) || c.shares <= 1e-8) return;   // 无行情 / 已清仓跳过
+    const avg = c.avgCost;                                // 移动平均成本（高抛不产生负成本，口径稳定）
+    if (!isFinite(avg) || avg <= 0) return;               // 成本≤0（负成本）不适用
+    const rate = (c.price - avg) / avg * 100;             // 浮盈率（相对成本价）
     /* 持仓天数：以首笔买入流水日起算 */
     const buys = (h.txs || []).filter(t => t.side === 'buy' && Number(t.shares) > 1e-9).map(t => t.date).sort();
     let days = Infinity;
@@ -3154,18 +3074,18 @@ function zuxunEngineChecks(){
       if (!isNaN(d0.getTime())) days = Math.max(0, Math.floor((Date.now() - d0.getTime()) / 86400000));
     }
     const nm = esc(h.name || h.code);
-    /* ① 止盈：＞8% 卖 1/3 */
-    if (rate > ZUXUN_TAKE_PROFIT)
+    /* ① 止盈：浮盈 ＞ takeProfit% 卖 1/3 */
+    if (rate > takeProfit)
       out.push({ ic:'📈', sev:'warn',
-        txt:'祖训止盈：『' + nm + '』浮盈 <b>' + rate.toFixed(1) + '%</b>（＞' + ZUXUN_TAKE_PROFIT + '%），应<b>卖出 1/3</b> 落袋，余仓继续做 T 让利润奔跑' });
-    /* ② 止损：短线 5% / 中线 10%（以持仓天数区分） */
-    const stop = days >= ZUXUN_SHORT_DAYS ? ZUXUN_STOP_MID : ZUXUN_STOP_SHORT;
+        txt:'祖训止盈：『' + nm + '』浮盈 <b>' + rate.toFixed(1) + '%</b>（＞' + takeProfit + '%），应<b>卖出 1/3</b> 落袋，余仓继续做 T 让利润奔跑' });
+    /* ② 止损：短线 stopShort% / 中线 stopMid%（以持仓天数区分，阈值 shortDays 天） */
+    const stop = days >= shortDays ? stopMid : stopShort;
     if (rate <= -stop)
       out.push({ ic:'🛑', sev:'danger',
-        txt:'祖训止损：『' + nm + '』浮亏 <b>' + Math.abs(rate).toFixed(1) + '%</b>（≤ -' + stop + '% · ' + (days >= ZUXUN_SHORT_DAYS ? '中线' : '短线' + (isFinite(days) ? ' ' + days + '天' : '')) + '），应果断卖出离场，不赌翻盘' });
-    /* ③ 重仓回撤：占组合 ≥ 15% 且曾浮盈、现回撤到 ≤ 0.5% → 0% 即止损 */
+        txt:'祖训止损：『' + nm + '』浮盈率 <b>' + rate.toFixed(1) + '%</b>（≤ -' + stop + '% · ' + (days >= shortDays ? '中线' : '短线' + (isFinite(days) ? ' ' + days + '天' : '')) + '），应果断卖出离场，不赌翻盘' });
+    /* ③ 重仓回撤：占组合 ≥ heavyPct% 且曾浮盈、现回撤到 ≤ revertMax% → 0% 即止损 */
     const share = mvTotal > 0 ? c.mv / mvTotal * 100 : 0;
-    if (share >= ZUXUN_HEAVY_PCT && rate <= ZUXUN_REVERT_MAX){
+    if (share >= heavyPct && rate <= revertMax){
       const everUp = (h.txs || []).some(t => Number(t.price) > avg * 1.02);   // 历史有成交价高于成本 → 曾经浮盈
       if (everUp)
         out.push({ ic:'⚖️', sev:'warn',
@@ -3174,6 +3094,61 @@ function zuxunEngineChecks(){
   });
   return out;
 }
+/* ============================ 祖训「买卖纪律」可编辑卡片 ============================
+   「养鹅心法 · 投资祖训」页「买卖纪律」板块由本函数动态渲染：
+   - 止盈 / 止损 / 重仓回撤 卡片里的数字可点 inline-edit（contenteditable），
+     失焦或回车提交 → state.settings.zuxun → persist.settings()
+     → 联动触发「预警与纪律」面板祖训规则引擎重算。
+   - ETF/个股卖出信号 是文字描述无法量化，保持只读展示。 */
+function renderZuxunDealCards(){
+  const el = document.getElementById('zuxunDealCards'); if (!el) return;
+  const cfg = (state.settings && state.settings.zuxun) || DEFAULT_SETTINGS.zuxun;
+  const ed = (key, val, unit, min, max) =>
+    '<span class="dc-edit" contenteditable="true" data-zx="' + key +
+    '" data-min="' + (typeof min === 'number' ? min : 0) +
+    '" data-max="' + (typeof max === 'number' ? max : 999) +
+    '" title="点击编辑">' + val + '</span><span class="unit">' + unit + '</span>';
+  el.innerHTML =
+    '<div class="deal-card up"><div class="dc-t">📈 止盈策略</div><div class="dc-d">持仓浮盈 ＞ ' +
+      ed('takeProfit', cfg.takeProfit, '%', 0, 100) +
+      ' 卖出 1/3，反复做 T，让利润奔跑又不失保护</div></div>' +
+    '<div class="deal-card down"><div class="dc-t">🛑 止损策略</div><div class="dc-d">短线 ' +
+      ed('stopShort', cfg.stopShort, '%', 0, 100) +
+      '、中线 ' + ed('stopMid', cfg.stopMid, '%', 0, 100) +
+      ' 为止损点；短线持仓 ＜ ' + ed('shortDays', cfg.shortDays, '天', 1, 365) +
+      ' 算短线，否则算中线</div></div>' +
+    '<div class="deal-card warn"><div class="dc-t">⚖️ 重仓回撤止损</div><div class="dc-d">仓位重（占组合 ≥ ' +
+      ed('heavyPct', cfg.heavyPct, '%', 1, 100) +
+      '）且曾有过浮盈，回撤到 ≤ ' + ed('revertMax', cfg.revertMax, '%', 0, 100) +
+      ' 即按 0% 止损</div></div>' +
+    '<div class="deal-card"><div class="dc-t">🔁 ETF 卖出信号</div><div class="dc-d">连续上涨过后 · 天量天价 · 顶部放量滞涨</div></div>' +
+    '<div class="deal-card"><div class="dc-t">🎯 个股卖出信号</div><div class="dc-d">股价远高价值 / 基本面改变 / 有更好选择；三者出现其一即卖，否则持股待涨</div></div>';
+  el.querySelectorAll('.dc-edit').forEach(node => {
+    const commit = () => {
+      const key = node.dataset.zx;
+      const min = parseFloat(node.dataset.min) || 0;
+      const max = parseFloat(node.dataset.max) || 999;
+      const raw = (node.textContent || '').trim();
+      const v = parseFloat(raw);
+      if (!Number.isFinite(v) || raw === ''){ renderZuxunDealCards(); toast('输入无效，已恢复原值', 'warn'); return; }
+      const clamped = Math.max(min, Math.min(max, v));
+      if (!state.settings.zuxun) state.settings.zuxun = Object.assign({}, DEFAULT_SETTINGS.zuxun);
+      state.settings.zuxun[key] = clamped;
+      persist.settings();
+      /* 联动：分析中心可见时立即重渲（祖训规则引擎读新阈值） */
+      const ab = document.getElementById('analysisBody');
+      if (ab && ab.closest('.page.active')) renderAnalysis();
+      node.classList.add('save-ok');
+      setTimeout(() => { try { node.classList.remove('save-ok'); } catch(e){} }, 700);
+      toast('祖训「' + ({takeProfit:'止盈',stopShort:'短线止损',stopMid:'中线止损',shortDays:'短线阈值',heavyPct:'重仓占比',revertMax:'回撤容差'}[key] || key) + '」已改为 ' + clamped + '，预警与纪律已联动', 'ok');
+      /* 内容修正（防止用户输入了带空格/小数点不规整） */
+      if (Number(node.textContent) !== clamped) node.textContent = clamped;
+    };
+    node.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); node.blur(); } });
+    node.addEventListener('blur', commit);
+  });
+}
+
 function warnRow(ic, txt, sev){ return '<div class="an-warn' + (sev ? ' sev-' + sev : '') + '"><span class="ic">' + ic + '</span><span>' + txt + '</span></div>'; }
 function bindAnalysis(){
   document.querySelectorAll('[data-an-range]').forEach(b => b.onclick = () => { state.settings.analysisRange = b.dataset.anRange; persist.settings(); renderAnalysis(); });
@@ -5517,34 +5492,6 @@ function bind(){
     } catch (e) { toast(e.message, 'err'); }
   };
 
-  /* --- 做T / 波段 --- */
-  $('#btnAutoTrade').onclick = openAutoTrade;
-  $('#t_code').addEventListener('blur', async () => {
-    const raw = $('#t_code').value.trim(); if (!raw || $('#t_name').value.trim()) return;
-    try { const q = await lookupCode('stock', raw); if (q.name) $('#t_name').value = q.name; if (!$('#t_buy').value && isFinite(q.price)) $('#t_buy').value = q.price; } catch (e) {}
-  });
-  $('#btnAddTrade').onclick = () => {
-    try {
-      const code = $('#t_code').value.trim();
-      if (!code) throw new Error('请填写代码');
-      const rec = {
-        id: uid(), date: $('#t_date').value || todayStr(), type: $('#t_type').value,
-        code, name: $('#t_name').value.trim() || code,
-        shares: num($('#t_shares').value, '股数', { min: 1e-8 }),
-        buyPrice: num($('#t_buy').value, '买入价', { min: 0 }),
-        sellPrice: num($('#t_sell').value, '卖出价', { min: 0 }),
-        fee: num($('#t_fee').value, '手续费', { min: 0, allowEmpty: true }),
-        note: $('#t_note').value.trim()
-      };
-      state.trades.push(rec); persist.trades();
-      const r = calcTrade(rec);
-      ['t_code','t_name','t_shares','t_buy','t_sell','t_note'].forEach(id => $('#' + id).value = '');
-      /* t_fee 留空，按费率自动算 */
-      toast('已添加：收益 ' + sign2(r.pnl) + '（' + pct2(r.roi) + '）', 'ok');
-      renderAll();
-    } catch (e) { toast(e.message, 'err'); }
-  };
-
   /* --- 事件委托：表格内所有操作 --- */
   document.addEventListener('click', async e => {
     const btn = e.target.closest('[data-act]');
@@ -7011,7 +6958,7 @@ function applySettingsToUI(){
   /* 手续费留空：autoFeeInputs/autoFeeOp 按费率自动算 */
   $('#h_date').value = todayStr();
   $('#o_date').value = todayStr();
-  $('#t_date').value = todayStr();
+  /* 做T/波段表单已删除（v53.13 起全自动从交易明细同步），无需初始化日期 */
   /* 每日操作记录默认勾选联动写入交易 */
   const oGen = $('#o_gen');
   if (oGen && !oGen.dataset.userTouched){ oGen.checked = true; $('#o_txBox').style.display = ''; }
@@ -7023,6 +6970,8 @@ function init(){
   initNav();
   bind();
   try { bindAnalysis(); } catch(e){}
+  /* 养鹅心法 · 买卖纪律卡片（阈值 inline-edit，首次启动渲染一次） */
+  try { renderZuxunDealCards(); } catch(e){}
   /* 行业自动识别（A股全栈数据技能：东财申万行业/基金主题词）：仅填充空行业字段，非破坏性；依赖网络，失败静默 */
   try { autoIdentifyIndustries(false); } catch(e){}
   /* 编辑标的弹窗「识别」按钮：弹窗每次重建，用 document 事件委托一次性绑定 */
