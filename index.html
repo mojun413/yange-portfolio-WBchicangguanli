@@ -305,6 +305,21 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .an-card h5{font-size:12px;color:var(--muted);font-weight:600;margin:0 0 8px}
 .an-chart{width:100%}
 .an-legend{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:8px;font-size:11px;color:var(--muted)}
+/* 1BK_V68.13.3：机构研报覆盖面板 */
+.research-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.rs-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.rs-card.dim-card{opacity:.72;background:var(--panel)}
+.rs-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rs-h b{font-size:13.5px;color:var(--text)}
+.rs-h .mono{font-size:11px}
+.rs-m{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.rs-m b{color:var(--text);font-weight:700}
+.rs-m .up{color:var(--up);font-weight:700}
+.rs-m .down{color:var(--down);font-weight:700}
+.rs-t{font-size:11.5px;color:var(--muted);line-height:1.5;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rs-card .tag.buy{background:rgba(239,68,68,.12);color:#dc2626;border:1px solid rgba(239,68,68,.25)}
+.rs-card .tag.hold{background:rgba(245,158,11,.12);color:#d97706;border:1px solid rgba(245,158,11,.25)}
+.rs-card .tag.neutral{background:rgba(100,116,139,.12);color:#64748b;border:1px solid rgba(100,116,139,.25)}
 .an-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:1px}
 .an-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .an-metric{background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:8px 10px}
@@ -762,7 +777,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.2</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.3</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1155,7 +1170,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.2 · 2026-08-10 19:11 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.3 · 2026-08-10 22:15 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1214,8 +1229,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.2';
-const APP_BUILD   = '2026-08-10 19:11';
+const APP_VERSION = '1BK_V68.13.3';
+const APP_BUILD   = '2026-08-10 22:15';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2664,9 +2679,24 @@ function inferIndustryFromName(name){
   return '';
 }
 /* 主入口：先试东财申万行业（A股/ETF 精准），失败/非A股再按名称推断（基金可用） */
+/* 1BK_V68.13.3：把离线精准行业表写入现有持仓（仅填空字段，非破坏性），零请求 */
+function applyIndustryMap(){
+  if (typeof INDUSTRY_MAP === 'undefined') return 0;
+  let n = 0;
+  state.holdings.forEach(h => {
+    if (h.closed) return;
+    const c = String(h.code || '').replace(/\D/g, '');
+    const ind = INDUSTRY_MAP[c];
+    if (ind && !(h.industry && h.industry.trim())){ h.industry = ind; n++; }
+  });
+  if (n){ try { persist.holdings(); } catch(e){} }
+  return n;
+}
 async function fetchIndustry(code, name){
   const c = (code || '').toString().replace(/\D/g, '');
   if (c.length === 6){
+    /* 1BK_V68.13.3：优先用离线抓取的精准行业表（零请求、防东财限流），缺失才走在线接口 */
+    if (typeof INDUSTRY_MAP !== 'undefined' && INDUSTRY_MAP[c]) return INDUSTRY_MAP[c];
     const secid = (c.startsWith('6') ? '1.' : '0.') + c;   // 沪=1 / 深·创·科·北=0（东财 secid 规则）
     try {
       const r = await fetch('https://push2.eastmoney.com/api/qt/stock/get?fltt=2&invt=2&fields=f127&secid=' + secid, { mode: 'cors' });
@@ -2734,6 +2764,28 @@ function inferConceptsFromName(name){
    仅保留「概念板块」——已剔除 行业(t2) / 地域(t1) / 指数·因子·地域题材(t3 中的非概念项)。
    运行时 h.concepts 优先取此表（精准），缺失时回退名称关键词推断。 */
 const CONCEPT_MAP = {"000100": ["显示技术", "AI眼镜", "柔性屏(折叠屏)", "AI芯片", "电子纸概念", "绿色电力", "MicroLED", "屏下摄像", "半导体概念", "MiniLED", "华为概念", "工业互联", "小米概念", "OLED", "虚拟现实", "光伏概念"], "000657": ["可控核聚变", "工业母机", "PCB", "小金属概念", "央国企改革", "医疗器械概念", "新材料"], "002025": ["通信技术", "铜缆高速连接", "液冷概念", "光通信模块", "CPO概念", "商业航天", "数据中心", "华为概念", "5G概念", "央国企改革", "军工"], "002050": ["电池技术", "机器人执行器", "液冷概念", "空气能热泵", "机器人概念", "汽车热管理", "华为汽车", "冷链物流", "新能源车", "燃料电池概念", "智能家居", "特斯拉概念"], "002099": ["减肥药", "肝炎概念", "生物疫苗", "化工原料"], "002378": ["小金属概念", "稀缺资源"], "002438": ["低空经济", "可控核聚变", "液冷概念", "超超临界发电", "数据中心", "氢能源", "风能", "核能核电", "节能环保", "军工"], "002517": ["文娱消费", "AI应用", "AI眼镜", "短剧互动游戏", "元宇宙概念", "华为概念", "电子竞技", "区块链", "虚拟现实", "网络游戏"], "600759": ["油气资源", "氦气概念", "天然气"], "601628": ["蚂蚁概念", "央国企改革"], "601838": ["央国企改革", "互联网金融"], "601975": ["一带一路", "央国企改革"], "605006": ["央国企改革", "风能"]}; /*CONCEPT_MAP_MARKER*/
+/* 1BK_V68.13.3：行业分类离线补齐（东财 f127 精准识别，2026-08-10 抓取）——
+   fetchIndustry 优先查此表（零请求），缺失才走在线接口/名称推断；ETF/基金不在此表（用名称主题词） */
+const INDUSTRY_MAP = {
+  "000100":"光学光电子","000657":"小金属","002025":"军工电子Ⅱ","002050":"家电零部件Ⅱ","002099":"化学制药",
+  "002378":"小金属","002438":"通用设备","002517":"游戏Ⅱ","600759":"油气开采Ⅱ","601628":"保险Ⅱ",
+  "601838":"银行Ⅱ","601975":"航运港口","603993":"工业金属","605006":"玻璃玻纤"
+}; /*INDUSTRY_MAP_MARKER*/
+/* 1BK_V68.13.3：研报评级离线抓取（东财 reportapi，2026-08-10）——
+   code -> {org, date, rating, eps(今年一致预期EPS), target(目标价上限,可空), title, src}，仅持仓个股 */
+const RESEARCH_MAP = {
+  "000100": { org:"中邮证券", date:"2026-04-27", rating:"买入", eps:0.36, target:null, title:"质效双升" },
+  "000657": { org:"华鑫证券", date:"2026-07-19", rating:"买入", eps:2.19, target:null, title:"钨价中枢上移叠加AI PCB微钻扩产" },
+  "002025": { org:"国信证券", date:"2026-06-11", rating:"增持", eps:0.85, target:78, title:"防务互连与驱动核心供应商，AI算力开辟新增长极" },
+  "002050": { org:"东吴证券", date:"2026-05-02", rating:"买入", eps:1.11, target:null, title:"业绩符合预期，仿生机器人等新兴产业蓄势待发" },
+  "002378": { org:"民生证券", date:"2025-08-27", rating:"买入", eps:0.23, target:null, title:"钨价上涨增厚利润，刀具有望持续放量" },
+  "002438": { org:"国元证券", date:"2026-05-12", rating:"买入", eps:0.67, target:null, title:"业绩维持稳定，新兴产品逐步市场化" },
+  "002517": { org:"开源证券", date:"2026-07-15", rating:"买入", eps:1.30, target:null, title:"Q2业绩同比高增，看好传奇+X持续驱动成长" },
+  "601628": { org:"国信证券", date:"2026-07-16", rating:"增持", eps:6.51, target:null, title:"资本市场成长主线促投资收益高增" },
+  "601838": { org:"国信证券", date:"2026-04-26", rating:"中性", eps:3.32, target:null, title:"净息差企稳，资产质量优异" },
+  "601975": { org:"西南证券", date:"2026-01-19", rating:"买入", eps:0.30, target:3.9, title:"亚太成品油运输龙头，未来有望开启分红" },
+  "603993": { org:"太平洋", date:"2026-05-14", rating:"买入", eps:1.46, target:null, title:"铜金双极战略初现峥嵘，钨金属表现亮眼" }
+}; /*RESEARCH_MAP_MARKER*/
 async function fetchConcepts(code, name){
   const c = (code || '').toString().replace(/\D/g, '');
   if (CONCEPT_MAP[c] && CONCEPT_MAP[c].length) return CONCEPT_MAP[c];
@@ -2978,6 +3030,48 @@ function renderAnalysis(){
     '<div class="an-table"><table class="tbl"><thead><tr><th class="l">行业</th><th>市值</th><th>占比</th><th></th></tr></thead><tbody>' +
     (indTable || '<tr><td colspan="4" class="dim">—</td></tr>') + '</tbody></table></div></div>' + sectorWarn;
 
+  /* 机构研报覆盖（1BK_V68.13.3）：遍历持仓个股，查离线抓取的 RESEARCH_MAP（东财 reportapi 最新研报） */
+  const researchRows = [];
+  state.holdings.forEach(h => {
+    if (h.closed) return;
+    const c = String(h.code || '').replace(/\D/g, '');
+    if (c.length !== 6) return;
+    const et = effType(c, h.type, h.typeLocked);
+    if (et === 'fund') return;                       // 场外基金无研报
+    const r = (typeof RESEARCH_MAP !== 'undefined' && RESEARCH_MAP[c]) || null;
+    const q = state.quotes[qkey(h)] || {};
+    const price = isFinite(Number(q.price)) ? Number(q.price) : NaN;
+    let ups = '—';
+    if (r && r.eps && isFinite(price) && price > 0){
+      const gap = (price - r.eps) / r.eps * 100;     // 现价 vs 一致预期 EPS：正=已超预期，负=仍低于预期
+      ups = '<span class="' + (gap >= 0 ? 'up' : 'down') + '">' + (gap > 0 ? '+' : '') + gap.toFixed(0) + '%</span>';
+    }
+    researchRows.push({
+      h, r,
+      name: esc(h.name || h.code),
+      code: c,
+      rating: r ? '<span class="tag ' + (r.rating === '买入' ? 'buy' : (r.rating === '增持' ? 'hold' : 'neutral')) + '">' + esc(r.rating) + '</span>' : '<span class="dim">无研报</span>',
+      org: r ? esc(r.org) : '—',
+      date: r ? esc(r.date) : '—',
+      eps: r && r.eps ? r.eps.toFixed(2) : '—',
+      target: r && r.target ? r.target.toFixed(2) : '—',
+      title: r ? esc(r.title) : '—',
+      ups
+    });
+  });
+  researchRows.sort((a, b) => (a.r ? 0 : 1) - (b.r ? 0 : 1));   // 有研报的排前面
+  const researchHTML = researchRows.length
+    ? '<div class="research-grid">' + researchRows.map(x =>
+        '<div class="rs-card' + (x.r ? '' : ' dim-card') + '">' +
+          '<div class="rs-h"><b>' + x.name + '</b><span class="mono dim">' + x.code + '</span>' + x.rating + '</div>' +
+          (x.r
+            ? '<div class="rs-m"><span>机构 <b>' + x.org + '</b></span><span>日期 <b>' + x.date + '</b></span></div>' +
+              '<div class="rs-m"><span>一致预期EPS <b class="mono">' + x.eps + '</b></span><span>现价vs预期 <b>' + x.ups + '</b></span><span>目标价 <b class="mono">' + x.target + '</b></span></div>' +
+              '<div class="rs-t" title="' + x.title + '">' + x.title + '</div>'
+            : '<div class="rs-m dim">暂无近期机构研报覆盖</div>') +
+        '</div>').join('') + '</div>'
+    : '<div class="empty" style="padding:8px">当前持仓没有个股（全部为基金/ETF），暂无研报数据</div>';
+
   /* 4) 预警与纪律（只对「当前持仓」标的生效：排除已清仓 closed 标的） */
   let alertCardsHTML = '';
   state.holdings.forEach(h => {
@@ -3071,6 +3165,9 @@ function renderAnalysis(){
     '<div class="spacer"></div><button class="btn-sm" id="btnIdentifyAll">批量识别行业</button>' +
     '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 仅统计当前持仓标的 · 行业取自东财申万行业(自动)</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>机构研报覆盖</div>' +
+    '<div class="panel-sub">东财研报 · 持仓个股最新机构评级与一致预期 · 数据抓取自 2026-08-10</div></div>' +
+    '<div class="panel-body">' + researchHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>预警与纪律</div>' +
     '<div class="panel-sub">祖训规则引擎自动盯盘 · 交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警 · 主力净流出/概念异动实时监测</div></div>' +
     '<div class="panel-body">' + alertHTML + '</div></div>';
@@ -7077,6 +7174,8 @@ function init(){
   /* 养鹅心法 · 买卖纪律卡片（阈值 inline-edit，首次启动渲染一次）+ 心法速览 */
   try { renderZuxunDealCards(); renderCreedStats(); } catch(e){}
   /* 行业自动识别（A股全栈数据技能：东财申万行业/基金主题词）：仅填充空行业字段，非破坏性；依赖网络，失败静默 */
+  /* 1BK_V68.13.3：先应用离线精准行业表（零请求），再在线兜底 */
+  try { applyIndustryMap(); } catch(e){}
   try { autoIdentifyIndustries(false); } catch(e){}
   /* 编辑标的弹窗「识别」按钮：弹窗每次重建，用 document 事件委托一次性绑定 */
   if (!window.__indDeleg){
@@ -7426,7 +7525,9 @@ function seedFromYangE(){
       if (htype === 'stock' && isExchangeTraded(String(code).replace(/\D/g, ''))) htype = 'etf';
       const h = {
         id: uid(), type: htype, code: String(code).replace(/\D/g, ''),
-        name: cleanName(name), market: market, txs: []
+        name: cleanName(name), market: market, txs: [],
+        /* 1BK_V68.13.3：行业优先用离线精准表（零请求），缺失留空待 autoIdentifyIndustries 在线补 */
+        industry: (typeof INDUSTRY_MAP !== 'undefined' && INDUSTRY_MAP[String(code).replace(/\D/g, '')]) || ''
       };
       // 按日期排序写入
       group.txs.sort((a, b) => a.date < b.date ? -1 : 1);
