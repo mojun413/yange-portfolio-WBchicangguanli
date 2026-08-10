@@ -777,7 +777,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.3</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.4</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1170,7 +1170,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.3 · 2026-08-10 22:15 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.4 · 2026-08-10 23:10 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1182,7 +1182,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
                 <button class="btn-sm" id="btnCloudCfg" title="填写 Supabase 项目的 URL 与 anon key">云同步设置</button>
                 <button class="btn-sm" id="btnDevNames" title="给各设备起名（如我的平板），跨设备共享">设备命名</button>
-                <button class="btn-sm" id="btnCloudSync" title="智能同步：与云端比对，较新的一方胜出（每日 15:05 自动执行的就是这个）">立即同步</button>
+                <button class="btn-sm" id="btnCloudSync" title="强制以云端为准覆盖本机（校验云端时间戳有效后执行；每日 15:05 自动同步仍按较新者胜）">云端覆盖本机</button>
                 <button class="btn-primary btn-sm" id="btnCloudForce" title="日常手动同步方式：以本机数据为准，强制覆盖云端">本机覆盖云端</button>
                 <button class="btn-sm" id="btnCloudSql" title="复制建表 SQL，在 Supabase SQL Editor 里执行一次">建表 SQL</button>
               </div></div>
@@ -1229,8 +1229,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.3';
-const APP_BUILD   = '2026-08-10 22:15';
+const APP_VERSION = '1BK_V68.13.4';
+const APP_BUILD   = '2026-08-10 23:10';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1306,8 +1306,8 @@ function initNav(){
   $('#btnDevNames') && ($('#btnDevNames').onclick = () => { openDeviceNames().catch(e => toast('设备命名失败：' + e.message, 'err')); });
   $('#btnCloudSync') && ($('#btnCloudSync').onclick = () => {
     if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl){ toast('未配置云端——先点「云同步设置」', 'warn'); return; }
-    toast('正在同步云端…', 'info');
-    cloudPull().then(() => toast('同步完成', 'ok')).catch(e => toast('同步失败：' + e.message, 'err'));
+    toast('正在从云端拉取并覆盖本机…', 'info');
+    cloudPullForce().catch(e => toast('同步失败：' + e.message, 'err'));
   });
   $('#btnCloudForce') && ($('#btnCloudForce').onclick = () => {
     if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl){ toast('未配置云端——先点「云同步设置」', 'warn'); return; }
@@ -7578,7 +7578,7 @@ async function importYangE2(){
   const cloudOn = !!(cloud.cfg && cloud.cfg.enabled && cloud.cfg.supabaseUrl);
   const cloudTip = cloudOn
     ? '<div class="hint" style="margin-top:8px;color:var(--accent)">☁️ 已开启云同步：恢复<b>仅影响本机</b>，<b>不会覆盖云端数据</b>。' +
-      '刷新页面或点「立即同步」将从云端加载你手动录入的最新数据。</div>'
+      '刷新页面或点「云端覆盖本机」将以云端为准恢复本机数据。</div>'
     : '';
   if (hasData){
     const ok = await dialog({ title: '恢复初始数据',
@@ -7859,7 +7859,7 @@ function renderCloudStatus(){
         (st.dailyAt ? '（今日已于 ' + fmtHM(st.dailyAt) + ' 完成）' : '') +
         '，其余时间请手动点「<b>本机覆盖云端</b>」' +
         (st.pending ? '<br><span style="color:var(--warn)">✎ 本机有 <b>' + st.pending + '</b> 项改动待同步（自 ' + fmtHM(st.pendingSince) + '）</span>' : '') +
-        (st.remoteNewer ? '<br><span style="color:var(--warn)">↓ 云端有其他设备的更新，未自动覆盖本机；确认后点「立即同步」拉取</span>' : '');
+        (st.remoteNewer ? '<br><span style="color:var(--warn)">↓ 云端有其他设备的更新，未自动覆盖本机；确认以云端为准时点「云端覆盖本机」拉取</span>' : '');
     }
   }
 }
@@ -7895,7 +7895,7 @@ function loadSupabaseJS(){
    旧行为：改动后防抖 600ms 自动推送云端。
    新行为：**不再自动推送**，只记录保存时间并累计「待同步」计数；真正的上云时机有两个——
      ① 每日 CONFIG.cloudDailySyncAt（默认 15:05，A股收盘后）自动同步一次；
-     ② 其余任意时间由用户手动点「本机覆盖云端」（或「立即同步」按较新时间胜出）。
+     ② 其余任意时间由用户手动点「本机覆盖云端」（本机为准）或「云端覆盖本机」（云端为准）。
    suppressPush=true（应用云端快照 / 载入初始种子期间）→ 不盖章、不计数，
    避免「刚载入的数据」被误判为本机新改动。 */
 function scheduleCloudPush(){
@@ -8098,11 +8098,40 @@ async function cloudPull(){
     renderCloudStatus();
   } catch(e){ console.warn('云端拉取失败', e); setCloudStatus('云同步离线（自动重试）', 'var(--warn)'); }
 }
+/* 1BK_V68.13.4：手动「立即同步」= 云端覆盖本机（强制以云端为准，前提云端时间戳无误）。
+   与 cloudPull()（较新者胜）不同：不做本地/云端新旧比较，只要云端快照时间戳有效就无条件应用，
+   用于「想以云端为准恢复/同步到本机」的场景（如本机误删数据、换新设备要拉云端）。
+   时间戳校验：remote.savedAt 必须是合法数字且 > 0，否则中止（防止脏数据/未初始化云端覆盖本机）。 */
+async function cloudPullForce(){
+  if (!cloud.client) return false;
+  try {
+    const { data, error } = await cloud.client.from(cloud.cfg.table).select('*').eq('id', 1).maybeSingle();
+    if (error) throw error;
+    if (!data || !data.data){
+      toast('云端暂无数据——首次上云请用「本机覆盖云端」', 'warn');
+      return false;
+    }
+    const remote = data.data;
+    const ts = Number(remote.savedAt) || 0;
+    if (!(ts > 0)){
+      toast('云端时间戳无效，已中止覆盖（请检查云端数据完整性）', 'err');
+      return false;
+    }
+    const ok = applyCloudSnapshot(remote);       // 无条件应用云端快照 → 覆盖本机
+    if (ok){
+      toast('已从云端覆盖本机（' + deviceLabel(data.device_id || '') + ' 快照 · ' + new Date(ts).toLocaleString() + '）', 'ok');
+      renderCloudStatus();
+      return true;
+    }
+    toast('云端快照格式不兼容，未覆盖', 'err');
+    return false;
+  } catch(e){ console.warn('云端强制拉取失败', e); setCloudStatus('云同步离线（自动重试）', 'var(--warn)'); toast('同步失败：' + e.message, 'err'); return false; }
+}
 
 /* Realtime 订阅（v53.1 语义变更）：其他设备写入云端 → **只提示不自动覆盖本机**。
    原因：新策略下同步时机由「每日 15:05 自动 + 其余时间手动本机覆盖云端」控制，
    若继续自动应用远端快照，用户本机正在录入的数据会被其他设备悄悄覆盖。
-   这里只更新状态徽标并提示，是否拉取由用户点「立即同步」决定。 */
+   这里只更新状态徽标并提示，是否覆盖由用户点「云端覆盖本机」决定。 */
 function cloudSubscribe(){
   if (!cloud.client || cloud.channel) return;
   cloud.channel = cloud.client
@@ -8122,7 +8151,7 @@ function cloudSubscribe(){
               /* v53.1：只提示，不自动覆盖本机 */
               if (!cloud.state.remoteNewer){
                 cloud.state.remoteNewer = true;
-                toast('云端有其他设备的更新（' + deviceLabel(rec.device_id || '') + '）。未自动覆盖本机，需要时点「立即同步」拉取', 'warn');
+                toast('云端有其他设备的更新（' + deviceLabel(rec.device_id || '') + '）。未自动覆盖本机，确认以云端为准时点「云端覆盖本机」', 'warn');
               }
             }
             renderCloudStatus();
