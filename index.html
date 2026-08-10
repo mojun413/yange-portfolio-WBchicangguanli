@@ -719,7 +719,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.8 · 2026-08-10 10:09</div>
+      <div class="sf-ver" id="sfVer">v53.9 · 2026-08-10 10:23</div>
     </div>
   </aside>
 
@@ -730,7 +730,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.8</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.9</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -806,16 +806,6 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="spacer"></div>
             <div class="mb-search"><input id="watchInput" type="text" placeholder="代码/名称 添加自选（如 002517 / 512000）" autocomplete="off"></div>
             <button class="btn-sm" id="btnWatchAdd" title="将输入的代码加入自选">＋ 添加</button>
-            <select id="monitorSortSel" class="btn-sm" title="选择排序方式" style="height:auto;padding:5px 8px;font-size:12px">
-              <option value="pct-desc">涨跌幅 ↓</option>
-              <option value="pct-asc">涨跌幅 ↑</option>
-              <option value="name-asc">名称 A→Z</option>
-              <option value="name-desc">名称 Z→A</option>
-              <option value="price-desc">现价 ↓</option>
-              <option value="price-asc">现价 ↑</option>
-            </select>
-            <button class="btn-sm" id="btnMonitorRefresh" title="手动刷新自选行情">刷新</button>
-            <button class="btn-sm" id="btnMonitorReset" title="恢复默认排序（涨跌幅降序）">重置排序</button>
           </div>
           <div class="panel-body tight">
             <div class="watch-cats" id="watchCats">
@@ -997,7 +987,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.8 · 2026-08-10 10:09 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.9 · 2026-08-10 10:23 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1043,8 +1033,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.8';
-const APP_BUILD   = '2026-08-10 10:09';
+const APP_VERSION = 'v53.9';
+const APP_BUILD   = '2026-08-10 10:23';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3259,11 +3249,8 @@ function renderWatch(){
     foot.innerHTML =
       '<span>自选 <b class="mf-num">' + watchList.length + '</b> 个' + (watchCat !== 'all' ? ' · 当前分类 <b>' + list.length + '</b>' : '') + '</span>' +
       '<span><b style="color:var(--up)">▲ ' + upC + '</b> · <b style="color:var(--down)">▼ ' + downC + '</b></span>' +
-      '<span class="dim">排序：' + ({pct:'涨跌幅', name:'名称', price:'现价'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升' : '降') + '）</span>';
+      '<span class="dim">默认涨跌幅降序</span>';
   }
-  /* 排序下拉同步当前值（标题循环/重置后保持一致） */
-  const sortSel = document.getElementById('monitorSortSel');
-  if (sortSel) sortSel.value = monitorSortKey + '-' + monitorSortDir;
 }
 /* 兼容别名（原板块版函数名，测试/绑定沿用） */
 const renderMonitor = renderWatch;
@@ -5012,9 +4999,6 @@ function bind(){
     state.settings.posShowClosed = !!e.target.checked;
     persist.settings(); renderPosition();
   });
-  /* 盯盘看板（自选标的） */
-  $('#btnMonitorRefresh').onclick = () => refreshMonitor(false);
-  $('#btnMonitorReset').onclick = () => { monitorSortKey = 'pct'; monitorSortDir = 'desc'; renderWatch(); };
   /* 自选分类 tab：全部 / 个股 / ETF */
   const watchCatsEl = document.getElementById('watchCats');
   if (watchCatsEl) watchCatsEl.onclick = e => {
@@ -5023,7 +5007,6 @@ function bind(){
     watchCat = el.dataset.c;
     renderWatch();
   };
-  $('#monitorSub').onclick = () => { cycleMonitorSort(); toast('已切换排序：' + ({pct:'涨跌幅', name:'名称', price:'现价'})[monitorSortKey] + '（' + (monitorSortDir === 'asc' ? '升序' : '降序') + '）'); };
   /* 添加自选：按钮 / 回车 */
   $('#btnWatchAdd').onclick = () => addWatch();
   $('#watchInput').onkeydown = e => { if (e.key === 'Enter') addWatch(); };
@@ -5033,14 +5016,6 @@ function bind(){
     if (del){ removeWatch(del.getAttribute('data-del')); return; }
     const card = e.target.closest('.watch-card');
     if (card){ openKlineByCode(card.getAttribute('data-code')); }
-  });
-  /* 排序下拉：直观选择排序方式（涨跌幅/名称/现价 × 升降序） */
-  $('#monitorSortSel') && ($('#monitorSortSel').onchange = e => {
-    const v = (e.target.value || '').split('-');
-    if (v.length === 2 && ['pct','name','price'].includes(v[0]) && ['asc','desc'].includes(v[1])){
-      monitorSortKey = v[0]; monitorSortDir = v[1];
-      renderWatch();
-    }
   });
   /* 6 张卡片金额隐藏小眼睛：事件委托（点 .cards 内任意 eye-btn → 单卡独立切换） */
   document.querySelector('.cards').addEventListener('click', e => {
