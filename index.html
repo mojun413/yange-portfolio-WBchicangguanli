@@ -662,7 +662,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.5 · 2026-08-10 09:15</div>
+      <div class="sf-ver" id="sfVer">v53.6 · 2026-08-10 09:30</div>
     </div>
   </aside>
 
@@ -673,7 +673,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.5</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.6</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -936,7 +936,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.5 · 2026-08-10 09:15 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.6 · 2026-08-10 09:30 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -982,8 +982,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.5';
-const APP_BUILD   = '2026-08-10 09:15';
+const APP_VERSION = 'v53.6';
+const APP_BUILD   = '2026-08-10 09:30';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2392,6 +2392,8 @@ function cashflowStats(){
 const INDUSTRY_LIST = ['银行','券商','保险','白酒/消费','医药','半导体/芯片','新能源/光伏','汽车','军工','计算机/软件','通信','地产','周期(化工/有色/钢铁)','公用事业','农业','港股/海外','其他','未分类'];
 const SECTOR_WARN_PCT = 35;   // 单一行业占组合市值超过该比例预警
 const SINGLE_WARN_PCT = 15;   // 单一标的占组合市值超过该比例预警（仓位铁律）
+const CONCEPT_MOVE_PCT = 5;   // 概念异动：成分股当日涨跌幅绝对值≥此值视为异动
+const FUND_FLOW_WARN_PCT = 2; // 主力净流出：占持仓市值比例≥此值预警（仅股票）
 
 /* ---------- 每日净值快照（挂在 15:05 云同步 + 首屏，作为资产曲线数据源）---------- */
 function saveSnapshots(){
@@ -2465,9 +2467,7 @@ function returnAttribution(){
     divTotal: cf.divTotal || 0, totalPnl,
     buyTotal: cf.buyTotal, sellTotal: cf.sellTotal,
     invCapital, peakInvested: cf.peakInvested, netInvested: cf.netInvested,
-    netRoi:  invCapital > 0 ? totalPnl / invCapital * 100 : NaN,          /* 净投入收益率（分母=买入−卖出，不含分红） */
-    occRoi:  cf.peakInvested > 0 ? totalPnl / cf.peakInvested * 100 : NaN, /* 峰值占用收益率 */
-    simpleRoi: invCapital > 0 ? totalPnl / invCapital * 100 : NaN,        /* 兼容旧字段 = 净投入收益率 */
+    roi: cf.peakInvested > 0 ? totalPnl / cf.peakInvested * 100 : NaN,    /* 唯一收益率 = 总收益 ÷ 峰值投入本金 */
     mv: isFinite(agg.mv) ? agg.mv : 0
   };
 }
@@ -2666,6 +2666,12 @@ function fireAlert(h, type, target, price){
   try { if (typeof Notification !== 'undefined' && Notification.permission === 'granted'){ new Notification('【' + type + '预警】' + nm, { body }); } } catch(e){}
   toast(body + (type === '止损' ? ' · 注意A股T+1（今日买入次日方可卖），涨跌停±10%/±20%可能无成交' : ''), 'warn', 6000);
 }
+/* 非价格类预警（概念异动 / 主力净流出）的站内+系统通知 */
+function fireAlertInfo(h, kind, msg){
+  const nm = h.name || h.code || '';
+  try { if (typeof Notification !== 'undefined' && Notification.permission === 'granted'){ new Notification('【' + kind + '】' + nm, { body: msg }); } } catch(e){}
+  toast(kind + '：' + nm + ' ' + msg, 'warn', 6000);
+}
 function checkAlerts(){
   if (!isTradingTime()) return;
   let fired = 0;
@@ -2678,6 +2684,37 @@ function checkAlerts(){
     if (low > 0 && c.price > low && h.alertState.low) delete h.alertState.low;     /* 回到线上 → 重新武装 */
     if (high > 0 && c.price >= high && !h.alertState.high){ h.alertState.high = Date.now(); fireAlert(h, '止盈', high, c.price); fired++; }
     if (high > 0 && c.price < high && h.alertState.high) delete h.alertState.high;
+  });
+  /* 主力净流出预警（仅股票，需有资金流数据；占持仓市值比例达阈值） */
+  state.holdings.forEach(h => {
+    if (effType(h.code, h.type) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
+    const c = calcHolding(h); const mv = isFinite(c.mv) ? c.mv : 0;
+    if (mv <= 0) return;
+    const ratio = Math.abs(h.fundFlow) / mv * 100;
+    h.alertState = h.alertState || {};
+    if (ratio >= FUND_FLOW_WARN_PCT && !h.alertState.fflow){ h.alertState.fflow = Date.now(); fireAlertInfo(h, '主力净流出', fundFlowText(h) + '（占持仓市值 ' + ratio.toFixed(1) + '%）'); fired++; }
+    else if (ratio < FUND_FLOW_WARN_PCT && h.alertState.fflow) delete h.alertState.fflow;   /* 回流后重新武装 */
+  });
+  /* 概念异动预警（按名称标签聚合；成分股单日大幅波动即视为该概念异动） */
+  const byConcept = {};
+  state.holdings.forEach(h => {
+    const cs = Array.isArray(h.concepts) ? h.concepts : [];
+    if (!cs.length) return;
+    const c = calcHolding(h); const pct = isFinite(c.pct) ? c.pct : NaN;
+    if (!isFinite(pct)) return;
+    cs.forEach(tag => { (byConcept[tag] = byConcept[tag] || []).push({ h, pct }); });
+  });
+  state.conceptAlertState = state.conceptAlertState || {};
+  Object.keys(byConcept).forEach(tag => {
+    const movers = byConcept[tag].filter(x => Math.abs(x.pct) >= CONCEPT_MOVE_PCT);
+    if (movers.length){
+      if (state.conceptAlertState[tag]) return;            /* 已触发则不再重复弹（回落到阈值下自动重新武装） */
+      state.conceptAlertState[tag] = Date.now();
+      const names = movers.map(x => (x.h.name || x.h.code) + (x.pct >= 0 ? '+' : '') + x.pct.toFixed(1) + '%').join('、');
+      const kind = movers.length >= 2 ? '概念联动异动' : '概念异动';
+      fireAlertInfo({ name: tag, code: tag }, kind, names);
+      fired++;
+    } else { delete state.conceptAlertState[tag]; }
   });
   if (fired) persist.holdings();
 }
@@ -2752,21 +2789,19 @@ function renderAnalysis(){
   }
 
   /* 2) 收益归因 */
-  const netRoiTxt = isFinite(att.netRoi) ? (att.netRoi >= 0 ? '+' : '') + att.netRoi.toFixed(2) + '%' : '—';
-  const occRoiTxt = isFinite(att.occRoi) ? (att.occRoi >= 0 ? '+' : '') + att.occRoi.toFixed(2) + '%' : '—';
+  const roiTxt = isFinite(att.roi) ? (att.roi >= 0 ? '+' : '') + att.roi.toFixed(2) + '%' : '—';
   const attrHTML =
     '<div class="kpi-grid">' +
     kpi2('总收益(= 清仓净收益 + 持仓浮动)', sign2(att.totalPnl), cls(att.totalPnl)) +
     kpi2('清仓净收益(已实现·落袋)', sign2(att.liquidatedNet), cls(att.liquidatedNet)) +
     kpi2('持仓浮动收益(实时)', sign2(att.holdFloat), cls(att.holdFloat)) +
     kpi2('累计分红(已摊入成本)', '+' + money(att.divTotal), '') +
-    kpi2('净投入收益率', netRoiTxt, cls(att.netRoi)) +
-    kpi2('峰值占用收益率', occRoiTxt, cls(att.occRoi)) +
+    kpi2('收益率 = 总收益 ÷ 峰值投入', roiTxt, cls(att.roi)) +
     '</div>' +
     '<div class="an-note"><b>计算依据</b>：<b>总收益 = 清仓净收益 + 持仓浮动收益</b>，与「总览」页的 <b>总收益</b> 完全一致（同一套算法、同一份数据，不重不漏）。' +
     '① <b>清仓净收益</b> = 「清仓结算」页全量汇总里的「已清仓盈亏」合计（所有已清仓标的净收益，落袋为安）；' +
     '② <b>持仓浮动收益</b> = 当前持仓按最新价算的浮动盈亏，<b>实时随股价变动</b>，与「总览」的「持仓浮盈」数字相同。' +
-    '分红已摊入摊薄成本，不重复计。两个收益率仅分母不同：<b>净投入收益率</b> = 总收益 ÷（累计买入 − 累计卖出净额，不含分红）；<b>峰值占用收益率</b> = 总收益 ÷ 历史上最多压进去的本金。</div>';
+    '分红已摊入摊薄成本，不重复计。仅保留<b>唯一一个收益率</b>：<b>收益率 = 总收益 ÷ 峰值投入本金</b>（峰值投入 = 历史上最多压进本金的金额，最贴近真实占用、不被申赎稀释）。</div>';
 
   /* 3) 行业暴露 */
   let sectorWarn = '';
@@ -2801,6 +2836,28 @@ function renderAnalysis(){
     if (topH && topShare / agg.mv * 100 > SINGLE_WARN_PCT)
       disc += warnRow('⚠️', '单标的集中度：『' + esc(topH.name || topH.code) + '』占组合市值 <b>' + (topShare / agg.mv * 100).toFixed(0) + '%</b>（> ' + SINGLE_WARN_PCT + '%），波动高度依赖单票');
   }
+  /* 主力净流出预警（仅股票） */
+  state.holdings.forEach(h => {
+    if (effType(h.code, h.type) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
+    const c = calcHolding(h); const mv = isFinite(c.mv) ? c.mv : 0; if (mv <= 0) return;
+    const ratio = Math.abs(h.fundFlow) / mv * 100;
+    if (ratio >= FUND_FLOW_WARN_PCT) disc += warnRow('🔻', '主力净流出：『' + esc(h.name || h.code) + '』' + fundFlowText(h) + '，占持仓市值 <b>' + ratio.toFixed(1) + '%</b>');
+  });
+  /* 概念异动预警（按名称标签聚合，成分股单日大幅波动） */
+  const byC = {};
+  state.holdings.forEach(h => {
+    const cs = Array.isArray(h.concepts) ? h.concepts : [];
+    const c = calcHolding(h); const pct = isFinite(c.pct) ? c.pct : NaN;
+    if (!isFinite(pct)) return;
+    cs.forEach(tag => { (byC[tag] = byC[tag] || []).push({ h, pct }); });
+  });
+  Object.keys(byC).forEach(tag => {
+    const movers = byC[tag].filter(x => Math.abs(x.pct) >= CONCEPT_MOVE_PCT);
+    if (movers.length){
+      const names = movers.map(x => esc(x.h.name || x.h.code) + (x.pct >= 0 ? '+' : '') + x.pct.toFixed(1) + '%').join('、');
+      disc += warnRow('⚡', (movers.length >= 2 ? '概念联动异动' : '概念异动') + '：『' + esc(tag) + '』' + names);
+    }
+  });
   const notifyBtn = (typeof Notification !== 'undefined')
     ? '<button class="btn-sm" id="btnEnableNotify">' + (Notification.permission === 'granted' ? '浏览器通知：已开启' : '开启浏览器通知') + '</button>'
     : '<span class="dim">当前环境不支持浏览器通知（价格预警将仅站内提示）</span>';
@@ -2823,7 +2880,7 @@ function renderAnalysis(){
     '<div class="panel-sub">东财主力净流入 · 交易时段每 90 秒刷新 · 仅股票</div></div>' +
     '<div class="panel-body">' + fundFlowPanelHTML() + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>预警与纪律</div>' +
-    '<div class="panel-sub">交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警</div></div>' +
+    '<div class="panel-sub">交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警 · 主力净流出/概念异动实时监测</div></div>' +
     '<div class="panel-body">' + alertHTML + '</div></div>';
   box.querySelectorAll('[data-an-range]').forEach(b => b.onclick = () => { state.settings.analysisRange = b.dataset.anRange; persist.settings(); renderAnalysis(); });
   const nb = box.querySelector('#btnEnableNotify');
