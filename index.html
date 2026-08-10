@@ -793,7 +793,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.22 · 2026-08-10 14:47</div>
+      <div class="sf-ver" id="sfVer">v53.23 · 2026-08-10 14:56</div>
     </div>
   </aside>
 
@@ -804,7 +804,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.22</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.23</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -878,8 +878,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="panel-title"><span class="bar"></span>盯盘看板</div>
             <div class="panel-sub" id="monitorSub">自选标的 · 交易时段每 2 秒自动刷新 · 休市自动暂停 · 红涨绿跌</div>
             <div class="spacer"></div>
-            <div class="mb-search"><input id="watchInput" type="text" placeholder="代码/名称 添加自选（如 002517 / 512000）" autocomplete="off"></div>
-            <button class="btn-sm" id="btnWatchAdd" title="将输入的代码加入自选">＋ 添加</button>
+            <div class="mb-search"><input id="watchInput" type="text" placeholder="代码批量添加自选（如 002517/512000/600519，支持 / 空格 分隔）" autocomplete="off"></div>
+            <button class="btn-sm" id="btnWatchAdd" title="将输入的代码加入自选（多个代码用 / 或空格分隔，可批量添加）">＋ 添加</button>
           </div>
           <div class="panel-body tight">
             <div class="watch-cats" id="watchCats">
@@ -1182,7 +1182,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.22 · 2026-08-10 14:47 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.23 · 2026-08-10 14:56 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1230,8 +1230,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.22';
-const APP_BUILD   = '2026-08-10 14:47';
+const APP_VERSION = 'v53.23';
+const APP_BUILD   = '2026-08-10 14:56';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3571,27 +3571,42 @@ function renderWatch(){
 const renderMonitor = renderWatch;
 
 /* 添加自选标的（输入代码 → 查行情 → 入库） */
+/* 批量添加自选：支持 / 、空格、逗号、顿号分隔多个代码（如 "002517/512000/600519"）。
+   返回 [{ digits, isFund, sym }] 待查询列表（已在自选中的自动跳过）。 */
+function splitWatchInput(raw){
+  const out = [];
+  const seen = new Set(watchList.map(w => w.code));
+  String(raw || '').split(/[\/\s,，、;；]+/).map(s => s.trim()).filter(Boolean).forEach(c => {
+    const digits = c.replace(/\D/g, '');
+    if (!digits || digits.length < 5) return;
+    if (seen.has(digits)) return;
+    seen.add(digits);
+    const isFund = /^0\d{5}$/.test(digits) && !/^00[0-4]\d{3}/.test(digits);
+    out.push({ digits, isFund, sym: quoteSymbol({ code: digits, type: isFund ? 'fund' : 'stock', market: '' }) });
+  });
+  return out;
+}
 async function addWatch(){
   const inp = document.getElementById('watchInput');
   const raw = (inp ? inp.value : '').trim();
-  if (!raw){ toast('请输入标的代码', 'warn'); return; }
-  const digits = raw.replace(/\D/g, '');
-  if (!digits || digits.length < 5){ toast('无法识别代码：' + esc(raw), 'warn'); return; }
-  if (watchList.some(w => w.code === digits)){ toast('该标的已在自选中', 'info'); return; }
-  /* 0 开头 6 位且非 000~004 段 → 场外基金（jj 行情）；其余走号段判定 */
-  const isFund = /^0\d{5}$/.test(digits) && !/^00[0-4]\d{3}/.test(digits);
-  const sym = quoteSymbol({ code: digits, type: isFund ? 'fund' : 'stock', market: '' });
+  if (!raw){ toast('请输入标的代码（支持多个，用 / 或空格分隔）', 'warn'); return; }
+  const toAdd = splitWatchInput(raw);
+  if (!toAdd.length){ toast('没有可添加的标的（代码格式无效或已在自选中）', 'warn'); return; }
+  const ok = [], fail = [];
   try {
-    const map = await fetchQuotes([sym]);
-    const q = map[sym];
-    if (!q || q.err || !q.name){ toast('未找到标的 ' + esc(raw) + '，请核对代码', 'warn'); return; }
-    watchList.push({ code: digits, name: q.name, market: sym.slice(0, 2) === 'jj' ? '' : sym.slice(0, 2), type: isFund ? 'fund' : 'stock' });
+    const map = await fetchQuotes(toAdd.map(x => x.sym));   /* 腾讯接口批量一次查完 */
+    toAdd.forEach(x => {
+      const q = map[x.sym];
+      if (!q || q.err || !q.name){ fail.push(x.digits); return; }
+      watchList.push({ code: x.digits, name: q.name, market: x.sym.slice(0, 2) === 'jj' ? '' : x.sym.slice(0, 2), type: x.isFund ? 'fund' : 'stock' });
+      ok.push(q.name || x.digits);
+    });
     persistWatch();
     if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* v53.22：自选即时上云，清缓存可恢复 */
     if (inp) inp.value = '';
     await refreshMonitor(true);
-    toast('已添加自选：' + q.name, 'ok');
-  } catch (e) { toast('查询失败：' + e.message, 'err'); }
+    toast(ok.length ? '已添加自选 ' + ok.length + ' 个' + (fail.length ? '；未成功 ' + fail.length + '（' + fail.join('、') + '）' : '') : '添加失败：' + fail.join('、'), ok.length ? (fail.length ? 'warn' : 'ok') : 'err');
+  } catch (e) { toast('批量查询失败：' + e.message, 'err'); }
 }
 
 /* 移除自选 */
