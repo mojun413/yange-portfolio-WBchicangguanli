@@ -718,6 +718,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a class="nav-item" data-page="settle" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h6"/></svg></span><span class="nav-txt">清仓结算</span></a>
       <a class="nav-item" data-page="analysis" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span><span class="nav-txt">分析中心</span></a>
       <a class="nav-item" data-page="position" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span class="nav-txt">仓位管理</span></a>
+      <a class="nav-item" data-page="creed" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span><span class="nav-txt">养鹅心法</span></a>
       <div class="nav-sep"></div>
       <a class="nav-item" data-page="settings" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span><span class="nav-txt">设置</span></a>
     </nav>
@@ -725,7 +726,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.10 · 2026-08-10 10:35</div>
+      <div class="sf-ver" id="sfVer">v53.11 · 2026-08-10 10:58</div>
     </div>
   </aside>
 
@@ -736,7 +737,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.10</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.11</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -979,6 +980,124 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
         </div>
       </section>
 
+      <!-- ========== 页：养鹅心法 ========== -->
+      <section class="page" id="page-creed">
+        <style>
+          #page-creed .panel-body{padding:18px 20px 26px}
+          .creed-hero{background:linear-gradient(135deg,rgba(79,70,229,.07),rgba(245,158,11,.10));border:1px solid var(--line);border-radius:14px;padding:22px 20px;margin-bottom:18px;text-align:center}
+          .creed-hero-main{font-size:25px;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.3}
+          .creed-hero-main .tilde{color:var(--gold);-webkit-text-fill-color:var(--gold)}
+          .creed-hero-sub{margin-top:9px;font-size:12.5px;color:var(--muted);letter-spacing:3px}
+          .creed-sec{margin-bottom:20px}
+          .creed-sec-t{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin:0 0 12px;color:var(--text)}
+          .creed-sec-t .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--gold));box-shadow:0 0 6px rgba(99,102,241,.5);flex:0 0 auto}
+          .creed-sec-t .dot.danger{background:linear-gradient(135deg,#ef4444,#f59e0b)}
+          .creed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:11px}
+          .creed-card{display:flex;gap:11px;align-items:flex-start;background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:11px;padding:11px 13px;transition:.15s}
+          .creed-card:hover{box-shadow:0 4px 14px rgba(16,24,40,.08)}
+          .creed-card .cc-ic{font-size:19px;flex:0 0 auto;line-height:1.25}
+          .creed-card .cc-bd{min-width:0}
+          .creed-card .cc-t{font-size:13.5px;font-weight:700;margin-bottom:3px}
+          .creed-card .cc-d{font-size:12.5px;color:var(--muted);line-height:1.6}
+          .creed-card .cc-d b{color:var(--text);font-weight:700}
+          .creed-deal{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:11px}
+          .deal-card{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;border-top:3px solid var(--accent)}
+          .deal-card.up{border-top-color:var(--up)}
+          .deal-card.down{border-top-color:var(--down)}
+          .deal-card .dc-t{font-size:13.5px;font-weight:700;margin-bottom:5px}
+          .deal-card .dc-d{font-size:12.5px;color:var(--muted);line-height:1.6}
+          .deal-card .dc-d b{color:var(--text);font-weight:700}
+          .veto-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:8px}
+          .veto-item{display:flex;gap:9px;align-items:flex-start;background:#fff7f6;border:1px solid #fde2e0;border-radius:9px;padding:8px 11px;font-size:12.5px;line-height:1.55;color:var(--text)}
+          .veto-item .vn{flex:0 0 auto;font-weight:800;color:#dc2626;font-size:13px;line-height:1.4}
+          .truth-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+          .truth-stat{background:linear-gradient(135deg,#fff,#fafbff);border:1px solid var(--line);border-radius:12px;padding:14px 14px;text-align:center}
+          .truth-stat .ts-n{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+          .truth-stat .ts-l{margin-top:7px;font-size:12px;color:var(--muted);line-height:1.6}
+          .truth-stat .ts-l b{color:var(--text);font-weight:700}
+          @media (max-width:640px){ .creed-hero-main{font-size:21px} }
+        </style>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><span class="bar"></span>养鹅心法 · 投资祖训</div>
+            <div class="panel-sub">我的投资风格偏好 —— 用纪律战胜情绪，用估值对抗喧嚣</div>
+          </div>
+          <div class="panel-body">
+
+            <div class="creed-hero">
+              <div class="creed-hero-main">弱水三千，只取一瓢<span class="tilde">，别贪~</span></div>
+              <div class="creed-hero-sub">逆向价值 · 攒股收息 · 分批建仓 · 纪律交易 · 学会空仓</div>
+            </div>
+
+            <div class="creed-sec">
+              <div class="creed-sec-t"><span class="dot"></span>心法总纲 · 10 条核心纪律</div>
+              <div class="creed-grid">
+                <div class="creed-card"><div class="cc-ic">🧱</div><div class="cc-bd"><div class="cc-t">不梭哈，分批建仓</div><div class="cc-d">1~2 层仓位试错，有趋势再分批加仓，永不满仓赌博</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🌅</div><div class="cc-bd"><div class="cc-t">早盘纪律</div><div class="cc-d">早上除非龙头低开看一看，其余一律不要买入</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🔇</div><div class="cc-bd"><div class="cc-t">拒绝噪音</div><div class="cc-d">推荐股票的博主一个都不要看，独立思考</div></div></div>
+                <div class="creed-card"><div class="cc-ic">⚖️</div><div class="cc-bd"><div class="cc-t">高盈亏比</div><div class="cc-d">不赚小钱就跑、亏了死套；果断止跌、顺势而为，赚点赶紧落袋，亏多不赌翻盘</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🤡</div><div class="cc-bd"><div class="cc-t">看懂博傻</div><div class="cc-d">情绪高潮期比的是胆量和速度，不是价值；不接最后一棒</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🚫</div><div class="cc-bd"><div class="cc-t">拒追涨杀跌</div><div class="cc-d">不追高就不会杀跌——追涨杀跌是亏损主因</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🔁</div><div class="cc-bd"><div class="cc-t">做 T 纪律</div><div class="cc-d">用规则和纪律取代情绪，低买高卖摊薄成本；做 T ≠ 加仓</div></div></div>
+                <div class="creed-card"><div class="cc-ic">☀️</div><div class="cc-bd"><div class="cc-t">日内了结</div><div class="cc-d">做 T 的仓位永远不过夜变长线</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🎲</div><div class="cc-bd"><div class="cc-t">仓位分层</div><div class="cc-d">小仓博弈连板，大仓赚小钱做小 T</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🧘</div><div class="cc-bd"><div class="cc-t">学会空仓</div><div class="cc-d">等待股灾，现金也是仓位</div></div></div>
+              </div>
+            </div>
+
+            <div class="creed-sec">
+              <div class="creed-sec-t"><span class="dot"></span>买卖纪律 · 止盈 / 止损 / 卖出信号</div>
+              <div class="creed-deal">
+                <div class="deal-card up"><div class="dc-t">📈 止盈策略</div><div class="dc-d">持仓收益 <b>＞8%</b> 卖出 1/3，反复做 T，让利润奔跑又不失保护</div></div>
+                <div class="deal-card down"><div class="dc-t">🛑 止损策略</div><div class="dc-d">短线 <b>5%</b>、中线 <b>10%</b> 为止损点；仓位重且已有浮盈的，回撤到 <b>0%</b> 即止损</div></div>
+                <div class="deal-card"><div class="dc-t">🔁 ETF 卖出信号</div><div class="dc-d">连续上涨过后 · 天量天价 · 顶部放量滞涨</div></div>
+                <div class="deal-card"><div class="dc-t">🎯 个股卖出信号</div><div class="dc-d">股价远高价值 / 基本面改变 / 有更好选择；三者出现其一即卖，否则持股待涨</div></div>
+              </div>
+            </div>
+
+            <div class="creed-sec">
+              <div class="creed-sec-t"><span class="dot"></span>选股与排雷体系</div>
+              <div class="creed-grid">
+                <div class="creed-card"><div class="cc-ic">💰</div><div class="cc-bd"><div class="cc-t">攒股收息</div><div class="cc-d">股息率 <b>5%</b>，每年利润稳定分红——拿分红、做时间的朋友</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🪙</div><div class="cc-bd"><div class="cc-t">四毛买一块</div><div class="cc-d">买低估值：估值 100E 但公司资产就值 100E。茅台 1300 / 净资产 216；寒武纪 1319 / 净资产 30——重点看现金流量表</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🌱</div><div class="cc-bd"><div class="cc-t">买成长</div><div class="cc-d">市盈率最不重要，<b>资产负债率 + 现金流</b> 才重要。资产负债＞60% 且净利＜10% 一律不看（最好连续 5 年＞10%）；毛利＜30% 是苦生意</div></div></div>
+                <div class="creed-card"><div class="cc-ic">🔍</div><div class="cc-bd"><div class="cc-t">核心自问</div><div class="cc-d">你仓位最重的票，你懂不懂它是做什么的？是不是所在行业靠前的？不懂不重仓</div></div></div>
+              </div>
+
+              <div class="creed-sec-t" style="margin-top:18px"><span class="dot danger"></span>一票否决清单 · 14 条红线</div>
+              <div class="veto-list">
+                <div class="veto-item"><span class="vn">①</span><span>累计净利润为负，过去 5 年净利润合计＜0</span></div>
+                <div class="veto-item"><span class="vn">②</span><span>净利润持续下滑，连续 5 年连续下滑</span></div>
+                <div class="veto-item"><span class="vn">③</span><span>经营现金流为负，连续 3 年都为负</span></div>
+                <div class="veto-item"><span class="vn">④</span><span>资产负债率同行业偏高，有息负债 / 净资产＞70%</span></div>
+                <div class="veto-item"><span class="vn">⑤</span><span>毛利持续下滑，连续 3 年下滑</span></div>
+                <div class="veto-item"><span class="vn">⑥</span><span>商誉占比过高，商誉 / 净资产＞30%</span></div>
+                <div class="veto-item"><span class="vn">⑦</span><span>近一年大股东大幅减持</span></div>
+                <div class="veto-item"><span class="vn">⑧</span><span>近两年审计非「标准无保留意见」；存在监管问询函、立案调查、行政处罚、公开谴责</span></div>
+                <div class="veto-item"><span class="vn">⑨</span><span>上市是否够 5 年（次新股警惕）</span></div>
+                <div class="veto-item"><span class="vn">⑩</span><span>实际控制人频繁变更，近 5 年变更＞2 次</span></div>
+                <div class="veto-item"><span class="vn">⑪</span><span>PE＞100 倍，研报炒作各种「强烈推荐」满天飞</span></div>
+                <div class="veto-item"><span class="vn">⑫</span><span>净资产为负，最近一年审计后净资产＜0</span></div>
+                <div class="veto-item"><span class="vn">⑬</span><span>应收账款 / 存货异常暴增，增速远超营收增速</span></div>
+                <div class="veto-item"><span class="vn">⑭</span><span>现金流多但高息贷款也多（自相矛盾），经营现金流 / 净利润长期＜50%（净现比过低）</span></div>
+              </div>
+            </div>
+
+            <div class="creed-sec">
+              <div class="creed-sec-t"><span class="dot"></span>散户是怎么亏钱的 · 数据真相</div>
+              <div class="truth-grid">
+                <div class="truth-stat"><div class="ts-n">3 天</div><div class="ts-l">散户平均持股＜3 天，而赚钱散户平均持股 <b>182 天</b></div></div>
+                <div class="truth-stat"><div class="ts-n">3.5%</div><div class="ts-l">散户平均赚 3.5% 就止盈，亏损平均 <b>15%+</b> 才止损</div></div>
+                <div class="truth-stat"><div class="ts-n">247-300%</div><div class="ts-l">散户平均换手率，机构仅 <b>25%</b>——频繁交易是亏损引擎</div></div>
+                <div class="truth-stat"><div class="ts-n">60%</div><div class="ts-l">持股 3 年以上盈利概率接近 60%，持股 1 月内仅 <b>9.3%</b></div></div>
+                <div class="truth-stat"><div class="ts-n">越小越赔</div><div class="ts-l">资金越小的账户越容易赔钱——散户劣势在心态与成本</div></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       <!-- ========== 页：设置 ========== -->
       <section class="page" id="page-settings">
         <div class="panel">
@@ -993,7 +1112,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.10 · 2026-08-10 10:35 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.11 · 2026-08-10 10:58 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1039,8 +1158,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.10';
-const APP_BUILD   = '2026-08-10 10:35';
+const APP_VERSION = 'v53.11';
+const APP_BUILD   = '2026-08-10 10:58';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1087,7 +1206,7 @@ const CONFIG = {
 };
 
 /* ============================ 导航（侧栏 + 分页） ============================ */
-const PAGE_TITLES = { overview:'总览', monitor:'盯盘看板', settle:'清仓结算', trades:'做T / 波段', stats:'交易统计', analysis:'分析中心', position:'仓位管理', settings:'设置' };
+const PAGE_TITLES = { overview:'总览', monitor:'盯盘看板', settle:'清仓结算', trades:'做T / 波段', stats:'交易统计', analysis:'分析中心', position:'仓位管理', creed:'养鹅心法', settings:'设置' };
 function switchPage(page){
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
