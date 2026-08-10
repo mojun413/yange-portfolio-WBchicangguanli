@@ -6,7 +6,7 @@
 <title>持仓与交易管理</title>
 <style>
 /* ============================================================
-   养鹅账本 · 2026 重排版设计系统
+   养鹅怡情 · 2026 重排版设计系统
    现代 SaaS 仪表盘风格：留白 / 圆角 / 柔影 / 玻璃顶栏 / 暗色侧栏
    ============================================================ */
 :root{
@@ -69,6 +69,7 @@ body{
 .side-brand .dot::after{content:"";position:absolute;inset:9px;border-radius:4px;
   background:linear-gradient(135deg,#0b0f1a,#1b2336);opacity:.92}
 .side-brand .bt{font-size:16px;font-weight:800;letter-spacing:.4px;color:#fff;line-height:1.2}
+.side-brand .motto{display:block;width:100%;font-size:11px;font-weight:500;color:#9fb0cc;letter-spacing:1px;margin-top:8px;padding-left:2px;font-style:italic}
 .side-brand .bt small{display:block;font-size:10px;font-weight:600;color:#7c8aa5;letter-spacing:2px;margin-top:2px}
 .side-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:5px;overflow-y:auto}
 .nav-item{
@@ -579,11 +580,15 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
 
 .spin{display:inline-block;width:11px;height:11px;border:2px solid #c8d2e6;border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px;margin-right:5px}
 @keyframes sp{to{transform:rotate(360deg)}}
+/* 分时图最新价呼吸光点（交易时段每 2 秒随价跳动，强化实时观感） */
+.min-pulse{transform-box:fill-box;transform-origin:center;animation:minPulse 1.6s ease-out infinite}
+@keyframes minPulse{0%{transform:scale(.5);opacity:.55}70%{transform:scale(2.4);opacity:0}100%{transform:scale(2.4);opacity:0}}
 
 /* 顶栏侧栏开关 + 折叠态 */
 .side-toggle{display:none;font-size:20px;padding:6px 12px;cursor:pointer;z-index:70;position:relative;pointer-events:auto;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--text)}
 .sidebar.collapsed{width:64px}
 .sidebar.collapsed .side-brand .bt,
+.sidebar.collapsed .side-brand .motto,
 .sidebar.collapsed .nav-item .nav-txt,
 .sidebar.collapsed .side-foot{display:none}
 .sidebar.collapsed .side-brand{justify-content:center;padding:22px 0 10px}
@@ -702,7 +707,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
   <aside class="sidebar" id="sidebar">
     <div class="side-brand">
       <span class="dot"></span>
-      <span class="bt">养鹅账本<small>PORTFOLIO</small></span>
+      <span class="bt">养鹅怡情<small>PORTFOLIO</small></span>
+      <span class="motto">弱水三千，只取一瓢</span>
     </div>
     <nav class="side-nav" id="sideNav">
       <a class="nav-item active" data-page="overview" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-txt">总览</span></a>
@@ -719,7 +725,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.9 · 2026-08-10 10:23</div>
+      <div class="sf-ver" id="sfVer">v53.10 · 2026-08-10 10:35</div>
     </div>
   </aside>
 
@@ -730,7 +736,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.9</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.10</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -987,7 +993,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.9 · 2026-08-10 10:23 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.10 · 2026-08-10 10:35 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1033,8 +1039,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.9';
-const APP_BUILD   = '2026-08-10 10:23';
+const APP_VERSION = 'v53.10';
+const APP_BUILD   = '2026-08-10 10:35';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2311,7 +2317,7 @@ function calcSettlement(h){
   /* 已清仓盈亏 = 卖出净回收 + 分红 + 残值 − 买入本金（含费）。全周期现金流口径，与摊薄成本自洽 */
   const realized = netProceeds + divAmount + residualValue - netInvested;
   /* 清仓判定与「在持」严格互补：在持 = !h.closed && shares>1e-8，其余凡有过卖出的都归清仓。
-     这样任何标的要么进持仓合计、要么进清仓合计，不重不漏，总收益恒等式才能闭合。 */
+     这样任何标的要么进持仓合计、要么进清仓合计，不重不漏，金蛋恒等式才能闭合。 */
   const liquidated = (shares <= 1e-8 || !!h.closed) && sellAmount > 0;
   const roi = netInvested > 0 ? realized / netInvested * 100 : NaN;
   const days = (firstBuy && lastSell) ? Math.max(0, Math.round((parseDate(lastSell) - parseDate(firstBuy)) / 86400000)) : 0;
@@ -2415,7 +2421,7 @@ function openAggregate(){
      divTotal   累计分红 / 股息 —— 真金白银流入
      netInvested  当前净投入 = buyTotal − sellTotal − divTotal（现在还压在市场里的钱）
      peakInvested 峰值占用资金 = 时间轴上累计净流出的历史最大值（历史上最多占用过多少本金）
-   总收益率用 peakInvested 作分母：不会被高频申赎稀释（累计投入口径的通病），
+   金蛋收益率用 peakInvested 作分母：不会被高频申赎稀释（累计投入口径的通病），
    也不会因为大额赎回让分母骤降而虚高（当前净投入口径的通病）。 */
 function cashflowStats(){
   const flows = [];
@@ -2502,24 +2508,24 @@ function buildFlows(){
   return flows;
 }
 function returnAttribution(){
-  /* 与总览「总收益」完全一致：总览 总收益 = 持仓浮盈 + 已清仓盈亏。
+  /* 与总览「金蛋」完全一致：总览 金蛋 = 持仓浮盈 + 已清仓盈亏。
      本函数直接复用总览的两个唯一数据源，保证面板数字 ≡ 总览数字（不重不漏）：
        清仓净收益   = 清仓结算全量合计（allSettledRows(true).t.realized）≡ 总览「已清仓盈亏」卡
        持仓浮动收益 = 当前持仓浮动盈亏（openAggregate().floatPnl）≡ 总览「持仓浮盈」卡（实时随价）
-       总收益       = 清仓净收益 + 持仓浮动收益 */
+       金蛋       = 清仓净收益 + 持仓浮动收益 */
   const agg = openAggregate();
   const cf = cashflowStats();
   const settle = allSettledRows(true);
   const liquidatedNet = isFinite(settle.t.realized) ? settle.t.realized : 0;   /* 清仓净收益 = 清仓结算汇总 */
   const holdFloat    = isFinite(agg.floatPnl) ? agg.floatPnl : 0;             /* 持仓浮动收益（实时） */
-  const totalPnl = liquidatedNet + holdFloat;   /* ≡ 总览 总收益 */
+  const totalPnl = liquidatedNet + holdFloat;   /* ≡ 总览 金蛋 */
   const invCapital = cf.buyTotal - cf.sellTotal;
   return {
     realized: liquidatedNet, floatPnl: holdFloat, liquidatedNet, holdFloat,
     divTotal: cf.divTotal || 0, totalPnl,
     buyTotal: cf.buyTotal, sellTotal: cf.sellTotal,
     invCapital, peakInvested: cf.peakInvested, netInvested: cf.netInvested,
-    roi: cf.peakInvested > 0 ? totalPnl / cf.peakInvested * 100 : NaN,    /* 唯一收益率 = 总收益 ÷ 峰值投入本金 */
+    roi: cf.peakInvested > 0 ? totalPnl / cf.peakInvested * 100 : NaN,    /* 唯一收益率 = 金蛋 ÷ 峰值投入本金 */
     mv: isFinite(agg.mv) ? agg.mv : 0
   };
 }
@@ -2690,17 +2696,10 @@ function refreshFundFlowUI(){
   });
 }
 function conceptChipsHtml(h){
-  const ind = (h.industry || '').trim();
-  const cs = getConcepts(h);
-  const fromMap = !!(h.code && CONCEPT_MAP[(h.code || '').toString().replace(/\D/g, '')]);
-  let s = '<div class="tags-row">';
-  if (ind) s += '<span class="chip chip-ind">' + esc(ind) + '</span>';
-  if (cs.length){
-    s += '<span class="chip-src">' + (fromMap ? '东财题材' : '主题推断') + '</span>';
-    cs.slice(0, 2).forEach(t => { s += '<span class="chip">' + esc(t) + '</span>'; });
-  }
-  s += '</div>';
-  return s;
+  /* v53.9：只展示 1 个准确的行业标签（h.industry，东财 f127 申万行业 / 名称推断兜底）；
+     概念标签不再列于此（概念异动预警仍走 CONCEPT_MAP，不在此处展示）。 */
+  const ind = (h.industry || '').trim() || '未分类';
+  return '<div class="tags-row"><span class="chip chip-ind">' + esc(ind) + '</span></div>';
 }
 function fundFlowText(h){
   const v = (h.fundFlow != null) ? h.fundFlow : NaN;
@@ -2862,16 +2861,16 @@ function renderAnalysis(){
   const roiTxt = isFinite(att.roi) ? (att.roi >= 0 ? '+' : '') + att.roi.toFixed(2) + '%' : '—';
   const attrHTML =
     '<div class="kpi-grid">' +
-    kpi2('总收益(= 清仓净收益 + 持仓浮动)', sign2(att.totalPnl), cls(att.totalPnl)) +
+    kpi2('金蛋(= 清仓净收益 + 持仓浮动)', sign2(att.totalPnl), cls(att.totalPnl)) +
     kpi2('清仓净收益(已实现·落袋)', sign2(att.liquidatedNet), cls(att.liquidatedNet)) +
     kpi2('持仓浮动收益(实时)', sign2(att.holdFloat), cls(att.holdFloat)) +
     kpi2('累计分红(已摊入成本)', '+' + money(att.divTotal), '') +
-    kpi2('收益率 = 总收益 ÷ 峰值投入', roiTxt, cls(att.roi)) +
+    kpi2('收益率 = 金蛋 ÷ 峰值投入', roiTxt, cls(att.roi)) +
     '</div>' +
-    '<div class="an-note"><b>计算依据</b>：<b>总收益 = 清仓净收益 + 持仓浮动收益</b>，与「总览」页的 <b>总收益</b> 完全一致（同一套算法、同一份数据，不重不漏）。' +
+    '<div class="an-note"><b>计算依据</b>：<b>金蛋 = 清仓净收益 + 持仓浮动收益</b>，与「总览」页的 <b>金蛋</b> 完全一致（同一套算法、同一份数据，不重不漏）。' +
     '① <b>清仓净收益</b> = 「清仓结算」页全量汇总里的「已清仓盈亏」合计（所有已清仓标的净收益，落袋为安）；' +
     '② <b>持仓浮动收益</b> = 当前持仓按最新价算的浮动盈亏，<b>实时随股价变动</b>，与「总览」的「持仓浮盈」数字相同。' +
-    '分红已摊入摊薄成本，不重复计。仅保留<b>唯一一个收益率</b>：<b>收益率 = 总收益 ÷ 峰值投入本金</b>（峰值投入 = 历史上最多压进本金的金额，最贴近真实占用、不被申赎稀释）。</div>';
+    '分红已摊入摊薄成本，不重复计。仅保留<b>唯一一个收益率</b>：<b>收益率 = 金蛋 ÷ 峰值投入本金</b>（峰值投入 = 历史上最多压进本金的金额，最贴近真实占用、不被申赎稀释）。</div>';
 
   /* 3) 行业暴露 */
   let sectorWarn = '';
@@ -2991,12 +2990,12 @@ function renderOverview(){
   const st = settleAll.t;
   const realized = st.realized;
 
-  /* ---------- 3. 总收益率：按交易流水（现金流）口径计算 ----------
-     总收益 = 持仓市值 + 累计卖出净额 + 累计分红 − 累计买入含费
+  /* ---------- 3. 金蛋收益率：按交易流水（现金流）口径计算 ----------
+     金蛋 = 持仓市值 + 累计卖出净额 + 累计分红 − 累计买入含费
             ≡ 持仓浮盈 + 已清仓盈亏（摊薄成本口径下两者恒等，可交叉验算）
      分母 = 峰值占用资金（历史上最多压进去多少本金），理由见 cashflowStats() 注释。 */
   const cf = cashflowStats();
-  /* 总收益 = 持仓浮盈 + 已清仓盈亏。这两块严格互补（在持标的 vs 其余标的），不重不漏，
+  /* 金蛋 = 持仓浮盈 + 已清仓盈亏。这两块严格互补（在持标的 vs 其余标的），不重不漏，
      等价于现金流推导「全部剩余份额市值 + 累计卖出净额 + 累计分红 − 累计买入含费」。 */
   const totalPnl = (noQuote || !isFinite(unreal)) ? NaN : unreal + realized;
   const roiBase = cf.peakInvested > 0 ? cf.peakInvested : cf.buyTotal;
@@ -3012,8 +3011,8 @@ function renderOverview(){
       sub: noQuote ? '待行情' : money(mv) + ' − ' + money(cost), c: cls(unreal) },
     { k:'已清仓盈亏',   v: sign2(realized),
       sub: st.n + ' 笔清仓合计 · 盈 ' + n2(st.pos) + ' / 亏 ' + n2(st.neg), c: cls(realized) },
-    { k:'总收益率',     v: pct2(roi),
-      sub: '总收益 ' + (isFinite(totalPnl) ? sign2(totalPnl) : '—') + ' ÷ 峰值投入 ' + money(roiBase), c: cls(roi) },
+    { k:'金蛋收益率',     v: pct2(roi),
+      sub: '金蛋 ' + (isFinite(totalPnl) ? sign2(totalPnl) : '—') + ' ÷ 峰值投入 ' + money(roiBase), c: cls(roi) },
     { k:'当日浮动盈亏', v: sign2(today),       sub: '持股数 ×（现价−昨收）', c: cls(today) }
   ];
   /* 已清仓盈亏 = 网页算法：所有标的流水卖出盈亏累加（含已清仓，不含做T台账）
@@ -3039,8 +3038,8 @@ function renderOverview(){
   const recycleRate = buyTotal > 0 ? sellTotal / buyTotal : NaN;
   /* 同步持有「未掩码」的 extraLine 原稿，供持仓市值小眼睛联动时即时调用 maskExtraDigits */
   _extraLineRaw =
-    '<span title="总收益 = 持仓市值 + 累计赎回 + 累计分红 − 累计购买；等价于 持仓浮盈 + 已清仓盈亏">' +
-      '总收益（浮盈 + 已清仓）：<b class="' + cls(total) + '">' + (isFinite(total) ? sign2(total) : '—') + '</b></span>' +
+    '<span title="金蛋 = 持仓市值 + 累计赎回 + 累计分红 − 累计购买；等价于 持仓浮盈 + 已清仓盈亏">' +
+      '金蛋（浮盈 + 已清仓）：<b class="' + cls(total) + '">' + (isFinite(total) ? sign2(total) : '—') + '</b></span>' +
     '<span title="历史时间轴上累计净流出的最大值，即最多的时候占用了多少本金（' + esc(cf.peakDate || '—') + '）">' +
       '峰值投入本金：' + money(cf.peakInvested) + '</span>' +
     '<span title="当前还压在市场里的钱 = 累计购买 − 累计赎回 − 累计分红">当前净投入：' + money(cf.netInvested) + '</span>' +
@@ -3048,7 +3047,7 @@ function renderOverview(){
     '<span>累计赎回金额：' + money(sellTotal) + '（净额 · ' + cf.sellN + ' 笔）</span>' +
     '<span>累计分红：<b class="up">' + money(cf.divTotal) + '</b>（' + cf.divN + ' 笔）</span>' +
     '<span>资金回笼率：<b class="' + cls((recycleRate - 1) * 100) + '">' + pct2(recycleRate * 100) + '</b></span>' +
-    '<span>做T/波段台账：<b class="' + cls(tPnl) + '">' + sign2(tPnl) + '</b>（' + state.trades.length + ' 笔，不计入总收益）</span>';
+    '<span>做T/波段台账：<b class="' + cls(tPnl) + '">' + sign2(tPnl) + '</b>（' + state.trades.length + ' 笔，不计入金蛋）</span>';
   $('#extraLine').innerHTML = loadHidden().indexOf('持仓市值') >= 0 ? maskExtraDigits(_extraLineRaw) : _extraLineRaw;
 
   /* 实时行情面板：展示所有当前持仓的最新价 + 涨跌幅（红涨绿跌） */
@@ -3153,7 +3152,8 @@ const MARKET_INDICES = [
   { code:'sh000001', name:'上证指数' }, { code:'sz399001', name:'深证成指' },
   { code:'sz399006', name:'创业板指' }, { code:'sh000300', name:'沪深300' },
   { code:'sh000688', name:'科创50' }, { code:'sh000016', name:'上证50' },
-  { code:'sh000905', name:'中证500' }
+  { code:'sh000905', name:'中证500' },
+  { code:'r_hkHSI', name:'恒生指数' }, { code:'r_hkHSTECH', name:'恒生科技' }, { code:'r_hkHSCEI', name:'国企指数' }
 ];
 let mktLiveLoading = false;
 async function renderMarketLive(){
@@ -3592,10 +3592,16 @@ function minuteSVG(rows, name, preClose){
       '<circle id="klDot" r="3" fill="#334155" stroke="#fff" stroke-width="1.2"/>' +
     '</g>' +
     '<rect id="klOverlay" x="' + padL + '" y="' + padT + '" width="' + (W - padL - padR) + '" height="' + (H - padT - padB) + '" fill="transparent" style="cursor:crosshair"/>';
+  /* 最新价光点（交易时段每 2 秒随价跳动；脉冲呼吸圈强化"实时"观感，对标同花顺） */
+  const lx = xOf(n - 1).toFixed(1), ly = yOf(last.price).toFixed(1);
+  const liveDot =
+    '<circle class="min-pulse" cx="' + lx + '" cy="' + ly + '" r="3.4" fill="' + dirC + '"/>' +
+    '<circle cx="' + lx + '" cy="' + ly + '" r="2.6" fill="' + dirC + '" stroke="#fff" stroke-width="1.1"/>';
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;display:block" data-kl="1" data-period="min" data-n="' + n + '" data-cw="' + cw.toFixed(4) + '" data-pl="' + padL + '" data-pt="' + padT + '" data-pc="' + preClose + '">' +
       title + gridY + yLbl + area +
       '<path d="' + line(pricePts) + '" fill="none" stroke="#2563eb" stroke-width="1.4"/>' +
       '<path d="' + line(avgPts) + '" fill="none" stroke="#e0a83e" stroke-width="1.2"/>' +
+      liveDot +
       vol + xLbl + cross + '</svg>';
 }
 /* 分时十字光标读数 */
@@ -3816,7 +3822,7 @@ function maskSub(s){
   return String(s == null ? '' : s).replace(/(¥?\s*[-+]?\s*\d[\d,]*\.?\d*\s*%?)/g, m => maskAmount(m));
 }
 /* 把 extraLine 一整段 HTML 里的阿拉伯数字掩码（保留 ¥/+/- 前缀与 % 后缀）。
-   当「持仓市值」小眼睛隐藏时联动调用，避免总收益/峰值/净投入/累计买卖/分红/回笼率/做T这些汇总数字泄露 */
+   当「持仓市值」小眼睛隐藏时联动调用，避免金蛋/峰值/净投入/累计买卖/分红/回笼率/做T这些汇总数字泄露 */
 function maskExtraDigits(html){
   return String(html == null ? '' : html)
     .replace(/([¥+\-]?\s*)([\d][\d,]*\.?\d*)(%?)/g, function(m, pre, num, suf){
@@ -3839,7 +3845,7 @@ function toggleCardAmount(key){
   const arr = loadHidden(), idx = arr.indexOf(key);
   if (nowHidden){ if (idx < 0) arr.push(key); } else if (idx >= 0) arr.splice(idx, 1);
   saveHidden(arr);
-  /* 「持仓市值」是最大聚合：它隐藏时，下方 extraLine（总收益/峰值投入/净投入/累计买卖/分红/回笼率/做T）
+  /* 「持仓市值」是最大聚合：它隐藏时，下方 extraLine（金蛋/峰值投入/净投入/累计买卖/分红/回笼率/做T）
      里的数字也会反推回其它卡片的真实金额，故联动隐藏。
      反之，恢复显示时也同步把 extraLine 的数字亮回来 */
   if (key === '持仓市值') refreshExtraLine();
