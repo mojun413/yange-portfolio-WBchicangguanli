@@ -777,7 +777,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.6</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.7</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1170,7 +1170,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.6 · 2026-08-11 00:09 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.7 · 2026-08-11 00:28 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1229,8 +1229,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.6';
-const APP_BUILD   = '2026-08-11 00:09';
+const APP_VERSION = '1BK_V68.13.7';
+const APP_BUILD   = '2026-08-11 00:28';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2646,6 +2646,7 @@ function industryAgg(){
     if (c.shares <= 1e-8) return;
     if (!isFinite(c.mv) || c.mv <= 0) return;
     const ind = (h.industry || '').trim() || '未分类';
+    /* 1BK_V68.13.8：行业只识别申万一级，直接按 h.industry 分组 */
     m[ind] = (m[ind] || 0) + c.mv; total += c.mv; n++;
     if (ind === '未分类') unclassified += c.mv;
   });
@@ -2688,7 +2689,10 @@ function applyIndustryMap(){
     if (h.closed) return;
     const c = String(h.code || '').replace(/\D/g, '');
     const ind = INDUSTRY_MAP[c];
-    if (ind && !(h.industry && h.industry.trim())){ h.industry = ind; n++; }
+    if (!ind) return;
+    /* 1BK_V68.13.7：存量旧值（东财 f127 口径，如「军工电子Ⅱ/银行Ⅱ/城商行」带Ⅱ或已过时）
+       在新申万表中命中但值不同 → 覆盖为申万二级（表为准，确保口径统一） */
+    if (!(h.industry && h.industry.trim()) || h.industry !== ind){ h.industry = ind; n++; }
   });
   if (n){ try { persist.holdings(); } catch(e){} }
   return n;
@@ -2696,12 +2700,28 @@ function applyIndustryMap(){
 async function fetchIndustry(code, name){
   const c = (code || '').toString().replace(/\D/g, '');
   if (c.length === 6){
-    /* 1BK_V68.13.3：优先用离线抓取的精准行业表（零请求、防东财限流），缺失才走在线接口 */
+    /* 1BK_V68.13.3/7：优先用离线抓取的精准申万行业表（零请求、防东财限流），缺失才走在线接口 */
     if (typeof INDUSTRY_MAP !== 'undefined' && INDUSTRY_MAP[c]) return INDUSTRY_MAP[c];
+    const suf = (c.startsWith('6') || c.startsWith('8') || c.startsWith('4')) ? '.SH' : '.SZ';
+    try {
+      /* 标准申万行业（东财数据中心 BOARD_NAME_LEVEL：一级-二级-三级），取二级作为行业字段 */
+      const r = await fetch('https://datacenter.eastmoney.com/securities/api/data/v1/get?reportName=RPT_F10_BASIC_ORGINFO' +
+        '&columns=SECURITY_CODE,BOARD_NAME_LEVEL&filter=(SECUCODE%3D%22' + c + suf + '%22)&pageNumber=1&pageSize=1&source=HSF10&client=PC',
+        { mode: 'cors' });
+      if (r.ok){
+        const d = await r.json();
+        const row = d && d.result && d.result.data && d.result.data[0];
+        const lv = row && row.BOARD_NAME_LEVEL;
+        if (typeof lv === 'string' && lv){
+          const parts = lv.split('-');
+          return parts[0];   // 1BK_V68.13.8：只识别申万一级（电子 / 国防军工 / 银行…）
+        }
+      }
+    } catch(e){}
     const secid = (c.startsWith('6') ? '1.' : '0.') + c;   // 沪=1 / 深·创·科·北=0（东财 secid 规则）
     try {
-      const r = await fetch('https://push2.eastmoney.com/api/qt/stock/get?fltt=2&invt=2&fields=f127&secid=' + secid, { mode: 'cors' });
-      if (r.ok){ const ind = parseIndustryFromEastmoney(await r.json()); if (ind) return ind; }
+      const r2 = await fetch('https://push2.eastmoney.com/api/qt/stock/get?fltt=2&invt=2&fields=f127&secid=' + secid, { mode: 'cors' });
+      if (r2.ok){ const ind = parseIndustryFromEastmoney(await r2.json()); if (ind) return ind; }
     } catch(e){}
   }
   return inferIndustryFromName(name);   // 基金或识别失败 → 名称主题词兜底
@@ -2767,10 +2787,13 @@ function inferConceptsFromName(name){
 const CONCEPT_MAP = {"000100": ["显示技术", "AI眼镜", "柔性屏(折叠屏)", "AI芯片", "电子纸概念", "绿色电力", "MicroLED", "屏下摄像", "半导体概念", "MiniLED", "华为概念", "工业互联", "小米概念", "OLED", "虚拟现实", "光伏概念"], "000657": ["可控核聚变", "工业母机", "PCB", "小金属概念", "央国企改革", "医疗器械概念", "新材料"], "002025": ["通信技术", "铜缆高速连接", "液冷概念", "光通信模块", "CPO概念", "商业航天", "数据中心", "华为概念", "5G概念", "央国企改革", "军工"], "002050": ["电池技术", "机器人执行器", "液冷概念", "空气能热泵", "机器人概念", "汽车热管理", "华为汽车", "冷链物流", "新能源车", "燃料电池概念", "智能家居", "特斯拉概念"], "002099": ["减肥药", "肝炎概念", "生物疫苗", "化工原料"], "002378": ["小金属概念", "稀缺资源"], "002438": ["低空经济", "可控核聚变", "液冷概念", "超超临界发电", "数据中心", "氢能源", "风能", "核能核电", "节能环保", "军工"], "002517": ["文娱消费", "AI应用", "AI眼镜", "短剧互动游戏", "元宇宙概念", "华为概念", "电子竞技", "区块链", "虚拟现实", "网络游戏"], "600759": ["油气资源", "氦气概念", "天然气"], "601628": ["蚂蚁概念", "央国企改革"], "601838": ["央国企改革", "互联网金融"], "601975": ["一带一路", "央国企改革"], "605006": ["央国企改革", "风能"]}; /*CONCEPT_MAP_MARKER*/
 /* 1BK_V68.13.3：行业分类离线补齐（东财 f127 精准识别，2026-08-10 抓取）——
    fetchIndustry 优先查此表（零请求），缺失才走在线接口/名称推断；ETF/基金不在此表（用名称主题词） */
+/* 1BK_V68.13.7：行业分类离线补齐（东财数据中心 RPT_F10_BASIC_ORGINFO · BOARD_NAME_LEVEL 标准申万行业，
+   2026-08-11 抓取；v68.13.8 起只识别申万一级，如 电子/国防军工/银行/有色金属）——
+   fetchIndustry 优先查此表（零请求），缺失才走在线接口/名称推断；ETF/基金不在此表（用名称主题词） */
 const INDUSTRY_MAP = {
-  "000100":"光学光电子","000657":"小金属","002025":"军工电子Ⅱ","002050":"家电零部件Ⅱ","002099":"化学制药",
-  "002378":"小金属","002438":"通用设备","002517":"游戏Ⅱ","600759":"油气开采Ⅱ","601628":"保险Ⅱ",
-  "601838":"银行Ⅱ","601975":"航运港口","603993":"工业金属","605006":"玻璃玻纤"
+  "000100":"电子","000657":"有色金属","002025":"国防军工","002050":"家用电器","002099":"医药生物",
+  "002378":"有色金属","002438":"机械设备","002517":"传媒","600759":"石油石化","601628":"非银金融",
+  "601838":"银行","601975":"交通运输","603993":"有色金属","605006":"建筑材料"
 }; /*INDUSTRY_MAP_MARKER*/
 /* 1BK_V68.13.3：研报评级离线抓取（东财 reportapi，2026-08-10）——
    code -> {org, date, rating, eps(今年一致预期EPS), target(目标价上限,可空), title, src}，仅持仓个股 */
@@ -3164,7 +3187,7 @@ function renderAnalysis(){
     '<div class="panel-body">' + attrHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>行业 / 板块分布</div>' +
     '<div class="spacer"></div><button class="btn-sm" id="btnIdentifyAll">批量识别行业</button>' +
-    '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 仅统计当前持仓标的 · 行业取自东财申万行业(自动)</div></div>' +
+    '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 仅统计当前持仓标的 · 行业取自申万一级行业（东财数据中心，v68.13.8）</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>机构研报覆盖</div>' +
     '<div class="panel-sub">东财研报 · 持仓个股最新机构评级与一致预期 · 数据抓取自 2026-08-10</div></div>' +
