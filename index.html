@@ -86,15 +86,18 @@ body{
 .bn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 9px 4px;border-radius:12px;
   color:#97a3ba;font-size:10px;font-weight:600;cursor:pointer;min-width:56px;text-decoration:none;
   transition:.15s;position:relative;user-select:none;white-space:nowrap}
-.bn .ico{font-size:19px;line-height:1}
+.bn .ico{font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center}
+.bn .ico svg{display:block}
 .bn:hover{color:#fff;background:rgba(255,255,255,.06)}
 .bn.active{color:#fff;background:linear-gradient(135deg,rgba(79,70,229,.38),rgba(245,158,11,.24))}
 .bn.active::before{content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:3px;background:linear-gradient(90deg,#6366f1,#f59e0b)}
 .bn .bdot{position:absolute;top:3px;right:10px;width:6px;height:6px;border-radius:50%;background:#e5484d;border:1.5px solid #141a2b}
 @media (max-width:1100px){
-  .botnav{justify-content:flex-start;overflow-x:auto}
-  .botnav::-webkit-scrollbar{height:0}
-  .bn{min-width:60px}
+  /* v53.28：手机/平板底部导航紧凑排满——9 项均分宽度，不再横向滚动 */
+  .botnav{justify-content:space-between;overflow-x:visible}
+  .bn{flex:1;min-width:0;padding:5px 2px 4px;font-size:9.5px}
+  .bn .ico svg{width:17px;height:17px}
+  .bn.active::before{top:-5px;width:18px;height:2.5px}
 }
 
 /* 分页：默认隐藏，激活显示 */
@@ -183,29 +186,29 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .filterbar.on select.mini{border-color:var(--accent);background:var(--accent-soft)}
 
 /* ===================== 总览 KPI 卡片 ===================== */
-.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:16px}
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
 .card{
   position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:13px 14px 11px;box-shadow:var(--shadow);min-width:0;overflow:hidden;
+  padding:10px 12px 9px;box-shadow:var(--shadow);min-width:0;overflow:hidden;
   transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:#d7dcec}
 .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),var(--gold));opacity:0;transition:opacity .18s;border-radius:var(--radius) 0 0 var(--radius)}
 .card:hover::before{opacity:1}
-.card .k{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;font-weight:500;line-height:1.3}
-.card .v{font-size:21px;font-weight:800;margin-top:3px;letter-spacing:-.5px;word-break:break-all;font-variant-numeric:tabular-nums;line-height:1.02}
-.card .sub{font-size:11.5px;color:var(--muted);margin-top:2px;min-height:14px;line-height:1.35}
-.extra-line{margin-top:10px;font-size:12.5px;color:var(--muted);display:flex;gap:18px;flex-wrap:wrap;padding:0 2px;line-height:1.5}
+.card .k{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;font-weight:500;line-height:1.3}
+.card .v{font-size:18px;font-weight:800;margin-top:2px;letter-spacing:-.5px;word-break:break-all;font-variant-numeric:tabular-nums;line-height:1.05}
+.card .sub{font-size:11px;color:var(--muted);margin-top:2px;min-height:13px;line-height:1.35}
+.extra-line{margin-top:8px;font-size:12px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;padding:0 2px;line-height:1.5}
 
 /* === 实时行情面板 === */
-.live-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:6px;margin-bottom:8px}
-.live-card{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px 13px;display:flex;flex-direction:column;gap:2px;transition:border-color .15s, transform .15s, box-shadow .15s;box-shadow:0 1px 3px rgba(16,24,40,.08)}
+.live-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:6px;margin-bottom:6px}
+.live-card{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px 9px;display:flex;flex-direction:column;gap:2px;transition:border-color .15s, transform .15s, box-shadow .15s;box-shadow:0 1px 3px rgba(16,24,40,.08)}
 .live-card:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px)}
-.live-card .lc-name{font-size:13.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35}
-.live-card .lc-price{font-size:18px;font-weight:700;letter-spacing:-.4px;font-variant-numeric:tabular-nums;line-height:1.0}
-.live-card .lc-pct{font-size:12.5px;font-variant-numeric:tabular-nums;font-weight:600;line-height:1.3}
+.live-card .lc-name{font-size:12.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35}
+.live-card .lc-price{font-size:16px;font-weight:700;letter-spacing:-.4px;font-variant-numeric:tabular-nums;line-height:1.0}
+.live-card .lc-pct{font-size:11.5px;font-variant-numeric:tabular-nums;font-weight:600;line-height:1.3}
 .live-card .lc-pct .arrow{font-size:10px;margin-right:2px}
-.live-card .lc-noquote{font-size:12px;color:var(--muted)}
+.live-card .lc-noquote{font-size:11.5px;color:var(--muted)}
 
 /* === 盯盘看板 === */
 .monitor-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
@@ -353,13 +356,13 @@ tr.div-row .mono.down{color:#c2185b;font-weight:600}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .dim{color:var(--muted)}
 /* 总览持仓表：列高紧凑化（一屏显示更多标的）+ 金额数字放大（类型/持股数/成本价/现价） */
-#holdTable th, #holdTable td{padding:7px 12px;line-height:1.3}
+#holdTable th, #holdTable td{padding:6px 10px;line-height:1.3}
 #holdTable .name-cell{gap:0;line-height:1.2}
-#holdTable .name-cell .n{font-size:13.5px}
-#holdTable .name-cell .c{font-size:11px}
+#holdTable .name-cell .n{font-size:13px}
+#holdTable .name-cell .c{font-size:10.5px}
 #holdTable .tags-row{margin-top:1px}
-#holdTable .chip{font-size:10.5px;padding:1px 7px}
-#holdTable .hold-amt{font-size:16px;line-height:1.25}
+#holdTable .chip{font-size:10px;padding:0 6px}
+#holdTable .hold-amt{font-size:15px;line-height:1.25}
 #holdTable .hold-amt .tag{font-size:13.5px;padding:2px 10px}
 .chip-src{display:inline-block;font-size:10px;color:#b45309;background:#fff7e8;border:1px solid #ffe0b2;border-radius:6px;padding:1px 6px;font-weight:600;margin-right:3px;vertical-align:1px}
 
@@ -673,13 +676,17 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
   .page.active{display:block}
   .topbar-in{padding:10px 12px}
   .page-title-current{font-size:16px}
-  .cards{grid-template-columns:repeat(2,1fr);gap:10px}
-  .card .v{font-size:17px}
+  .cards{grid-template-columns:repeat(2,1fr);gap:8px}
+  .card .v{font-size:15px}
+  .card .k{font-size:10.5px}
   .g-holding,.g-trade,.g-tx,.g-op,.g-op2{grid-template-columns:repeat(2,1fr)}
-  th,td{padding:9px 10px}
-  .panel-head{padding:13px 14px}
-  .panel-body{padding:14px}
-  .panel-body.tight{padding:0 12px}
+  th,td{padding:7px 8px;font-size:12px}
+  #holdTable th,#holdTable td{padding:5px 7px}
+  #holdTable .hold-amt{font-size:13px}
+  .live-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .panel-head{padding:11px 12px}
+  .panel-body{padding:12px}
+  .panel-body.tight{padding:0 10px}
   .tb-brand .motto{display:none}  /* v53.27：手机端隐藏座右铭 */
 }
 </style>
@@ -737,7 +744,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.27</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.28</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1115,7 +1122,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.27 · 2026-08-10 15:43 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.28 · 2026-08-10 15:53 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1152,15 +1159,15 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
 
   <!-- ===================== 底部导航（方案 B，v53.25） ===================== -->
   <nav class="botnav" id="botnav" aria-label="底部导航">
-    <a class="bn active" data-page="overview" href="javascript:void(0)"><span class="ico">🏠</span>总览</a>
-    <a class="bn" data-page="monitor" href="javascript:void(0)"><span class="ico">📡</span>盯盘</a>
-    <a class="bn" data-page="trades" href="javascript:void(0)"><span class="ico">⚡</span>做T</a>
-    <a class="bn" data-page="stats" href="javascript:void(0)"><span class="ico">📊</span>统计</a>
-    <a class="bn" data-page="settle" href="javascript:void(0)"><span class="ico">🧾</span>清仓</a>
-    <a class="bn" data-page="analysis" href="javascript:void(0)"><span class="ico">🔍</span>分析</a>
-    <a class="bn" data-page="position" href="javascript:void(0)"><span class="ico">🎯</span>仓位</a>
-    <a class="bn" data-page="creed" href="javascript:void(0)"><span class="ico">📖</span>心法</a>
-    <a class="bn" data-page="settings" href="javascript:void(0)"><span class="ico">⚙️</span>设置</a>
+    <a class="bn active" data-page="overview" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>总览</a>
+    <a class="bn" data-page="monitor" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.93 4.93a10 10 0 0114.14 0"/><path d="M7.76 7.76a6 6 0 018.48 0"/><circle cx="12" cy="12" r="2"/><path d="M12 14v6"/></svg></span>盯盘</a>
+    <a class="bn" data-page="trades" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>做T</a>
+    <a class="bn" data-page="stats" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>统计</a>
+    <a class="bn" data-page="settle" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h6"/></svg></span>清仓</a>
+    <a class="bn" data-page="analysis" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span>分析</a>
+    <a class="bn" data-page="position" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>仓位</a>
+    <a class="bn" data-page="creed" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>心法</a>
+    <a class="bn" data-page="settings" href="javascript:void(0)"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>设置</a>
   </nav>
 </div>
 
@@ -1174,8 +1181,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.27';
-const APP_BUILD   = '2026-08-10 15:43';
+const APP_VERSION = 'v53.28';
+const APP_BUILD   = '2026-08-10 15:53';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
