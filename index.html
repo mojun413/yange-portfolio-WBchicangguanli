@@ -742,7 +742,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.14 · 2026-08-10 13:03</div>
+      <div class="sf-ver" id="sfVer">v53.15 · 2026-08-10 13:16</div>
     </div>
   </aside>
 
@@ -753,7 +753,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.14</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.15</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1117,7 +1117,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.14 · 2026-08-10 13:03 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.15 · 2026-08-10 13:16 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1163,8 +1163,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.14';
-const APP_BUILD   = '2026-08-10 13:03';
+const APP_VERSION = 'v53.15';
+const APP_BUILD   = '2026-08-10 13:16';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2147,12 +2147,15 @@ function updateLivePrices(){
         清仓结算 / 做T / 交易统计 由历史流水推导，与现价无关，无需重算。 */
   const active = document.querySelector('.page.active');
   const pid = active ? active.id : '';
-  if (pid === 'page-overview' && typeof renderOverview === 'function') renderOverview();
-  else if (pid === 'page-position' && typeof renderPosition === 'function') renderPosition();
-  else if (pid === 'page-analysis' && typeof renderAnalysis === 'function') renderAnalysis();
-  else if (pid === 'page-creed' && typeof renderZuxunDealCards === 'function') renderZuxunDealCards();
-  /* 总览 KPI 即使不在总览页也保持数据一致（下次切页无需等待） */
-  else if (typeof renderOverview === 'function' && document.getElementById('page-overview')) renderOverview();
+  /* 页面渲染包 try-catch（v53.15 加固）：单页渲染异常不再连锁中断 tick，也不影响 checkAlerts */
+  try {
+    if (pid === 'page-overview' && typeof renderOverview === 'function') renderOverview();
+    else if (pid === 'page-position' && typeof renderPosition === 'function') renderPosition();
+    else if (pid === 'page-analysis' && typeof renderAnalysis === 'function') renderAnalysis();
+    else if (pid === 'page-creed' && typeof renderZuxunDealCards === 'function') renderZuxunDealCards();
+    /* 总览 KPI 即使不在总览页也保持数据一致（下次切页无需等待） */
+    else if (typeof renderOverview === 'function' && document.getElementById('page-overview')) renderOverview();
+  } catch(e){ console.error('[tick render]', e); }
   checkAlerts();        /* 交易时段每拍检测止损/止盈破线（休市自动跳过） */
 }
 
@@ -2980,6 +2983,7 @@ function renderAnalysis(){
     if (h.closed) return;
     const c = calcHolding(h); if (c.shares <= 1e-8) return;
     if (effType(h.code, h.type, h.typeLocked) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
+    const mv = isFinite(c.mv) ? c.mv : 0; if (mv <= 0) return;
     const ratio = Math.abs(h.fundFlow) / mv * 100;
     if (ratio >= FUND_FLOW_WARN_PCT) disc += warnRow('🔻', '主力净流出：『' + esc(h.name || h.code) + '』' + fundFlowText(h) + '，占持仓市值 <b>' + ratio.toFixed(1) + '%</b>', 'danger');
   });
