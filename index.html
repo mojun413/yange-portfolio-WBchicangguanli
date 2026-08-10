@@ -253,6 +253,12 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .pos-badge.tag-heavy{background:#fef3c7;color:#92400e}
 .pos-badge.tag-full {background:#d1fae5;color:#065f46}
 .pos-badge.tag-over {background:#fee2e2;color:#991b1b;font-weight:700}
+/* 持仓卡：概念标签 chips + 主力资金流行 */
+.tags-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;max-width:240px}
+.chip{display:inline-block;font-size:10.5px;line-height:1.5;padding:1px 7px;border-radius:999px;background:#eef2f7;color:#475569;border:1px solid #e2e8f0;white-space:nowrap}
+.chip.chip-ind{background:#e0e7ff;color:#3730a3;border-color:#c7d2fe}
+.ff-inline{display:block;font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums}
+.ff-inline.up{color:var(--up)} .ff-inline.down{color:var(--down)} .ff-inline.dim{color:var(--muted)}
 
 /* ===================== 仓位综合分析（图文并茂） ===================== */
 .pos-an{margin-top:18px;border-top:1px dashed var(--line);padding-top:14px}
@@ -656,7 +662,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.3 · 2026-08-10 00:19</div>
+      <div class="sf-ver" id="sfVer">v53.4 · 2026-08-10 09:01</div>
     </div>
   </aside>
 
@@ -667,7 +673,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.3</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.4</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -930,7 +936,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.3 · 2026-08-10 00:19 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.4 · 2026-08-10 09:01 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -976,8 +982,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.3';
-const APP_BUILD   = '2026-08-10 00:19';
+const APP_VERSION = 'v53.4';
+const APP_BUILD   = '2026-08-10 09:01';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2442,17 +2448,28 @@ function buildFlows(){
   return flows;
 }
 function returnAttribution(){
-  let realized = 0;
-  state.holdings.forEach(h => { const c = calcHolding(h); if (isFinite(c.realized)) realized += c.realized; });
+  /* 与总览总收益恒等式闭合：总览 总收益 = Σ各标的(已实现+浮动)。
+     拆分口径（对齐用户定义）：
+       清仓净收益 = 已清仓标的的净收益（落袋为安）
+       持仓浮动收益 = 当前持仓按现价的浮动盈亏（实时随股价变动）
+       持仓减仓已实现 = 持仓期间做T/减仓已落袋部分（并入总收益，避免凭空蒸发） */
+  let closedR = 0, openR = 0, openFloat = 0;
+  state.holdings.forEach(h => {
+    const c = calcHolding(h);
+    const r = isFinite(c.realized) ? c.realized : 0;
+    const f = isFinite(c.floatPnl) ? c.floatPnl : 0;
+    if (c.shares > 1e-8){ openR += r; openFloat += f; }   /* 持仓中：减仓已实现 + 浮动 */
+    else { closedR += r; }                                  /* 已清仓：净收益 = 该标的已实现 */
+  });
   const agg = openAggregate(), cf = cashflowStats();
-  const floatPnl = isFinite(agg.floatPnl) ? agg.floatPnl : 0;
-  const totalPnl = realized + floatPnl;                              /* 分红已内含于摊薄成本（floatPnl），不重复计 */
-  /* 关键纠正：分母用「净投入 = 累计买入 − 累计卖出净额（不含分红）」，而非「当前持仓成本」。
-     旧版用 agg.cost（仅当前持仓的摊薄成本）作分母，但当已止盈/减仓（realized≠0）时，
-     已实现收益来自已卖出的仓位、其成本早已不在 agg.cost 中，导致分母偏小、收益率虚高失真。 */
+  const liquidatedNet = closedR;     /* 清仓净收益（= 已实现收益，落袋） */
+  const holdFloat    = openFloat;    /* 持仓浮动收益（实时） */
+  const holdReduced  = openR;        /* 持仓减仓已实现（做T/减仓落袋） */
+  const totalPnl = liquidatedNet + holdFloat + holdReduced;   /* 与总览总收益完全一致 */
   const invCapital = cf.buyTotal - cf.sellTotal;
   return {
-    realized, floatPnl, divTotal: cf.divTotal || 0, totalPnl,
+    realized: liquidatedNet, floatPnl: holdFloat, holdReduced, liquidatedNet, holdFloat,
+    divTotal: cf.divTotal || 0, totalPnl,
     buyTotal: cf.buyTotal, sellTotal: cf.sellTotal,
     invCapital, peakInvested: cf.peakInvested, netInvested: cf.netInvested,
     netRoi:  invCapital > 0 ? totalPnl / invCapital * 100 : NaN,         /* 净投入收益率（分母=买入−卖出，不含分红） */
@@ -2526,10 +2543,128 @@ async function autoIdentifyIndustries(force){
   for (const h of targets){
     const ind = await fetchIndustry(h.code, h.name);
     if (ind && ind !== h.industry){ h.industry = ind; changed++; }
+    /* 概念标签：名称关键词即时推断（零请求），仅在为空时填，非破坏性 */
+    if (!Array.isArray(h.concepts) || !h.concepts.length){
+      const cs = inferConceptsFromName(h.name);
+      if (cs.length){ h.concepts = cs; changed++; }
+    }
     await new Promise(r => setTimeout(r, 120));   /* 对东财友好，避免突发并发 */
   }
   if (changed){ try { persist.holdings(); } catch(e){} const box = document.getElementById('page-analysis'); if (box && box.classList.contains('active')) renderAnalysis(); }
   return changed;
+}
+
+/* ===================== 概念标签（名称关键词推断，诚实标注） ===================== */
+/* 浏览器端百度/东财概念接口有反爬限制，故用名称主题词即时推断（零请求、零失败），行业仍走东财 f127 精准识别。
+   若需东财/同花顺官方概念标签，可在本地用 a-stock-data 技能离线批量拉取后回填。 */
+function inferConceptsFromName(name){
+  const n = (name || '').toString();
+  const map = [
+    [/半导体|芯片|集成电路|GPU|CPU|寒武纪|海光|中芯/, '半导体'],
+    [/人工智能|大模型|AI|算力|数据中心|云计算|信创|算力租赁|讯飞|语音/, 'AI/算力'],
+    [/机器人|人形机器人|减速器|丝杠/, '机器人'],
+    [/新能源|电池|锂电|储能|光伏|逆变器|固态电池|电动车/, '新能源'],
+    [/智能驾驶|自动驾驶|车|整车/, '汽车'],
+    [/稀土|小金属|有色|黄金|资源|铜|铝/, '有色/资源'],
+    [/医药|生物|创新药|CXO|医疗|疫苗|中药|器械/, '医药'],
+    [/白酒|消费|食品|饮料|乳业|猪肉|农业|养殖/, '消费'],
+    [/券商|证券|保险|银行|金融|期货/, '金融'],
+    [/军工|航天|航空|国防|卫星|导航/, '军工'],
+    [/通信|5G|光模块|CPO|运营商|卫星通信/, '通信'],
+    [/软件|操作系统|鸿蒙|计算机|数字经济/, '软件'],
+    [/地产|物业|家居|建材|建筑/, '地产链'],
+    [/传媒|游戏|影视|出版/, '传媒'],
+    [/电力|公用事业|燃气|水务|环保|核电/, '公用事业'],
+    [/化工|化学|材料|化纤|农药|轮胎/, '化工'],
+    [/钢铁|煤炭|水泥|周期/, '周期'],
+    [/港股|美股|纳斯达克|标普|QDII|海外|中概|全球/, '港股/海外'],
+    [/国企|央企|中字头|改革/, '中特估'],
+    [/红利|高股息|股息/, '高股息'],
+    [/ETF|指数|联接/, '指数']
+  ];
+  const out = [];
+  for (const [re, tag] of map) if (re.test(n) && out.indexOf(tag) < 0) out.push(tag);
+  return out;
+}
+async function fetchConcepts(code, name){ return inferConceptsFromName(name); }
+/* ===================== 主力资金流（东财 push2his，浏览器直连 CORS 开放） ===================== */
+/* 返回 {today:今日主力净流入(元), d5:近5日累计(元), ts}；仅股票有意义（ETF/基金无主力资金维度） */
+async function fetchFundFlow(code){
+  const c = (code || '').toString().replace(/\D/g, '');
+  if (c.length !== 6) return null;
+  const mkt = (c.startsWith('6') || c.startsWith('8') || c.startsWith('4')) ? '1' : '0';
+  const secid = mkt + '.' + c;
+  try {
+    const r = await fetch('https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get?lmt=5&klt=101&secid=' + secid +
+      '&fields1=f1,f2,f3,f7&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64,f65', { mode: 'cors' });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const kl = d && d.data && d.data.klines;
+    if (!kl || !kl.length) return null;
+    let today = 0, d5 = 0;
+    kl.forEach(line => { const p = line.split(','); const v = parseFloat(p[1]); if (isFinite(v)){ today = v; d5 += v; } });
+    return { today, d5, ts: Date.now() };
+  } catch(e){ return null; }
+}
+/* 仅对股票拉资金流；交易时段每 ~90s 刷新（休市零请求）。完成后刷新持仓卡 + 分析中心 */
+async function refreshFundFlows(){
+  if (!isTradingTime()) return;
+  const stocks = state.holdings.filter(h => effType(h.code, h.type) === 'stock');
+  for (const h of stocks){
+    const ff = await fetchFundFlow(h.code);
+    if (ff){ h.fundFlow = ff.today; h.fundFlow5 = ff.d5; h.fundFlowTs = ff.ts; try { persist.holdings(); } catch(e){} }
+    await new Promise(r => setTimeout(r, 200));   /* 对东财友好，避免突发并发 */
+  }
+  refreshFundFlowUI();
+  const ph = document.getElementById('page-holdings'), pa = document.getElementById('page-analysis');
+  if (ph && ph.classList.contains('active')) renderHoldings();
+  if (pa && pa.classList.contains('active')) renderAnalysis();
+}
+function refreshFundFlowUI(){
+  document.querySelectorAll('.q-ff').forEach(el => {
+    const k = el.dataset.q; const h = state.holdings.find(x => qkey(x) === k); if (!h) return;
+    const v = (h.fundFlow != null) ? h.fundFlow : NaN;
+    if (!isFinite(v)){ el.textContent = '—'; el.className = 'ff-inline q-ff dim'; return; }
+    const wan = v / 1e4, up = v >= 0;
+    el.textContent = '主力' + (up ? '净流入 ' : '净流出 ') + (Math.abs(wan) >= 1e4 ? (wan / 1e4).toFixed(2) + '亿' : wan.toFixed(0) + '万');
+    el.className = 'ff-inline q-ff ' + (up ? 'up' : 'down');
+  });
+}
+function conceptChipsHtml(h){
+  const ind = (h.industry || '').trim();
+  const cs = Array.isArray(h.concepts) ? h.concepts : [];
+  let s = '<div class="tags-row">';
+  if (ind) s += '<span class="chip chip-ind">' + esc(ind) + '</span>';
+  cs.slice(0, 4).forEach(t => { s += '<span class="chip">' + esc(t) + '</span>'; });
+  s += '</div>';
+  return s;
+}
+function fundFlowText(h){
+  const v = (h.fundFlow != null) ? h.fundFlow : NaN;
+  if (!isFinite(v)) return '—';
+  const wan = v / 1e4, up = v >= 0;
+  return '主力' + (up ? '净流入 ' : '净流出 ') + (Math.abs(wan) >= 1e4 ? (wan / 1e4).toFixed(2) + '亿' : wan.toFixed(0) + '万');
+}
+function fundFlowPanelHTML(){
+  const rows = state.holdings.filter(h => isFinite(h.fundFlow)).map(h => ({ h, ff: h.fundFlow, ff5: h.fundFlow5 || 0 }));
+  if (!rows.length) return '<div class="empty">交易时段将自动拉取东财主力净流入（每 90 秒刷新，仅股票）。当前无数据。</div>';
+  rows.sort((a, b) => a.ff - b.ff);
+  const outflow = rows.filter(r => r.ff < 0).slice(0, 8);
+  const inflow  = rows.filter(r => r.ff > 0).slice(-8).reverse();
+  const line = r => {
+    const up = r.ff >= 0, wan = r.ff / 1e4;
+    const fmt = w => (Math.abs(w) >= 1e4 ? (w / 1e4).toFixed(2) + '亿' : w.toFixed(0) + '万');
+    return '<tr><td class="l">' + esc(r.h.name || r.h.code) + '</td>' +
+      '<td class="mono ' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + fmt(wan) + '</td>' +
+      '<td class="mono dim">' + (isFinite(r.ff5) ? (r.ff5 >= 0 ? '+' : '') + fmt(r.ff5 / 1e4) : '—') + '</td></tr>';
+  };
+  let warn = '';
+  if (outflow.length) warn = warnRow('⚠️', '有 <b>' + outflow.length + '</b> 只标的今日主力净流出，警惕主力撤退（结合行业/概念看是否系统性）');
+  return '<div class="table-wrap"><table class="tbl"><thead><tr><th class="l">主力净流出 TOP</th><th>今日</th><th>近5日</th></tr></thead><tbody>' +
+    (outflow.map(line).join('') || '<tr><td colspan="3" class="dim">无净流出标的</td></tr>') + '</tbody></table></div>' +
+    (inflow.length ? '<details style="margin-top:6px"><summary style="cursor:pointer;color:var(--muted);font-size:12px">查看主力净流入 TOP</summary>' +
+      '<div class="table-wrap" style="margin-top:6px"><table class="tbl"><thead><tr><th class="l">主力净流入 TOP</th><th>今日</th><th>近5日</th></tr></thead><tbody>' +
+      inflow.map(line).join('') + '</tbody></table></div></details>' : '') + warn;
 }
 
 /* ---------- 预警与纪律 ---------- */
@@ -2630,17 +2765,18 @@ function renderAnalysis(){
   const occRoiTxt = isFinite(att.occRoi) ? (att.occRoi >= 0 ? '+' : '') + att.occRoi.toFixed(2) + '%' : '—';
   const attrHTML =
     '<div class="kpi-grid">' +
-    kpi2('总收益(已实现+浮动)', sign2(att.totalPnl), cls(att.totalPnl)) +
-    kpi2('已实现收益', sign2(att.realized), cls(att.realized)) +
-    kpi2('浮动盈亏', sign2(att.floatPnl), cls(att.floatPnl)) +
+    kpi2('总收益(与总览一致)', sign2(att.totalPnl), cls(att.totalPnl)) +
+    kpi2('清仓净收益(已实现)', sign2(att.liquidatedNet), cls(att.liquidatedNet)) +
+    kpi2('持仓浮动收益(实时)', sign2(att.holdFloat), cls(att.holdFloat)) +
+    (att.holdReduced ? kpi2('持仓减仓已实现', sign2(att.holdReduced), cls(att.holdReduced)) : '') +
     kpi2('累计分红(已摊入成本)', '+' + money(att.divTotal), '') +
     kpi2('净投入收益率', netRoiTxt, cls(att.netRoi)) +
     kpi2('峰值占用收益率', occRoiTxt, cls(att.occRoi)) +
     kpi2('IRR(资金加权·年化)', irrTxt, cls(att.irr)) +
     '</div>' +
-    '<div class="an-note"><b>计算依据</b>：总收益 = 已实现盈亏 + 浮动盈亏；分红已摊入摊薄成本（floatPnl 已含），不重复计入。' +
-    '三种收益率分母不同：①<b>净投入收益率</b> = 总收益 ÷（累计买入 − 累计卖出净额，<b>不含分红</b>）；②<b>峰值占用收益率</b> = 总收益 ÷ 历史峰值占用本金；③<b>IRR</b> = 逐笔现金流（买入流出 / 卖出·分红流入 / 期末市值赎回）解出的资金加权年化收益率，体现加仓减仓的时机与体量。' +
-    '旧版曾误用「当前持仓成本」作分母，在已止盈/减仓后严重失真，现已纠正为净投入口径。</div>';
+    '<div class="an-note"><b>计算依据</b>：总收益 = 清仓净收益 + 持仓浮动收益（+ 持仓减仓已实现），与总览「总收益」<b>完全一致</b>（总览 = Σ各标的 已实现 + 浮动）。' +
+    '其中 <b>清仓净收益</b> = 已清仓标的的净收益（落袋为安）；<b>持仓浮动收益</b> = 当前持仓按现价计算的浮动盈亏，<b>实时随股价变动</b>；若持仓期间做过减仓/做T，减仓已实现收益单独列出（已并入总收益，不漏不重）。' +
+    '三种收益率分母不同：①<b>净投入收益率</b> = 总收益 ÷（累计买入 − 累计卖出净额，<b>不含分红</b>）；②<b>峰值占用收益率</b> = 总收益 ÷ 历史峰值占用本金；③<b>IRR</b> = 逐笔现金流（买入流出 / 卖出·分红流入 / 期末市值赎回）解出的资金加权年化收益率，体现加仓减仓的时机与体量。分红已摊入摊薄成本，不重复计。</div>';
 
   /* 3) 行业暴露 */
   let sectorWarn = '';
@@ -2693,6 +2829,9 @@ function renderAnalysis(){
     '<div class="spacer"></div><button class="btn-sm" id="btnIdentifyAll">批量识别行业</button>' +
     '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 行业取自东财申万行业(自动)</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>主力资金流</div>' +
+    '<div class="panel-sub">东财主力净流入 · 交易时段每 90 秒刷新 · 仅股票</div></div>' +
+    '<div class="panel-body">' + fundFlowPanelHTML() + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>预警与纪律</div>' +
     '<div class="panel-sub">交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警</div></div>' +
     '<div class="panel-body">' + alertHTML + '</div></div>';
@@ -3746,7 +3885,10 @@ function renderHoldings(){
     html += '<tr class="clickable ' + (open ? 'expanded' : '') + '" data-row="' + h.id + '">' +
       '<td class="l"><div class="name-cell"><span class="n"><span class="caret">' + (open ? '▾' : '▸') + '</span>' +
         esc(h.name || h.code) + (c.quoteErr ? '<span class="err-dot" title="' + esc(c.quoteErr) + '"></span>' : '') + '</span>' +
-        '<span class="c">' + esc(fullCode(h).toUpperCase()) + '</span></div></td>' +
+        '<span class="c">' + esc(fullCode(h).toUpperCase()) + '</span>' +
+        conceptChipsHtml(h) +
+        '<span class="ff-inline q-ff ' + (isFinite(h.fundFlow) ? (h.fundFlow >= 0 ? 'up' : 'down') : 'dim') + '" data-q="' + qkey(h) + '">' + fundFlowText(h) + '</span>' +
+        '</div></td>' +
       '<td class="l"><span class="tag ' + effType(h.code, h.type) + '">' + typeLabel(h.code, h.type) + '</span></td>' +
       '<td class="mono">' + shr(c.shares) + '</td>' +
       '<td class="mono">' + (c.shares > 0 ? '<span class="' + (c.spreadAvg < 0 ? 'neg-cost' : '') + '">' + price4(c.spreadAvg) + '</span>' : '—') + '</td>' +
@@ -4974,7 +5116,11 @@ function bind(){
             '<button type="button" class="btn-sm" id="e_ident">识别</button></div>' +
             '<datalist id="ind_list">' + INDUSTRY_LIST.map(k => '<option value="' + k + '">').join('') + '</datalist></div>' +
           '<div class="field"><label class="fl">止损价（破线预警）</label><input id="e_alertLow" type="number" step="0.001" min="0" placeholder="留空=不预警" value="' + (Number(h.alertLow) || '') + '"></div>' +
-          '<div class="field"><label class="fl">止盈价（破线预警）</label><input id="e_alertHigh" type="number" step="0.001" min="0" placeholder="留空=不预警" value="' + (Number(h.alertHigh) || '') + '"></div></div>';
+          '<div class="field"><label class="fl">止盈价（破线预警）</label><input id="e_alertHigh" type="number" step="0.001" min="0" placeholder="留空=不预警" value="' + (Number(h.alertHigh) || '') + '"></div>' +
+          '<div class="field" style="grid-column:1 / -1"><label class="fl">概念标签（逗号/顿号分隔·可留空按名称自动推断）</label>' +
+            '<div style="display:flex;gap:6px;align-items:center">' +
+            '<input id="e_concepts" placeholder="点右侧「识别概念」按名称推断" value="' + esc((Array.isArray(h.concepts) ? h.concepts.join('、') : '') || '') + '" style="flex:1;min-width:0">' +
+            '<button type="button" class="btn-sm" id="e_ident_c">识别概念</button></div></div></div>';
         let picked = null;
         const ok = await dialog({ title: '编辑标的', bodyHTML: body, buttons: [
           { label: '取消', value: null },
@@ -4982,8 +5128,11 @@ function bind(){
               const v = s => { const el = m.querySelector('#' + s); return el ? el.value.trim() : ''; };
               const code = v('e_code');
               if (!code) { toast('代码不能为空', 'err'); return false; }
+              const rawC = v('e_concepts');
+              const concepts = rawC ? rawC.split(/[，,、\s]+/).map(s => s.trim()).filter(Boolean) : [];
               picked = { name: v('e_name'), code, type: v('e_type'), market: v('e_mkt'),
-                         industry: v('e_industry'), alertLow: parseFloat(v('e_alertLow')) || 0, alertHigh: parseFloat(v('e_alertHigh')) || 0 };
+                         industry: v('e_industry'), alertLow: parseFloat(v('e_alertLow')) || 0, alertHigh: parseFloat(v('e_alertHigh')) || 0,
+                         concepts };
             } } ] });
         if (!ok || !picked) return;
         const oldKey = qkey(h);
@@ -4991,6 +5140,7 @@ function bind(){
         h.type = picked.type || h.type;
         h.market = picked.market || '';
         h.industry = picked.industry || '';
+        h.concepts = Array.isArray(picked.concepts) ? picked.concepts : [];
         h.alertLow = picked.alertLow || 0;
         h.alertHigh = picked.alertHigh || 0;
         h.alertState = {};   /* 改了阈值 → 重置触发状态，重新武装 */
@@ -5435,6 +5585,10 @@ function normHolding(h){
   return { id: h.id || uid(), type: (h.type === 'fund' || h.type === 'etf') ? h.type : 'stock', code: String(h.code || '').replace(/\D/g, '') || String(h.code || ''),
            name: h.name || '', market: h.market || '',
            industry: h.industry || '', alertLow: Number(h.alertLow) || 0, alertHigh: Number(h.alertHigh) || 0, alertState: h.alertState || {},
+           concepts: Array.isArray(h.concepts) ? h.concepts.filter(Boolean).map(String) : [],
+           fundFlow: isFinite(Number(h.fundFlow)) ? Number(h.fundFlow) : null,
+           fundFlow5: isFinite(Number(h.fundFlow5)) ? Number(h.fundFlow5) : null,
+           fundFlowTs: h.fundFlowTs || 0,
            txs: Array.isArray(h.txs) ? h.txs.map(t => Object.assign({ id: t.id || uid() }, t)) : [] };
 }
 
@@ -6414,14 +6568,22 @@ function init(){
   if (!window.__indDeleg){
     window.__indDeleg = true;
     document.addEventListener('click', async (e) => {
-      const btn = e.target && e.target.closest && e.target.closest('#e_ident');
+      const btn = e.target && e.target.closest && e.target.closest('#e_ident, #e_ident_c');
       if (!btn || btn.disabled) return;
-      const codeEl = document.getElementById('e_code'), nameEl = document.getElementById('e_name'), indEl = document.getElementById('e_industry');
-      if (!codeEl || !indEl) return;
-      btn.disabled = true; const t0 = btn.textContent; btn.textContent = '识别中…';
-      const ind = await fetchIndustry(codeEl.value, nameEl ? nameEl.value : '');
-      if (ind) indEl.value = ind; else toast('未能自动识别（非A股代码或网络异常），可手动填写', 'warn');
-      btn.textContent = t0; btn.disabled = false;
+      const codeEl = document.getElementById('e_code'), nameEl = document.getElementById('e_name');
+      if (!codeEl) return;
+      if (btn.id === 'e_ident'){
+        const indEl = document.getElementById('e_industry'); if (!indEl) return;
+        btn.disabled = true; const t0 = btn.textContent; btn.textContent = '识别中…';
+        const ind = await fetchIndustry(codeEl.value, nameEl ? nameEl.value : '');
+        if (ind) indEl.value = ind; else toast('未能自动识别（非A股代码或网络异常），可手动填写', 'warn');
+        btn.textContent = t0; btn.disabled = false;
+      } else if (btn.id === 'e_ident_c'){
+        const cEl = document.getElementById('e_concepts'); if (!cEl) return;
+        const cs = inferConceptsFromName(nameEl ? nameEl.value : '');
+        cEl.value = cs.join('、');
+        toast(cs.length ? ('已按名称推断概念：' + cs.join('、')) : '未从名称推断出概念，可手动填写', cs.length ? 'ok' : 'info');
+      }
     });
   }
   renderAll();
@@ -6434,6 +6596,9 @@ function init(){
   /* 盯盘看板：首屏拉一次；之后每 60 秒仅在交易时段刷新（休市零请求） */
   refreshMonitor(true);
   setInterval(() => { if (!document.hidden && isTradingTime()) refreshMonitor(true); }, 60000);
+  /* 主力资金流：交易时段每 90 秒刷新（休市零请求）；首屏拉一次（非交易时段自动 no-op） */
+  setInterval(() => { if (!document.hidden) refreshFundFlows(); }, 90000);
+  refreshFundFlows();
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
     renderMarketStatus(true);
