@@ -283,6 +283,19 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .pos-an .an-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .pos-an .an-title::before{content:"";width:3px;height:14px;background:linear-gradient(180deg,var(--accent),var(--gold));border-radius:2px}
 .an-grid{display:grid;grid-template-columns:minmax(230px,1fr) minmax(260px,1.15fr) minmax(200px,0.9fr);gap:14px;align-items:start}
+/* v53.29：仓位管理顶部「总仓位目标 + 当前市值分布」两卡左右并列 */
+.pos-top-grid{display:grid;grid-template-columns:minmax(220px,0.9fr) minmax(280px,1.1fr);gap:14px;align-items:stretch;margin-bottom:10px}
+/* 分析区两卡（占用率 + 组合指标），市值分布已上移顶部 */
+.an-grid-2{display:grid;grid-template-columns:minmax(260px,1fr) minmax(240px,0.9fr);gap:14px;align-items:start}
+.pos-target-card{display:flex;flex-direction:column;gap:8px}
+.pos-target-card .pt-row{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;color:var(--text)}
+.pos-target-card .pt-row input{border:1.5px solid var(--line-2);border-radius:8px;padding:7px 8px;color:var(--text);background:var(--panel)}
+.pos-target-card .pt-hint{font-size:11px;color:var(--muted);line-height:1.5}
+.pos-target-card .pt-occ{font-size:12px;color:var(--muted)}
+.pos-target-card .pt-occ .ob{height:7px;background:var(--line-2);border-radius:4px;overflow:hidden;margin-top:4px}
+.pos-target-card .pt-occ .ob i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .3s}
+.pos-donut-card{display:flex;flex-direction:column;min-width:0}
+.pos-donut-card h5{margin-bottom:6px}
 .an-card{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .an-card h5{font-size:12px;color:var(--muted);font-weight:600;margin:0 0 8px}
 .an-chart{width:100%}
@@ -310,7 +323,7 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .an-bar-row .bf{position:absolute;left:0;top:0;bottom:0;border-radius:5px;min-width:2px}
 .an-bar-row .bv{width:58px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);flex-shrink:0}
 .an-bar-row .full-line{position:absolute;left:100%;top:-2px;bottom:-2px;width:1.5px;background:#94a3b8;opacity:.7}
-@media (max-width:980px){ .an-grid{grid-template-columns:1fr} }
+@media (max-width:980px){ .an-grid,.an-grid-2,.pos-top-grid{grid-template-columns:1fr} }
 
 /* ===================== 表格 ===================== */
 .table-wrap{width:100%;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
@@ -744,7 +757,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.28</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.29</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -960,8 +973,19 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <label class="check" style="font-size:12px;margin:0 2px"><input type="checkbox" id="chkPosShowClosed" style="width:auto;margin:0"> 显示已清仓</label>
           </div>
           <div class="panel-body">
-            <div class="setting-row"><div><div class="t">总仓位目标金额</div><div class="d">整体仓位上限；「占总目标%」= 持仓成本 ÷ 总目标。留空表示不限总仓位</div></div>
-              <div style="display:flex;gap:6px;justify-content:flex-end;align-items:center">¥ <input id="posTotalTarget" type="number" step="100" min="0" placeholder="如 100000" style="width:150px;text-align:right"></div></div>
+            <!-- v53.29：总仓位目标 + 当前市值分布 两卡左右并列（顶部），压缩目标输入列宽 -->
+            <div class="pos-top-grid">
+              <div class="an-card pos-target-card">
+                <h5>总仓位目标金额</h5>
+                <div class="pt-row">¥ <input id="posTotalTarget" type="number" step="100" min="0" placeholder="如 100000" style="width:108px;text-align:right;font-size:14px;font-weight:700"></div>
+                <div class="pt-occ" id="posTargetOcc"></div>
+                <div class="pt-hint">「占总目标%」= 当前市值 ÷ 总目标；留空表示不限总仓位</div>
+              </div>
+              <div class="an-card pos-donut-card" id="posDonutCard">
+                <h5>当前市值分布</h5>
+                <div id="posDonutBody"></div>
+              </div>
+            </div>
             <div id="positionAlert"></div>
             <div class="table-wrap" id="positionTable"></div>
             <div id="positionSummary" class="hint" style="margin-top:10px"></div>
@@ -1122,7 +1146,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.28 · 2026-08-10 15:53 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.29 · 2026-08-10 16:05 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1181,8 +1205,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.28';
-const APP_BUILD   = '2026-08-10 15:53';
+const APP_VERSION = 'v53.29';
+const APP_BUILD   = '2026-08-10 16:05';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4697,7 +4721,7 @@ function renderPosition(){
   const totalTarget = Number(state.settings.totalTarget) || 0;
   if (tgtEl && document.activeElement !== tgtEl) tgtEl.value = totalTarget || '';
   const box = $('#positionTable');
-  if (!state.holdings.length){ box.innerHTML = '<div class="empty">暂无持仓，请先在总览建仓。</div>'; $('#positionAlert').innerHTML = ''; $('#positionSummary').innerHTML = ''; $('#posAnalysis').innerHTML = ''; return; }
+  if (!state.holdings.length){ box.innerHTML = '<div class="empty">暂无持仓，请先在总览建仓。</div>'; $('#positionAlert').innerHTML = ''; $('#positionSummary').innerHTML = ''; $('#posAnalysis').innerHTML = ''; renderTargetOcc(totalTarget, 0); renderDonutCard([]); return; }
   let totalFull = 0, totalMv = 0, totalCost = 0, overList = [], hiddenClosed = 0;
   /* 默认只显示「当前持仓」：!closed && 持股数>0；勾选「显示已清仓」才纳入已清仓标的 */
   const showClosed = !!state.settings.posShowClosed;
@@ -4779,6 +4803,8 @@ function renderPosition(){
   }
   if (overList.length) sumLines.push('<span style="color:#991b1b">⚠ ' + overList.length + ' 个标的已超额，请减仓或上调满仓金额</span>');
   $('#positionSummary').innerHTML = sumLines.join(' · ');
+  /* v53.29：目标卡占用率条 + 顶部市值分布卡（左右并列） */
+  renderTargetOcc(totalTarget, totalMv);
   /* 图文并茂的仓位综合分析 + 投资风格建议 */
   renderPositionAnalysis(rows, { totalCost, totalMv, totalFull, totalTarget, overList });
 }
@@ -4806,9 +4832,37 @@ function posDonut(items){
     '<text x="52" y="49" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)" font-variant-numeric="tabular-nums">' + pct + '%</text>' +
     '<text x="52" y="63" text-anchor="middle" font-size="9" fill="var(--muted)">' + esc(top ? top.label : '') + '</text></svg>';
 }
+/* v53.29：总仓位目标卡——占用率条（当前市值 / 总目标），实时联动 */
+function renderTargetOcc(totalTarget, totalMv){
+  const el = document.getElementById('posTargetOcc'); if (!el) return;
+  if (!totalTarget || totalTarget <= 0){
+    el.innerHTML = '<div class="pt-occ" style="font-size:11.5px;color:var(--muted)">未设置总目标 — 输入上方金额后按「当前市值 ÷ 总目标」实时计算占用率</div>';
+    return;
+  }
+  const mv = isFinite(totalMv) ? totalMv : 0;
+  const pct = Math.min(mv / totalTarget * 100, 100);
+  const over = mv > totalTarget;
+  el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12px">' +
+    '<span>当前市值 <b class="mono">' + money(mv) + '</b> / 目标 <b class="mono">' + money(totalTarget) + '</b></span>' +
+    '<span class="' + (over ? 'up' : '') + '" style="font-weight:700">占用 ' + (mv / totalTarget * 100).toFixed(1) + '%' + (over ? ' ⚠ 超目标' : '') + '</span></div>' +
+    '<div class="ob"><i style="width:' + pct.toFixed(1) + '%;' + (over ? 'background:linear-gradient(90deg,#f59e0b,#ef4444)' : '') + '"></i></div>';
+}
+/* v53.29：顶部「当前市值分布」卡（环形图 + 图例），与总目标卡左右并列 */
+function renderDonutCard(rows){
+  const body = document.getElementById('posDonutBody'); if (!body) return;
+  const posRows = rows.filter(r => isFinite(r.mv) && r.mv > 0);
+  const allocTotal = posRows.reduce((s, r) => s + r.mv, 0);
+  if (!allocTotal){ body.innerHTML = '<div class="empty" style="padding:6px;font-size:12px">暂无市值持仓（无行情），无法计算占比</div>'; return; }
+  const sorted = posRows.slice().sort((a, b) => b.mv - a.mv);
+  const items = sorted.slice(0, 6).map((r, i) => ({ label: r.h.name || r.h.code, value: r.mv, color: POS_PALETTE[i % POS_PALETTE.length] }));
+  const otherCost = allocTotal - items.reduce((s, i) => s + i.value, 0);
+  if (otherCost > 1) items.push({ label: '其他', value: otherCost, color: '#cbd5e1' });
+  const legend = items.map((it, i) => '<span><i style="background:' + it.color + '"></i>' + esc(it.label) + '</span>').join('');
+  body.innerHTML = posDonut(items) + '<div class="an-legend">' + legend + '</div>';
+}
 function renderPositionAnalysis(rows, agg){
   const box = $('#posAnalysis');
-  if (!rows.length){ box.innerHTML = ''; return; }
+  if (!rows.length){ box.innerHTML = ''; renderDonutCard([]); return; }
   const totalCost = agg.totalCost, totalMv = agg.totalMv, totalFull = agg.totalFull,
         totalTarget = agg.totalTarget, n = rows.length;
   /* 仓位口径统一为「当前市值」（与仓位管理表一致，v53.14 起） */
@@ -4888,11 +4942,12 @@ function renderPositionAnalysis(rows, agg){
     mkv('占用率', isFinite(occ) ? occ.toFixed(0) + '%' : '—') + mkv('前1占比', top1Share.toFixed(0) + '%') +
     mkv('超额', overN) + mkv('满仓/超额', fullN);
   function mkv(k, v){ return '<div class="an-metric"><div class="m-k">' + k + '</div><div class="m-v' + (k === '超额' && overN > 0 ? '" style="color:var(--up)' : '') + '">' + v + '</div></div>'; }
+  /* v53.29：市值分布卡已上移到顶部与总目标卡并列；an-grid 只留占用率 + 组合指标两卡 */
+  renderDonutCard(rows);
   box.innerHTML =
     '<div class="an-title">仓位综合分析 · 投资风格建议（按当前市值口径）</div>' +
     '<div class="guide" style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:10px">' + guide + '</div>' +
-    '<div class="an-grid">' +
-      '<div class="an-card"><h5>当前市值分布</h5>' + (allocTotal > 0 ? posDonut(items) + '<div class="an-legend">' + legend + '</div>' : '<div class="empty" style="padding:8px">暂无市值持仓（无行情），无法计算占比</div>') + '</div>' +
+    '<div class="an-grid an-grid-2">' +
       '<div class="an-card"><h5>单标的占用率（当前市值 / 满仓金额 · 竖线=满仓线）</h5>' + (barRows.length ? bars : '<div class="empty" style="padding:8px">尚未设置满仓金额或暂无行情</div>') + '</div>' +
       '<div class="an-card"><h5>组合指标</h5><div class="an-metrics">' + metrics + '</div>' +
         '<div class="an-style"><div class="st">🎯 ' + esc(styleLabel) + '</div><div class="sd">' + styleDesc + '</div></div>' +
