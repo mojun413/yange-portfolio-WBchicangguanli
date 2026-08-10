@@ -40,6 +40,12 @@
    打开即全宽展示，无需双手缩放；页面内容自适应视口宽度（html overflow-x:hidden 已防横向溢出） */
 html{overflow-x:hidden;touch-action:manipulation;-webkit-text-size-adjust:100%}  /* 锁死页面级横向溢出 + 禁止双击/捏合缩放干扰 */
 html,body{margin:0;padding:0}
+/* v53.21：杜绝一切撑宽页面的元素 —— iOS Safari 只要 scrollWidth > 视口就整体缩小页面，
+   必须保证任何子元素（SVG/弹窗/表格/长文本）都不超出视口宽，打开即 100% 缩放满宽展示 */
+svg{max-width:100%;height:auto}
+.mask{overflow:auto}
+.modal{max-width:min(520px, calc(100vw - 32px))}
+.modal.wide{max-width:min(940px, calc(100vw - 32px))}
 body{
   background:var(--bg);
   background-image:var(--bg-grid);
@@ -508,7 +514,7 @@ th.sorted .si{opacity:1}
 .import-progress .big{font-size:20px;font-weight:700}
 .import-progress .sub{font-size:13px;color:var(--muted);margin-top:4px}
 /* 同步腾讯文档按钮的自定义高亮 tooltip（JS 动态创建到 body，避开顶栏层叠上下文） */
-.tip{display:none;position:fixed;width:330px;background:#1f2937;color:#f3f4f6;
+.tip{display:none;position:fixed;width:330px;max-width:calc(100vw - 24px);background:#1f2937;color:#f3f4f6;
   border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.85;z-index:9999;
   box-shadow:0 12px 32px rgba(0,0,0,.35);text-align:left;white-space:normal;font-weight:400}
 .tip .t1{display:block;color:#ffd166;font-weight:700;margin-bottom:5px;font-size:12.5px;border-bottom:1px solid #3a4557;padding-bottom:5px}
@@ -580,10 +586,11 @@ th.sorted .si{opacity:1}
 .about-box .ab-body b{color:var(--text)}
 
 /* ===================== 弹窗 ===================== */
-.mask{position:fixed;inset:0;background:rgba(15,19,32,.45);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
-.modal{background:#fff;border-radius:18px;max-width:520px;width:100%;box-shadow:var(--shadow-lg);overflow:hidden;max-height:86vh;display:flex;flex-direction:column;animation:modalin .22s cubic-bezier(.22,1,.36,1)}
+/* max-width 用 min() 钳到视口内，弹窗超宽时在遮罩内滚动而非撑宽页面（撑宽会让 iOS Safari 整体缩小页面） */
+.mask{position:fixed;inset:0;background:rgba(15,19,32,.45);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;overflow:auto}
+.modal{background:#fff;border-radius:18px;max-width:min(520px, calc(100vw - 32px));width:100%;box-shadow:var(--shadow-lg);overflow:hidden;max-height:86vh;display:flex;flex-direction:column;animation:modalin .22s cubic-bezier(.22,1,.36,1)}
 @keyframes modalin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-.modal.wide{max-width:940px}
+.modal.wide{max-width:min(940px, calc(100vw - 32px))}
 .modal h3{margin:0;padding:16px 20px;font-size:16px;border-bottom:1px solid var(--line-2);font-weight:700}
 .modal .mb{padding:18px 20px;overflow:auto}
 .modal .mf{padding:13px 20px;border-top:1px solid var(--line-2);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;background:var(--panel-2)}
@@ -755,7 +762,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.20 · 2026-08-10 14:28</div>
+      <div class="sf-ver" id="sfVer">v53.21 · 2026-08-10 14:37</div>
     </div>
   </aside>
 
@@ -766,7 +773,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.20</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.21</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1144,7 +1151,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.20 · 2026-08-10 14:28 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.21 · 2026-08-10 14:37 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1192,8 +1199,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.20';
-const APP_BUILD   = '2026-08-10 14:28';
+const APP_VERSION = 'v53.21';
+const APP_BUILD   = '2026-08-10 14:37';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
