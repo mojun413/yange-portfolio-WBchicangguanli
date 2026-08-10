@@ -61,7 +61,7 @@ body{
   color:#c7d2e2;border-right:1px solid rgba(255,255,255,.05);
   box-shadow:2px 0 24px rgba(8,12,22,.18);
 }
-.side-brand{display:flex;align-items:center;gap:12px;padding:22px 20px 10px}
+.side-brand{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:22px 20px 10px}
 .side-brand .dot{width:32px;height:32px;border-radius:10px;flex-shrink:0;
   background:linear-gradient(135deg,var(--gold-2),var(--gold));
   box-shadow:0 6px 16px rgba(245,158,11,.4), inset 0 1px 0 rgba(255,255,255,.4);
@@ -69,7 +69,7 @@ body{
 .side-brand .dot::after{content:"";position:absolute;inset:9px;border-radius:4px;
   background:linear-gradient(135deg,#0b0f1a,#1b2336);opacity:.92}
 .side-brand .bt{font-size:16px;font-weight:800;letter-spacing:.4px;color:#fff;line-height:1.2}
-.side-brand .motto{display:block;width:100%;font-size:11px;font-weight:500;color:#9fb0cc;letter-spacing:1px;margin-top:8px;padding-left:2px;font-style:italic}
+.side-brand .motto{order:3;flex-basis:100%;font-size:13px;font-weight:600;color:#c7d2e6;letter-spacing:.5px;margin-top:4px;padding-left:0;font-style:normal}
 .side-brand .bt small{display:block;font-size:10px;font-weight:600;color:#7c8aa5;letter-spacing:2px;margin-top:2px}
 .side-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:5px;overflow-y:auto}
 .nav-item{
@@ -391,6 +391,12 @@ tr.hold-total .tf-note{display:block;font-weight:400;font-size:11px;color:var(--
 .alert-card{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);font-size:12.5px}
 .alert-card .ac-name{font-weight:600}
 .alert-card .ac-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.ze-wrap{margin-bottom:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ze-head{display:flex;align-items:center;gap:6px;padding:7px 12px;font-size:12.5px;font-weight:700;background:var(--panel-2);border-bottom:1px solid var(--line-2)}
+.ze-ic{font-size:14px}
+.ze-sub{font-weight:400;font-size:11px;color:var(--muted)}
+.ze-list{padding:8px 10px}
+.ze-ok{font-size:12.5px;color:var(--down);font-weight:600;display:flex;align-items:center;gap:6px}
 .ac-badge.hit{background:#fdeaea;color:var(--down)}
 .ac-badge.watch{background:#eef3fb;color:var(--accent)}
 .notify-row{margin-top:8px}
@@ -400,6 +406,15 @@ tr.hold-total .tf-note{display:block;font-weight:400;font-size:11px;color:var(--
 .mkt-live-head .bar{width:4px;height:14px;border-radius:3px;background:var(--accent)}
 .mkt-live-sub{font-weight:400;font-size:11.5px;color:var(--muted)}
 .mkt-live-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.mkt-breadth{margin-top:8px;padding:8px 12px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px}
+.mkt-breadth-row{display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;font-size:12px;color:var(--muted)}
+.mkt-breadth-row .bb{display:inline-flex;gap:4px;align-items:baseline;white-space:nowrap}
+.mkt-breadth-row .bb b{font-size:15px;color:var(--text);font-weight:700}
+.mkt-breadth-row .bb.up b{color:var(--up)}
+.mkt-breadth-row .bb.down b{color:var(--down)}
+.mkt-breadth-row .bb.lu b{color:var(--up)}
+.mkt-breadth-row .bb.ld b{color:var(--down)}
+.mkt-breadth-row .bb-tip{font-size:11px;color:var(--muted);opacity:.75;margin-left:auto}
 .mkt-chip{flex:0 0 auto;min-width:108px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:1px}
 .mkt-chip .mkt-name{font-size:11.5px;color:var(--muted)}
 .mkt-chip .mkt-val{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
@@ -618,6 +633,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
   .sidebar{width:72px}
   .sidebar .side-brand{justify-content:center;padding:20px 0 8px}
   .sidebar .side-brand .bt{display:none}
+  .sidebar .side-brand .motto{display:none}
   .sidebar .side-nav{padding:10px 8px;align-items:center}
   .sidebar .nav-item{justify-content:center;padding:13px 0;width:100%}
   .sidebar .nav-item .ico{margin:0;width:auto;font-size:19px}
@@ -726,7 +742,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.11 · 2026-08-10 10:58</div>
+      <div class="sf-ver" id="sfVer">v53.12 · 2026-08-10 12:08</div>
     </div>
   </aside>
 
@@ -737,7 +753,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.11</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.12</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -803,13 +819,14 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
         <div class="mkt-live" id="mktLive">
           <div class="mkt-live-head"><span class="bar"></span>大盘直播 <span class="mkt-live-sub" id="mktLiveSub">交易时段每 2 秒刷新 · 红涨绿跌</span></div>
           <div class="mkt-live-row" id="mktLiveRow"></div>
+          <div class="mkt-breadth" id="mktBreadth"></div>
         </div>
         <div class="monitor-split">
           <div class="ms-col">
 <div class="panel">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>盯盘看板</div>
-            <div class="panel-sub" id="monitorSub">自选标的 · 交易时段每 60 秒自动刷新 · 休市自动暂停 · 红涨绿跌</div>
+            <div class="panel-sub" id="monitorSub">自选标的 · 交易时段每 2 秒自动刷新 · 休市自动暂停 · 红涨绿跌</div>
             <div class="spacer"></div>
             <div class="mb-search"><input id="watchInput" type="text" placeholder="代码/名称 添加自选（如 002517 / 512000）" autocomplete="off"></div>
             <button class="btn-sm" id="btnWatchAdd" title="将输入的代码加入自选">＋ 添加</button>
@@ -894,9 +911,9 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
         <div class="panel">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>做 T / 做波段</div>
-            <div class="panel-sub">独立于持仓成本核算的短线台账</div>
+            <div class="panel-sub">自动从交易明细同步 · 独立于持仓成本核算的短线台账</div>
             <span style="flex:1"></span>
-            <button class="btn-sm" id="btnAutoTrade" title="扫描持仓的买卖流水，自动识别同日做T配对和多日波段配对">自动识别</button>
+            <button class="btn-sm" id="btnAutoTrade" title="扫描持仓的买卖流水，自动识别同日做T配对和多日波段配对（日常已自动同步，此按钮用于补录/复查）">自动识别</button>
           </div>
           <div class="panel-body" style="border-bottom:1px solid var(--line-2);background:var(--panel-2)">
             <div class="form-grid g-trade">
@@ -1112,7 +1129,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.11 · 2026-08-10 10:58 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.12 · 2026-08-10 12:08 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1158,8 +1175,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.11';
-const APP_BUILD   = '2026-08-10 10:58';
+const APP_VERSION = 'v53.12';
+const APP_BUILD   = '2026-08-10 12:08';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2315,6 +2332,28 @@ function autoDetectTrades(){
   return candidates;
 }
 
+/* ============================ 做T / 波段自动同步 ============================
+   「无需手动录入」：每次渲染做T页面 / 数据同步后自动把交易明细里可配对的
+   做T（同日等量买卖）与波段（跨日等量买卖）写入 state.trades 并持久化。
+   autoDetectTrades() 内部已按 (code|date|shares|buyPrice|sellPrice) 对现有记录去重，
+   因此重复调用不会产生重复数据（幂等）。返回本次新增条数。 */
+function syncAutoTrades(){
+  let n = 0;
+  try {
+    const cands = autoDetectTrades();
+    cands.forEach(r => {
+      state.trades.push({
+        id: uid(), date: r.date, type: r.type, code: r.code, name: r.name,
+        shares: r.shares, buyPrice: r.buyPrice, sellPrice: r.sellPrice,
+        fee: r.fee || 0, note: r.note, auto: true
+      });
+      n++;
+    });
+    if (n) persist.trades();
+  } catch(e){ /* 静默：同步失败不影响页面 */ }
+  return n;
+}
+
 /* --- 自动识别对话框 --- */
 async function openAutoTrade(){
   const cands = autoDetectTrades();
@@ -3051,7 +3090,11 @@ function renderAnalysis(){
   const notifyBtn = (typeof Notification !== 'undefined')
     ? '<button class="btn-sm" id="btnEnableNotify">' + (Notification.permission === 'granted' ? '浏览器通知：已开启' : '开启浏览器通知') + '</button>'
     : '<span class="dim">当前环境不支持浏览器通知（价格预警将仅站内提示）</span>';
-  const alertHTML = '<div class="disc-wrap">' +
+  /* 祖训纪律引擎（规则引擎自动盯盘） */
+  const zx = zuxunEngineChecks();
+  const zxHTML = '<div class="ze-wrap"><div class="ze-head"><span class="ze-ic">⚖️</span>祖训纪律引擎 <span class="ze-sub">自动盯盘 · 浮盈＞8%卖1/3 · 短线5%/中线10%止损 · 重仓回撤0%止损</span></div>' +
+    '<div class="ze-list">' + (zx.length ? zx.map(z => warnRow(z.ic, z.txt, z.sev)).join('') : '<div class="ze-ok">✓ 全部持仓符合祖训纪律，无越界信号</div>') + '</div></div>';
+  const alertHTML = '<div class="disc-wrap">' + zxHTML +
     (alertCardsHTML ? '<div class="alert-cards">' + alertCardsHTML + '</div>' : '<div class="empty" style="margin-bottom:8px">尚未设置任何预警——在「编辑标的」里填止损价/止盈价即可，交易时段破线会自动弹通知</div>') +
     (disc || '<div class="dim" style="font-size:12px">暂无纪律提醒，组合稳健 ✓</div>') +
     '<div class="notify-row">' + notifyBtn + '</div></div>';
@@ -3063,15 +3106,15 @@ function renderAnalysis(){
     '<div class="panel-body">' + curveHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>收益归因（IRR vs 成本收益率）</div></div>' +
     '<div class="panel-body">' + attrHTML + '</div></div>' +
-    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>行业 / 板块暴露</div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>行业 / 板块分布</div>' +
     '<div class="spacer"></div><button class="btn-sm" id="btnIdentifyAll">批量识别行业</button>' +
-    '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 行业取自东财申万行业(自动)</div></div>' +
+    '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 仅统计当前持仓标的 · 行业取自东财申万行业(自动)</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>主力资金流</div>' +
     '<div class="panel-sub">东财主力净流入 · 交易时段每 90 秒刷新 · 仅股票</div></div>' +
     '<div class="panel-body">' + fundFlowPanelHTML() + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>预警与纪律</div>' +
-    '<div class="panel-sub">交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警 · 主力净流出/概念异动实时监测</div></div>' +
+    '<div class="panel-sub">祖训规则引擎自动盯盘 · 交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警 · 主力净流出/概念异动实时监测</div></div>' +
     '<div class="panel-body">' + alertHTML + '</div></div>';
   box.querySelectorAll('[data-an-range]').forEach(b => b.onclick = () => { state.settings.analysisRange = b.dataset.anRange; persist.settings(); renderAnalysis(); });
   const nb = box.querySelector('#btnEnableNotify');
@@ -3080,6 +3123,57 @@ function renderAnalysis(){
   if (bia) bia.onclick = async () => { bia.disabled = true; const t0 = bia.textContent; bia.textContent = '识别中…'; const n = await autoIdentifyIndustries(true); bia.textContent = t0; bia.disabled = false; renderAnalysis(); toast('已按东财申万行业重新识别 ' + n + ' 个标的（基金按名称主题推断）', 'ok'); };
 }
 function kpi2(label, val, clsN){ return '<div class="kpi-card"><div class="k">' + label + '</div><div class="v ' + (clsN || '') + '">' + val + '</div></div>'; }
+
+/* ============================ 祖训纪律引擎（规则引擎） ============================
+   把「养鹅心法 · 投资祖训」的买卖纪律变成自动盯盘规则，按当前持仓实时检查：
+   ① 止盈：持仓浮盈 ＞ 8% → 卖出 1/3；
+   ② 止损：短线（持仓＜30天）5%、中线（≥30天）10%；
+   ③ 重仓回撤：占组合 ≥ 15% 且曾有过浮盈、现浮盈回撤到 ≤ 0.5% → 0% 即止损。
+   返回 [{ ic, txt, sev }]，由 renderAnalysis 渲染为预警行。 */
+const ZUXUN_SHORT_DAYS = 30;      // 持仓 ≥ 此天数视为中线（止损阈值 10%），否则短线（5%）
+const ZUXUN_TAKE_PROFIT = 8;      // 浮盈 ＞ 8% 卖 1/3
+const ZUXUN_STOP_SHORT = 5;       // 短线止损
+const ZUXUN_STOP_MID = 10;        // 中线止损
+const ZUXUN_HEAVY_PCT = 15;       // 重仓判定（与单标的集中度预警一致）
+const ZUXUN_REVERT_MAX = 0.5;     // 浮盈回撤到 ≤ 此值视为「回撤到 0%」
+function zuxunEngineChecks(){
+  const out = [];
+  const agg = openAggregate();
+  const mvTotal = (isFinite(agg.mv) && agg.mv > 0) ? agg.mv : 0;
+  state.holdings.forEach(h => {
+    const c = calcHolding(h);
+    if (!isFinite(c.price) || c.shares <= 0) return;          // 无行情 / 已清仓跳过
+    const avg = c.avgCost;                                    // 移动平均成本（高抛不产生负成本，口径稳定）
+    if (!isFinite(avg) || avg <= 0) return;                   // 成本≤0（负成本）不适用
+    const rate = (c.price - avg) / avg * 100;                 // 浮盈率（相对成本价）
+    /* 持仓天数：以首笔买入流水日起算 */
+    const buys = (h.txs || []).filter(t => t.side === 'buy' && Number(t.shares) > 1e-9).map(t => t.date).sort();
+    let days = Infinity;
+    if (buys.length){
+      const d0 = new Date(String(buys[0]).replace(/-/g, '/'));
+      if (!isNaN(d0.getTime())) days = Math.max(0, Math.floor((Date.now() - d0.getTime()) / 86400000));
+    }
+    const nm = esc(h.name || h.code);
+    /* ① 止盈：＞8% 卖 1/3 */
+    if (rate > ZUXUN_TAKE_PROFIT)
+      out.push({ ic:'📈', sev:'warn',
+        txt:'祖训止盈：『' + nm + '』浮盈 <b>' + rate.toFixed(1) + '%</b>（＞' + ZUXUN_TAKE_PROFIT + '%），应<b>卖出 1/3</b> 落袋，余仓继续做 T 让利润奔跑' });
+    /* ② 止损：短线 5% / 中线 10%（以持仓天数区分） */
+    const stop = days >= ZUXUN_SHORT_DAYS ? ZUXUN_STOP_MID : ZUXUN_STOP_SHORT;
+    if (rate <= -stop)
+      out.push({ ic:'🛑', sev:'danger',
+        txt:'祖训止损：『' + nm + '』浮亏 <b>' + Math.abs(rate).toFixed(1) + '%</b>（≤ -' + stop + '% · ' + (days >= ZUXUN_SHORT_DAYS ? '中线' : '短线' + (isFinite(days) ? ' ' + days + '天' : '')) + '），应果断卖出离场，不赌翻盘' });
+    /* ③ 重仓回撤：占组合 ≥ 15% 且曾浮盈、现回撤到 ≤ 0.5% → 0% 即止损 */
+    const share = mvTotal > 0 ? c.mv / mvTotal * 100 : 0;
+    if (share >= ZUXUN_HEAVY_PCT && rate <= ZUXUN_REVERT_MAX){
+      const everUp = (h.txs || []).some(t => Number(t.price) > avg * 1.02);   // 历史有成交价高于成本 → 曾经浮盈
+      if (everUp)
+        out.push({ ic:'⚖️', sev:'warn',
+          txt:'重仓回撤止损：『' + nm + '』占组合 <b>' + share.toFixed(0) + '%</b>，浮盈已回撤到 <b>' + rate.toFixed(1) + '%</b>（曾有过浮盈），按祖训 <b>0% 即止损</b>' });
+    }
+  });
+  return out;
+}
 function warnRow(ic, txt, sev){ return '<div class="an-warn' + (sev ? ' sev-' + sev : '') + '"><span class="ic">' + ic + '</span><span>' + txt + '</span></div>'; }
 function bindAnalysis(){
   document.querySelectorAll('[data-an-range]').forEach(b => b.onclick = () => { state.settings.analysisRange = b.dataset.anRange; persist.settings(); renderAnalysis(); });
@@ -3246,7 +3340,7 @@ const watchSym = w => {
 async function refreshMonitor(silent){
   if (monitorLoading) return;
   const sub = document.getElementById('monitorSub');
-  if (!watchList.length){ renderWatch(); if (sub) sub.textContent = '自选标的 · 交易时段每 60 秒自动刷新 · 休市自动暂停 · 红涨绿跌'; return; }
+  if (!watchList.length){ renderWatch(); if (sub) sub.textContent = '自选标的 · 交易时段每 2 秒自动刷新 · 休市自动暂停 · 红涨绿跌'; return; }
   monitorLoading = true;
   if (!silent && sub) sub.innerHTML = '<span class="spin"></span>正在拉取自选行情…';
   try {
@@ -3255,7 +3349,7 @@ async function refreshMonitor(silent){
     watchQuotes = map;
     renderWatch();
     const nf = syms.filter(s => { const q = map[s]; return !q || q.err || !isFinite(q.price); }).length;
-    if (sub) sub.textContent = '自选 ' + watchList.length + ' 个 · ' + (syms.length - nf) + ' 个有行情 · ' + (isTradingTime() ? '交易时段每 60 秒自动刷新' : marketPhaseLabel(marketPhase()) + '，已暂停刷新') + ' · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
+    if (sub) sub.textContent = '自选 ' + watchList.length + ' 个 · ' + (syms.length - nf) + ' 个有行情 · ' + (isTradingTime() ? '交易时段每 2 秒自动刷新' : marketPhaseLabel(marketPhase()) + '，已暂停刷新') + ' · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
   } catch (e) {
     if (!silent){
       const grid = document.getElementById('monitorGrid');
@@ -3292,8 +3386,70 @@ async function renderMarketLive(){
     }).join('');
     const sub = document.getElementById('mktLiveSub');
     if (sub) sub.textContent = (isTradingTime() ? '交易时段每 2 秒刷新' : marketPhaseLabel(marketPhase()) + '，已暂停') + ' · 红涨绿跌';
+    /* 大盘广度：仅交易时段拉取（15s 节流，函数内自控），休市复用收盘缓存不发请求 */
+    if (isTradingTime()) await fetchMarketBreadth(false);
+    renderBreadth();
   } catch(e){}
   mktLiveLoading = false;
+}
+
+/* ============================ 大盘广度：涨/跌/涨停/跌停家数 ============================
+   东财 push2 clist 全A分页拉取（需 Referer 否则 total 为 null），本地统计当日涨跌家数；
+   涨停/跌停按 ±9.5% 阈值近似（主板 10% / 创业科创 20% 通用近似口径，标注「约」）。
+   仅在交易时段拉取，15s 节流；休市零请求，复用收盘缓存。 */
+let mktBreadthLoading = false;
+let mktBreadthCache = null;       /* { up, down, flat, limitUp, limitDown, ts } */
+let mktBreadthLastAt = 0;
+const BREADTH_INTERVAL = 15000;
+async function fetchMarketBreadth(force){
+  const now = Date.now();
+  if (!force && now - mktBreadthLastAt < BREADTH_INTERVAL) return mktBreadthCache;
+  if (mktBreadthLoading) return mktBreadthCache;
+  mktBreadthLoading = true;
+  try {
+    const FS = 'm:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';   /* 沪A主板+深A主板+创业板+科创/北交 ≈ 全A */
+    const PAGE = 500;
+    const headers = { Referer: 'https://quote.eastmoney.com/', 'User-Agent': 'Mozilla/5.0' };
+    const base = 'https://push2.eastmoney.com/api/qt/clist/get?pn=';
+    const tail = '&pz=' + PAGE + '&po=1&np=1&fltt=2&invt=2&fid=f3&fs=' + FS + '&fields=f3';
+    const j0 = await fetch(base + '1' + tail, { headers }).then(r => r.json()).catch(() => null);
+    const total = j0 && j0.data && j0.data.total;
+    if (!total){ mktBreadthCache = null; return null; }
+    const pages = Math.max(1, Math.ceil(total / PAGE));
+    const urls = [];
+    for (let p = 1; p <= pages; p++) urls.push(base + p + tail);
+    const js = await Promise.all(urls.map(u => fetch(u, { headers }).then(r => r.json()).catch(() => null)));
+    let up = 0, down = 0, flat = 0, limitUp = 0, limitDown = 0;
+    js.forEach(j => {
+      const diff = j && j.data && j.data.diff;
+      if (!Array.isArray(diff)) return;
+      diff.forEach(d => {
+        const f3 = Number(d.f3);
+        if (!isFinite(f3)) return;
+        if (f3 > 0.001) up++; else if (f3 < -0.001) down++; else flat++;
+        if (f3 >= 9.5) limitUp++; else if (f3 <= -9.5) limitDown++;
+      });
+    });
+    mktBreadthCache = { up, down, flat, limitUp, limitDown, ts: now };
+  } catch(e){ /* 静默：广度失败不影响指数直播 */ }
+  mktBreadthLoading = false;
+  mktBreadthLastAt = Date.now();
+  return mktBreadthCache;
+}
+function renderBreadth(){
+  const el = document.getElementById('mktBreadth'); if (!el) return;
+  if (!mktBreadthCache){
+    el.innerHTML = '<div class="mkt-breadth-row dim">' + (isTradingTime() ? '涨跌家数加载中…' : '涨跌家数 · 开盘后自动统计') + '</div>';
+    return;
+  }
+  el.innerHTML = '<div class="mkt-breadth-row">' +
+    '<span class="bb up"><b>' + mktBreadthCache.up + '</b> 上涨</span>' +
+    '<span class="bb down"><b>' + mktBreadthCache.down + '</b> 下跌</span>' +
+    '<span class="bb flat"><b>' + mktBreadthCache.flat + '</b> 平盘</span>' +
+    '<span class="bb lu"><b>' + mktBreadthCache.limitUp + '</b> 涨停</span>' +
+    '<span class="bb ld"><b>' + mktBreadthCache.limitDown + '</b> 跌停</span>' +
+    '<span class="bb-tip">全A · 涨停/跌停按 ±9.5% 近似 · ' + new Date(mktBreadthCache.ts).toLocaleTimeString('zh-CN', { hour12: false }) + '</span>' +
+    '</div>';
 }
 
 /* 渲染自选标的卡片（排序；卡片点击看 K 线，× 移除） */
@@ -3620,7 +3776,14 @@ function minuteJsonp(sym){
 function parseMinute(data, sym){
   const node = data && data.data && data.data[sym];
   const arr = node && node.data && node.data.data;
-  if (!Array.isArray(arr) || !arr.length) return { rows: [], date: '' };
+  /* 昨收优先从分时响应自带的 qt 行情取（字段[4]，与 parseQuote 同口径），避免再发一次 fetchQuotes 失败时回退到首根价导致分时图画成直线 */
+  let preClose = NaN;
+  try {
+    const qtNode = node && node.qt;
+    const qtArr = qtNode && (qtNode[sym] || qtNode['v_ff_' + sym]);
+    if (Array.isArray(qtArr) && isFinite(Number(qtArr[4])) && Number(qtArr[4]) > 0) preClose = Number(qtArr[4]);
+  } catch (e) {}
+  if (!Array.isArray(arr) || !arr.length) return { rows: [], date: '', preClose };
   let prevCum = 0;
   const rows = [];
   arr.forEach(str => {
@@ -3632,7 +3795,7 @@ function parseMinute(data, sym){
     prevCum = cum;
     rows.push({ t, price, avg: (cum > 0 ? amt / cum : price), vol, cum, amt });
   });
-  return { rows, date: (node.data && node.data.date) || '' };
+  return { rows, date: (node.data && node.data.date) || '', preClose };
 }
 /* 分时 SVG：价格线 + 均价线(黄) + 昨收基准 + 涨跌面积 + 成交量（对标同花顺） */
 function minuteSVG(rows, name, preClose){
@@ -3875,12 +4038,15 @@ function showKlineDialog(name, sym){
         if (!silent) body.innerHTML = '<div class="dim" style="padding:20px">分时数据拉取失败（' + esc(sym) + '）</div>';
         loading = false; schedule('min'); return;
       }
-      let preClose = NaN;
-      try {
-        const m = await fetchQuotes([sym]);
-        const q = m && m[sym];
-        if (q && isFinite(q.preClose) && q.preClose > 0) preClose = q.preClose;
-      } catch (e) {}
+      /* 昨收优先用分时响应自带的 qt（同一份数据，零额外请求）；缺失时再回退 fetchQuotes；再缺失才用首根价兜底 */
+      let preClose = isFinite(pm.preClose) && pm.preClose > 0 ? pm.preClose : NaN;
+      if (!isFinite(preClose) || preClose <= 0){
+        try {
+          const m = await fetchQuotes([sym]);
+          const q = m && m[sym];
+          if (q && isFinite(q.preClose) && q.preClose > 0) preClose = q.preClose;
+        } catch (e) {}
+      }
       const holder = document.createElement('div');
       holder.innerHTML = minuteSVG(pm.rows, name, preClose);
       if (silent){ const old = body.querySelector('svg'); if (old) old.remove(); } else { body.innerHTML = ''; }
@@ -3984,7 +4150,7 @@ const HOLD_COLS = [
   { key:'floatPnl', label:'浮动盈亏',   cls:'',  type:'num',  get:(h,c) => c.floatPnl },
   { key:'roi',      label:'收益率',      cls:'',  type:'num',  get:(h,c) => c.roi },
   { key:'pct',      label:'当日涨跌',    cls:'',  type:'num',  get:(h,c) => c.pct },
-  { key:'tRef',     label:'做T参考',     cls:'l', type:'text', get:(h,c) => NaN }   // 不参与排序，仅展示
+  { key:'tRef',     label:'做T参考',     cls:'l', type:'num',  get:(h,c) => tRefPct(h,c) }   // 按三角标记后的做T参考比例（现价 vs 最近一次加/减仓价）排序
 ];
 /* 按当前排序设置对 [{h,c}] 排序；缺值（NaN/空）永远排在最后，与升降序无关 */
 function sortHoldRows(rows){
@@ -4223,6 +4389,18 @@ function renderHoldings(){
     (sc ? '已按「' + sc.label + '」' + (sortDir === 'asc' ? '升序' : '降序') : '点表头可排序');
 }
 
+/* 做T参考排序取值：三角标记后的百分比 = (现价 − 最近一次加/减仓成交价) / 成交价 × 100。无行情或无流水返回 NaN（排序时沉底） */
+function tRefPct(h, c){
+  const q = state.quotes[qkey(h)] || {};
+  const price = Number(q.price);
+  if (!isFinite(price)) return NaN;
+  const rows = (c.rows || []).filter(t => !t.dividend);
+  if (!rows.length) return NaN;
+  const last = rows[rows.length - 1];
+  const tp = Number(last.price);
+  if (!isFinite(tp) || tp <= 0) return NaN;
+  return (price - tp) / tp * 100;
+}
 /* 持仓列表行「做T参考」：最近一笔操作（加仓/减仓）的成交价 → 现价 差价与比例。
    两行小字：第一行 方向+日期+价格区间，第二行 差价比例（涨红跌绿）。 */
 function tRefCell(h, c){
@@ -4389,8 +4567,11 @@ function renderOps(){
 /* ============================ 渲染：做T / 波段 ============================ */
 function renderTrades(){
   const box = $('#tradeTable');
+  /* 自动同步：交易明细 → 做T/波段（幂等，无需手动录入；有新配对才提示） */
+  const autoN = syncAutoTrades();
+  if (autoN > 0) toast('已自动同步 ' + autoN + ' 条做T/波段配对（做T ' + state.trades.filter(t => t.auto && t.type === 'T').length + ' / 波段 ' + state.trades.filter(t => t.auto && t.type === 'swing').length + '）', 'ok');
   const baseList = state.trades.slice().sort((a, b) => (a.date === b.date ? 0 : (a.date < b.date ? 1 : -1)));
-  if (!baseList.length){ box.innerHTML = '<div class="empty">还没有做T / 波段记录。记录一笔完整的买卖，自动算出成本、收益与收益率。</div>'; return; }
+  if (!baseList.length){ box.innerHTML = '<div class="empty">暂无做T / 波段记录——新增买卖交易明细后，本页会自动从交易明细中配对生成做T / 波段，无需手动录入。</div>'; return; }
   const list = sortTradeRows(baseList);
   const sum = { T:{ pnl:0, cost:0, n:0, win:0 }, swing:{ pnl:0, cost:0, n:0, win:0 } };
   const body = list.map(t => {
@@ -6875,7 +7056,7 @@ function init(){
   setTimeout(() => { try { takeDailySnapshot(); } catch(e){} }, 2000);  /* 首屏记录今日快照（待首拉行情后） */
   setupTimer();
   setupTick();                 /* 行情秒级 ticker：仅交易时段每 2 秒刷新并联动重算 */
-  /* 盯盘看板：首屏拉一次；之后每 60 秒仅在交易时段刷新（休市零请求） */
+  /* 盯盘看板：首屏拉一次；之后每 2 秒仅在交易时段刷新（休市零请求） */
   refreshMonitor(true);
   /* 大盘直播：首屏拉一次；交易时段每 2 秒仅在 monitor 页激活时刷新（休市零请求） */
   renderMarketLive(true);
@@ -6886,7 +7067,7 @@ function init(){
     if (!isTradingTime()) return;
     renderMarketLive(true);
   }, 2000);
-  setInterval(() => { if (!document.hidden && isTradingTime()) refreshMonitor(true); }, 60000);
+  setInterval(() => { if (!document.hidden && isTradingTime()) refreshMonitor(true); }, 2000);
   /* 主力资金流：交易时段每 90 秒刷新（休市零请求）；首屏拉一次（非交易时段自动 no-op） */
   setInterval(() => { if (!document.hidden) refreshFundFlows(); }, 90000);
   refreshFundFlows();
@@ -7261,13 +7442,11 @@ async function importYangE2(){
   renderAll();
   if (state.holdings.length) refreshQuotes(true);
 
-  // 自动检测做T/波段配对（只提示，需用户点「自动识别」确认导入）
+  // 做T/波段自动同步（无需手动录入；renderAll 内 renderTrades 已同步，此处仅提示）
   setTimeout(() => {
     try {
-      const cands = autoDetectTrades();
-      if (cands.length) toast('检测到 ' + cands.length + ' 条可导入的做T/波段配对（做T ' +
-        cands.filter(c => c.type === 'T').length + ' + 波段 ' + cands.filter(c => c.type === 'swing').length +
-        '），点「做T/波段」面板的「自动识别」查看并确认导入', 'info');
+      const autoN = state.trades.filter(t => t.auto).length;
+      if (autoN) toast('做T/波段已自动同步 ' + autoN + ' 条（来自交易明细，无需手动录入）', 'info');
     } catch(e){ /* 静默 */ }
   }, 500);
 
