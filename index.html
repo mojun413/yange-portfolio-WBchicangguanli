@@ -236,6 +236,10 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 /* 自选标的卡片（盯盘看板）：带移除按钮 + 点击看 K 线 */
 .watch-card{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:5px 7px;display:flex;flex-direction:column;gap:0;transition:border-color .15s, transform .15s, box-shadow .15s;cursor:pointer}
 .watch-card:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px)}
+/* v53.22：当前持仓的自选卡 → 金色高亮边框 + 左上角「持仓」徽章 */
+.watch-card.holding{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset, 0 1px 4px rgba(245,158,11,.25);background:#fffcf5}
+.watch-card.holding .mc-name{color:#92400e;font-weight:700}
+.watch-card .hold-badge{position:absolute;top:-1px;left:-1px;background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#7c2d12;font-size:9px;font-weight:800;padding:1px 5px;border-radius:7px 0 6px 0;line-height:1.4;letter-spacing:.5px;z-index:3}
 .watch-card .mc-name{font-size:11px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;padding-right:12px}
 .watch-card .mc-pct{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.2px;line-height:1.15}
 .watch-card .mc-price{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.3}
@@ -646,6 +650,33 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
   .g-tx,.g-op2{grid-template-columns:repeat(3,1fr)}
   .form-actions{grid-column:1/-1}
 }
+/* ---- 13 寸大平板 901-1366px（iPad Pro 12.9"/13"，竖屏 1024 / 横屏 1366）专门适配 ----
+   触控为主：侧栏收成 88-96px 图标栏（导航常驻不占宽），主区最大化；
+   卡片 3-4 列、字号/触控目标微调。>1366 才回到桌面全侧栏布局。 */
+@media (min-width:901px) and (max-width:1366px){
+  .sidebar{width:88px}
+  .sidebar .side-brand{justify-content:center;padding:18px 0 8px}
+  .sidebar .side-brand .bt,.sidebar .side-brand .motto{display:none}
+  .sidebar .side-nav{padding:10px 6px;align-items:center}
+  .sidebar .nav-item{justify-content:center;padding:12px 0;width:100%}
+  .sidebar .nav-item .ico{margin:0;font-size:19px}
+  .sidebar .nav-item .nav-txt{display:none}
+  .sidebar .nav-sep{width:100%;margin:8px 0}
+  .sidebar .side-foot{display:none}
+  .wrap{padding:0 var(--page-pad) 80px}
+  .cards{grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  .live-grid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr))}
+  th,td{padding:9px 12px}
+  .panel-head{padding:13px 16px}
+  .panel-body{padding:14px 16px}
+  .page-title-current{font-size:17px}
+  .topbar-in{padding:12px 16px}
+}
+@media (min-width:1101px) and (max-width:1366px){
+  /* 13 寸横屏（>1100）：侧栏略宽 96px，卡片 4 列更充实 */
+  .sidebar{width:96px}
+  .cards{grid-template-columns:repeat(4,1fr)}
+}
 /* ---- 竖屏平板 641-900px：侧栏自动收成 72px 图标栏，主区 2 列 ----
    专业平板布局（iPad 竖屏 / 大平板）：导航常驻不占空间，内容区最大化；
    图标栏保留完整导航可见性（图标 + 悬停提示），触控目标 ≥44px。 */
@@ -762,7 +793,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.21 · 2026-08-10 14:37</div>
+      <div class="sf-ver" id="sfVer">v53.22 · 2026-08-10 14:47</div>
     </div>
   </aside>
 
@@ -773,7 +804,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.21</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.22</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1151,7 +1182,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.21 · 2026-08-10 14:37 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.22 · 2026-08-10 14:47 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1199,8 +1230,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.21';
-const APP_BUILD   = '2026-08-10 14:37';
+const APP_VERSION = 'v53.22';
+const APP_BUILD   = '2026-08-10 14:47';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3515,7 +3546,11 @@ function renderWatch(){
     const clsN = upN ? 'up' : (downN ? 'down' : 'flat');
     const arrow = upN ? '▲' : (downN ? '▼' : '·');
     const name = q.name || w.name || w.code;
-    return '<div class="watch-card ' + clsN + '" data-code="' + esc(w.code) + '" title="' + esc(name) + '（' + esc(w.code) + '）· 点击查看K线">' +
+    /* v53.22：自选里当前持有的标的（持仓且未清仓）→ 金色高亮边框 + 「持仓」徽章，一眼区分盯盘 vs 自选 */
+    const hd = state.holdings.find(x => String(x.code || '').replace(/\D/g, '') === String(w.code || '').replace(/\D/g, ''));
+    const isHolding = !!hd && !hd.closed && calcHolding(hd).shares > 1e-8;
+    return '<div class="watch-card ' + clsN + (isHolding ? ' holding' : '') + '" data-code="' + esc(w.code) + '" title="' + esc(name) + '（' + esc(w.code) + '）· ' + (isHolding ? '当前持仓 · ' : '') + '点击查看K线">' +
+      (isHolding ? '<span class="hold-badge" title="当前持仓标的">持仓</span>' : '') +
       '<button class="watch-del" data-del="' + esc(w.code) + '" title="移除自选">×</button>' +
       '<div class="mc-name">' + esc(name) + '</div>' +
       '<div class="mc-pct ' + clsN + '">' + (isFinite(pct) ? arrow + (pct > 0 ? '+' : '') + pct.toFixed(2) + '%' : '<span class="dim">—</span>') + '</div>' +
@@ -3552,6 +3587,7 @@ async function addWatch(){
     if (!q || q.err || !q.name){ toast('未找到标的 ' + esc(raw) + '，请核对代码', 'warn'); return; }
     watchList.push({ code: digits, name: q.name, market: sym.slice(0, 2) === 'jj' ? '' : sym.slice(0, 2), type: isFund ? 'fund' : 'stock' });
     persistWatch();
+    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* v53.22：自选即时上云，清缓存可恢复 */
     if (inp) inp.value = '';
     await refreshMonitor(true);
     toast('已添加自选：' + q.name, 'ok');
@@ -3562,6 +3598,7 @@ async function addWatch(){
 function removeWatch(code){
   watchList = watchList.filter(w => w.code !== code);
   persistWatch();
+  if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* v53.22：自选即时上云 */
   refreshMonitor(true);
   toast('已移除自选', 'ok');
 }
@@ -7759,6 +7796,23 @@ function scheduleCloudPush(){
   if (!cloud.state.pendingSince) cloud.state.pendingSince = Date.now();
   clearTimeout(cloud.pushTimer); cloud.pushTimer = null;   /* 明确取消旧版自动推送 */
   try { renderCloudStatus(); } catch(e){}
+}
+/* ===== 自选等轻量数据即时上云（v53.22）=====
+   自选增删后 debounce 600ms 单向「本机 → 云端」推送：云端始终保留最新自选，
+   即使清空浏览器缓存 / 换设备，cloudInit → cloudPull → applyCloudSnapshot 也能把自选恢复回来。
+   与 v53.1「核心数据不自动推送」策略不冲突：仅自选这类高频小改动即时上云。 */
+let fastPushTimer = null;
+async function pushCloudNow(){
+  try {
+    if (!cloud.client) await cloudInit();
+    if (cloud.client) await cloudPush();
+  } catch(e){ /* 静默 */ }
+}
+function scheduleFastCloudPush(){
+  if (cloud.suppressPush) return;
+  if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl) return;
+  if (fastPushTimer) clearTimeout(fastPushTimer);
+  fastPushTimer = setTimeout(pushCloudNow, cloud.cfg.pushDebounceMs || 600);
 }
 /* 清空「待同步」计数（推送成功 / 应用云端快照后调用） */
 function clearCloudPending(){ cloud.state.pending = 0; cloud.state.pendingSince = 0; cloud.state.remoteNewer = false; }
