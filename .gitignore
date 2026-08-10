@@ -1,0 +1,28 @@
+# 忽略临时文件与系统文件
+*.tmp
+*.log
+*.pid
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 忽略子目录中已有的独立 git 仓库（保留其自身版本历史）
+**/.git/
+
+# 忽略体积大且可再生的缓存/构建物
+node_modules/
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+
+# 忽略部署历史记录
+_deploy_history/
+*.deploy.json
+
+# Windows 保留设备名（无法被 git 索引）
+**/nul
+**/con
+**/prn
+**/aux
+2026-08-07-20-29-11/

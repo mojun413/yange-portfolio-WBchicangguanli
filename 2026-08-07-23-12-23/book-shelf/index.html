@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>经典必读书单 · 34 本结构化拆书主页</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3e9d6;
+    --paper-2:#fbf5e9;
+    --paper-3:#efe3cd;
+    --ink:#3a3024;
+    --ink-soft:#5b4a36;
+    --muted:#8a7a62;
+    --line:#d8c8a8;
+    --ribbon-1:#b5462f;
+    --ribbon-2:#c89b3c;
+    --ribbon-3:#6f8253;
+    --ribbon-4:#5b7a8c;
+    --ribbon-5:#a8632e;
+    --ribbon-6:#7a6a8c;
+    --gold:#c9a24b;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:"Noto Serif SC","Songti SC","STSong","SimSun",Georgia,serif;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      radial-gradient(circle at 18% 12%, rgba(255,255,255,.45), transparent 42%),
+      radial-gradient(circle at 82% 78%, rgba(168,140,90,.18), transparent 45%),
+      linear-gradient(160deg,#f6ecd9 0%, #f1e6cf 48%, #ecdfc4 100%);
+    line-height:1.9;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:0;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  .wrap{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 22px 80px;}
+  .hero{
+    position:relative;min-height:46vh;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:clamp(40px,9vw,80px) 22px;margin:0 -22px 46px;
+    background-color:#2a2118;
+    background-image:linear-gradient(180deg, rgba(28,22,16,.30) 0%, rgba(28,22,16,.62) 55%, rgba(20,15,10,.86) 100%), url("https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1400&q=70");
+    background-size:cover;background-position:center;color:#f6ecd9;
+  }
+  .hero-inner{max-width:760px;}
+  .hero .kicker{letter-spacing:.5em;font-size:clamp(11px,2.4vw,14px);text-transform:uppercase;color:#e8d6b4;margin-bottom:18px;opacity:.9;}
+  .hero h1{font-size:clamp(40px,10vw,76px);font-weight:900;margin:0;letter-spacing:.1em;text-shadow:0 4px 24px rgba(0,0,0,.55);line-height:1.06;}
+  .hero .sub{margin-top:18px;font-size:clamp(15px,3.4vw,20px);color:#ecdcbd;letter-spacing:.16em;}
+  .hero .rule{width:64px;height:2px;background:var(--gold);margin:22px auto 0;opacity:.85;}
+  /* 分类导航 */
+  .nav{position:sticky;top:0;z-index:5;background:rgba(243,233,214,.96);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 0;margin:0 -22px 34px;overflow-x:auto;overflow-y:hidden;}
+  .nav-inner{max-width:1000px;margin:0 auto;display:flex;gap:8px;padding:0 22px;flex-wrap:nowrap;}
+  .nav a{flex:0 0 auto;font-size:13px;color:var(--ink-soft);text-decoration:none;padding:6px 13px;border:1px solid var(--line);border-radius:20px;background:var(--paper-2);white-space:nowrap;transition:.15s;}
+  .nav a:hover,.nav a:focus{background:var(--ribbon-1);color:#fff;border-color:var(--ribbon-1);}
+  .nav a .n{color:var(--ribbon-5);font-weight:700;margin-left:4px;}
+  .nav a:hover .n{color:#f6ecd9;}
+  .sec-head{display:flex;align-items:center;gap:14px;margin:0 0 26px;}
+  .ribbon{position:relative;flex:0 0 auto;background:var(--ribbon-1);color:#fff;font-size:13px;font-weight:600;padding:8px 16px 8px 14px;letter-spacing:.08em;box-shadow:0 2px 6px rgba(0,0,0,.18);}
+  .ribbon::after{content:"";position:absolute;right:-11px;top:0;bottom:0;border-left:11px solid var(--ribbon-1);border-top:11px solid transparent;border-bottom:11px solid transparent;}
+  .sec-title{font-size:clamp(22px,5vw,30px);font-weight:700;margin:0;color:var(--ink);letter-spacing:.04em;}
+  .sec-title .en{display:block;font-size:12px;font-weight:400;letter-spacing:.28em;color:var(--muted);text-transform:uppercase;margin-top:4px;}
+  .lead{font-size:clamp(15px,3.4vw,18px);color:var(--ink-soft);margin:0 0 24px;}
+  .cat{margin-top:46px;scroll-margin-top:60px;}
+  .cat-head{display:flex;align-items:center;gap:12px;margin:0 0 18px;border-bottom:2px solid var(--line);padding-bottom:10px;}
+  .cat-head .dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto;}
+  .cat-head h3{margin:0;font-size:clamp(19px,4.2vw,24px);font-weight:700;letter-spacing:.05em;}
+  .cat-head .en{font-size:12px;color:var(--muted);letter-spacing:.24em;text-transform:uppercase;margin-left:4px;}
+  .cat-head .cnt{margin-left:auto;font-size:13px;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .card{
+    background:var(--paper-2);border:1px solid var(--line);border-left:5px solid var(--ribbon-1);
+    border-radius:12px;padding:20px 22px;box-shadow:0 4px 0 rgba(180,150,100,.16);
+    display:flex;flex-direction:column;gap:8px;text-decoration:none;color:var(--ink);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(120,90,50,.22);}
+  .card .num{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--ribbon-1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:4px;}
+  .card h3{margin:0;font-size:20px;font-weight:700;letter-spacing:.03em;}
+  .card .author{font-size:14px;color:var(--ribbon-5);font-weight:600;}
+  .card p{margin:0;font-size:14px;color:var(--ink-soft);line-height:1.8;}
+  .card .go{margin-top:6px;font-size:13px;color:var(--ribbon-4);font-weight:600;letter-spacing:.05em;}
+  .note{margin-top:30px;background:#fbf1e2;border:1px solid #e6c79a;border-radius:10px;padding:16px 20px;}
+  .note h4{margin:0 0 8px;color:#a8632e;font-size:15px;letter-spacing:.05em;}
+  .note p{margin:0;font-size:14.5px;color:var(--ink-soft);line-height:1.85;}
+  footer{text-align:center;border-top:1px solid var(--line);padding-top:30px;margin-top:36px;color:var(--muted);font-size:13px;line-height:1.9;}
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr;}
+    .sec-title .en{display:none;}
+    .hero{min-height:38vh;}
+    .wrap{padding:0 16px 60px;}
+    .hero{margin:0 -16px 38px;}
+    .nav{margin:0 -16px 30px;}
+    .nav-inner{padding:0 16px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="kicker">MY READING SHELF · 34</div>
+    <h1>经典必读书单</h1>
+    <div class="sub">34 本结构化拆书 · 米色纸感 · 护眼可扫</div>
+    <div class="rule"></div>
+  </div>
+</header>
+
+<!-- 分类导航 -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#cat-cog">认知<span class="n">6</span></a>
+    <a href="#cat-growth">成长<span class="n">5</span></a>
+    <a href="#cat-phil">哲学<span class="n">4</span></a>
+    <a href="#cat-eco">经济<span class="n">4</span></a>
+    <a href="#cat-sci">科技<span class="n">3</span></a>
+    <a href="#cat-hist">历史<span class="n">3</span></a>
+    <a href="#cat-lit">文学<span class="n">5</span></a>
+    <a href="#cat-spirit">灵性·财富·成长<span class="n">4</span></a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="sec-head">
+    <span class="ribbon" style="background:var(--ribbon-2);">书</span>
+    <h2 class="sec-title">书单总览<span class="en">34 Books on the Shelf</span></h2>
+  </div>
+  <p class="lead">书单源自你的 IMA 知识库「经典必读书单 · 精炼 30 本」，覆盖认知·成长·哲学·经济·科技·历史·文学七大类；另有 4 本私房书（悉达多/秘密/与神对话/纳瓦尔宝典）归入「灵性·财富·成长」。点开任意卡片，进入该书的结构化拆书笔记（逐章精读 + 概念速查 + 金句 + 适合谁读 + 清醒提示）。顶部导航可一键跳转到对应分类。</p>
+
+  <!-- 认知 -->
+  <section class="cat" id="cat-cog">
+    <div class="cat-head"><span class="dot" style="background:var(--ribbon-1);"></span><h3>认知</h3><span class="en">Cognition</span><span class="cnt">6 本</span></div>
+    <div class="grid">
+      <a class="card" href="https://c98708724f7e48b3b5e4042071a7acd2.gz3.agentos-app.net" target="_blank" rel="noopener"><span class="num">1</span><h3>思考，快与慢</h3><span class="author">丹尼尔·卡尼曼</span><p>行为经济学奠基，揭示人类判断与决策的认知偏差。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://ff5883a0c17c4b9da977a175b70003af.bj7.agentos-app.net" target="_blank" rel="noopener"><span class="num">2</span><h3>影响力</h3><span class="author">罗伯特·西奥迪尼</span><p>六大说服原则，理解人际影响力机制的圣经级读物。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://0576b354ef5c4bed913cf4c6f670e50f.gz2.agentos-app.net" target="_blank" rel="noopener"><span class="num">3</span><h3>穷查理宝典</h3><span class="author">查理·芒格</span><p>芒格一生智慧，跨学科决策的奠基之作。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://050226f49c254c4a9a65c29bc048a7e0.sh2.agentos-app.net" target="_blank" rel="noopener"><span class="num">4</span><h3>刻意练习</h3><span class="author">安德斯·艾利克森</span><p>破除 1 万小时定律迷信，揭示刻意训练的力量。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://1ce4450cb43e4224b410f1bac6ced26e.sh3.agentos-app.net" target="_blank" rel="noopener"><span class="num">5</span><h3>终身成长</h3><span class="author">卡罗尔·德韦克</span><p>固定型 vs 成长型思维模式，重塑教育与管理叙事。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://cba1da78d6cd4906bb1d12cf447c751b.bj3.agentos-app.net" target="_blank" rel="noopener"><span class="num">6</span><h3>学会提问</h3><span class="author">尼尔·布朗、斯图尔特·基利</span><p>批判性思维的入门圣经。</p><span class="go">→ 阅读拆书笔记</span></a>
+    </div>
+  </section>
+
+  <!-- 成长 -->
+  <section class="cat" id="cat-growth">
+    <div class="cat-head"><span class="dot" style="background:var(--ribbon-5);"></span><h3>成长</h3><span class="en">Growth</span><span class="cnt">5 本</span></div>
+    <div class="grid">
+      <a class="card" href="https://9b2a949dbae24edbb82a1a40d8f44d1f.bj4.agentos-app.net" target="_blank" rel="noopener"><span class="num">7</span><h3>高效能人士的七个习惯</h3><span class="author">史蒂芬·柯维</span><p>以原则为中心，全球销量超 4000 万册的领导力奠基作。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://7cbc0e6bca944f73b2e821f0a0e11655.bj7.agentos-app.net" target="_blank" rel="noopener"><span class="num">8</span><h3>活出生命的意义</h3><span class="author">维克多·弗兰克尔</span><p>意义疗法开山之作，美国国会图书馆评十大影响力图书。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://8399dbaed50a49c1857cc47462848ec1.gz3.agentos-app.net" target="_blank" rel="noopener"><span class="num">9</span><h3>非暴力沟通</h3><span class="author">马歇尔·卢森堡</span><p>观察—感受—需求—请求四步法，沟通领域圣经。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://9375f121fa2d44f9bd88edbbdb6fffd5.bj4.agentos-app.net" target="_blank" rel="noopener"><span class="num">10</span><h3>掌控习惯</h3><span class="author">詹姆斯·克利尔</span><p>四步法拆解习惯，全球销量超千万册。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://f8fe547ceeb548eb9d91049db3e24251.bj5.agentos-app.net" target="_blank" rel="noopener"><span class="num">11</span><h3>被讨厌的勇气</h3><span class="author">岸见一郎、古贺史健</span><p>对话体重述阿德勒心理学，席卷亚洲的成长经典。</p><span class="go">→ 阅读拆书笔记</span></a>
+    </div>
+  </section>
+
+  <!-- 哲学 -->
+  <section class="cat" id="cat-phil">
+    <div class="cat-head"><span class="dot" style="background:var(--ribbon-6);"></span><h3>哲学</h3><span class="en">Philosophy</span><span class="cnt">4 本</span></div>
+    <div class="grid">
+      <a class="card" href="https://a6f21114c7d34809a8b328eafa171891.bj2.agentos-app.net" target="_blank" rel="noopener"><span class="num">12</span><h3>理想国</h3><span class="author">柏拉图</span><p>西方政治哲学与乌托邦思想源头。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://2cd327a2ba154bc4add2dd3c7eeaa6b3.sh3.agentos-app.net" target="_blank" rel="noopener"><span class="num">13</span><h3>论语</h3><span class="author">孔子及弟子</span><p>中国儒家思想总源头，理解中国社会的必经原点。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://5baf8ddb3bd24c8b8683012535212bf2.sh5.agentos-app.net" target="_blank" rel="noopener"><span class="num">14</span><h3>道德经</h3><span class="author">老子</span><p>道法自然、无为而治，被译外文最多的中文典籍之一。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://c53de96b29884997ba26e779cfdc8c2b.bj2.agentos-app.net" target="_blank" rel="noopener"><span class="num">15</span><h3>社会契约论</h3><span class="author">卢梭</span><p>人民主权理论奠基，启发法国大革命与美国独立宣言。</p><span class="go">→ 阅读拆书笔记</span></a>
+    </div>
+  </section>
+
+  <!-- 经济 -->
+  <section class="cat" id="cat-eco">
+    <div class="cat-head"><span class="dot" style="background:var(--ribbon-3);"></span><h3>经济</h3><span class="en">Economics</span><span class="cnt">4 本</span></div>
+    <div class="grid">
+      <a class="card" href="https://a4a568a7e4f4413087a09598482cf1ca.gz5.agentos-app.net" target="_blank" rel="noopener"><span class="num">16</span><h3>国富论</h3><span class="author">亚当·斯密</span><p>现代经济学奠基作，看不见的手与分工理论。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://87d6b1f348144cd4889c40843baf4c79.bj2.agentos-app.net" target="_blank" rel="noopener"><span class="num">17</span><h3>资本论</h3><span class="author">卡尔·马克思</span><p>政治经济学批判的巅峰巨著。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://2e1c8f07f8c74a50bf289a82859b5e76.gz4.agentos-app.net" target="_blank" rel="noopener"><span class="num">18</span><h3>通往奴役之路</h3><span class="author">哈耶克</span><p>20 世纪自由主义经典，1974 年诺奖作品。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://e1374121bec44a8c8b3d84bdf9e26ea8.bj3.agentos-app.net" target="_blank" rel="noopener"><span class="num">19</span><h3>管理的实践</h3><span class="author">彼得·德鲁克</span><p>现代管理学奠基之作，管理学的开山之作。</p><span class="go">→ 阅读拆书笔记</span></a>
+    </div>
+  </section>
+
+  <!-- 科技 -->
+  <section class="cat" id="cat-sci">
+    <div class="cat-head"><span class="dot" style="background:var(--ribbon-4);"></span><h3>科技</h3><span class="en">Science</span><span class="cnt">3 本</span></div>
+    <div class="grid">
+      <a class="card" href="https://b27248f3456e4bd19800b1f5da288588.sh3.agentos-app.net" target="_blank" rel="noopener"><span class="num">20</span><h3>时间简史</h3><span class="author">史蒂芬·霍金</span><p>把宇宙学、黑洞、大爆炸讲成大众可读的科学史诗。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://00df6f8b5a8d44c98cf69ea40d71edd5.gz4.agentos-app.net" target="_blank" rel="noopener"><span class="num">21</span><h3>自私的基因</h3><span class="author">理查德·道金斯</span><p>以基因为自然选择基本单位重写进化论。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://1c3480872a5e4c84a3f7c0d7ece81748.bj4.agentos-app.net" target="_blank" rel="noopener"><span class="num">22</span><h3>人类简史</h3><span class="author">尤瓦尔·赫拉利</span><p>用三幕剧重述人类史，全球最具公共影响力的通识读物。</p><span class="go">→ 阅读拆书笔记</span></a>
+    </div>
+  </section>
+
+  <!-- 历史 -->
+  <section class="cat" id="cat-hist">
+    <div class="cat-head"><span class="dot" style="background:var(--ribbon-2);"></span><h3>历史</h3><span class="en">History</span><span class="cnt">3 本</span></div>
+    <div class="grid">
+      <a class="card" href="https://0b045e7767694a03b67a48fa40843edb.bj7.agentos-app.net" target="_blank" rel="noopener"><span class="num">23</span><h3>全球通史</h3><span class="author">斯塔夫里阿诺斯</span><p>全球史观奠基之作，畅销半世纪长盛不衰。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://381df7a965754f42a48f961f5faf3c52.bj5.agentos-app.net" target="_blank" rel="noopener"><span class="num">24</span><h3>枪炮、病菌与钢铁</h3><span class="author">贾雷德·戴蒙德</span><p>用地理环境解释文明差异，理解现代世界不平等起源。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://31bc661271a64d98a0ccf39a265ab24c.gz5.agentos-app.net" target="_blank" rel="noopener"><span class="num">25</span><h3>万历十五年</h3><span class="author">黄仁宇</span><p>以大历史观剖开明朝走向衰亡的制度基因。</p><span class="go">→ 阅读拆书笔记</span></a>
+    </div>
+  </section>
+
+  <!-- 文学 -->
+  <section class="cat" id="cat-lit">
+    <div class="cat-head"><span class="dot" style="background:var(--ribbon-1);"></span><h3>文学</h3><span class="en">Literature</span><span class="cnt">5 本</span></div>
+    <div class="grid">
+      <a class="card" href="https://5fbe823a5c5942faa78935068d98944d.bj8.agentos-app.net" target="_blank" rel="noopener"><span class="num">26</span><h3>红楼梦</h3><span class="author">曹雪芹</span><p>中国古典小说巅峰之作，中华文化的百科全书。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://f506dfcc3d0a41f1b15dec59cb82e5bf.gz3.agentos-app.net" target="_blank" rel="noopener"><span class="num">27</span><h3>百年孤独</h3><span class="author">加西亚·马尔克斯</span><p>魔幻现实主义扛鼎之作，全球销量超 5000 万册。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://a65781766bea46aeb598cbec55d21962.gz5.agentos-app.net" target="_blank" rel="noopener"><span class="num">28</span><h3>战争与和平</h3><span class="author">列夫·托尔斯泰</span><p>史诗、家史与心灵史熔于一炉，世界小说之冠。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://9907650a4b9a4c01bd2ec422111bc27d.sh2.agentos-app.net" target="_blank" rel="noopener"><span class="num">29</span><h3>围城</h3><span class="author">钱锺书</span><p>中国现代讽刺文学高峰。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" href="https://730c20e7f6404c1cb490fae26bbb4a91.bj3.agentos-app.net" target="_blank" rel="noopener"><span class="num">30</span><h3>了不起的盖茨比</h3><span class="author">F. 斯科特·菲茨杰拉德</span><p>美国现代文学开山之作，美国梦最深刻寓言。</p><span class="go">→ 阅读拆书笔记</span></a>
+    </div>
+  </section>
+
+  <!-- 灵性·财富·成长（私房书架） -->
+  <section class="cat" id="cat-spirit">
+    <div class="cat-head"><span class="dot" style="background:var(--ribbon-6);"></span><h3>灵性·财富·成长</h3><span class="en">Spirit · Wealth · Growth</span><span class="cnt">4 本</span></div>
+    <div class="grid">
+      <a class="card" style="border-left-color:var(--ribbon-1);" href="https://abfed2406f1f413891bc4a8dab49c36d.gz4.agentos-app.net" target="_blank" rel="noopener"><span class="num" style="background:var(--ribbon-1);">★</span><h3>悉达多</h3><span class="author">赫尔曼·黑塞</span><p>婆罗门之子走遍苦行、情欲、财富与河流，用一生证明真理无法被传授，只能被亲历。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" style="border-left-color:var(--ribbon-5);" href="https://91b511632d99440bb73899a37ce1a2b5.bj4.agentos-app.net" target="_blank" rel="noopener"><span class="num" style="background:var(--ribbon-5);">★</span><h3>秘密</h3><span class="author">朗达·拜恩</span><p>吸引力法则逐章拆解：10 章含清醒提示——哪些技巧有实证，哪些只是信仰。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" style="border-left-color:var(--ribbon-4);" href="https://3a8f10c25553472692234dfa0e426d60.bj4.agentos-app.net" target="_blank" rel="noopener"><span class="num" style="background:var(--ribbon-4);">★</span><h3>与神对话（第一部）</h3><span class="author">尼尔·唐纳·沃许</span><p>中年谷底写给神的愤怒之信，神竟回话——把"神"重新定义为同在而非威权，附清醒提示。</p><span class="go">→ 阅读拆书笔记</span></a>
+      <a class="card" style="border-left-color:var(--ribbon-3);" href="https://da7943605e0c4aa684131579cfa43380.gz1.agentos-app.net" target="_blank" rel="noopener"><span class="num" style="background:var(--ribbon-3);">★</span><h3>纳瓦尔宝典</h3><span class="author">埃里克·乔根森 编</span><p>硅谷投资人纳瓦尔箴言结集：财富=专长+杠杆+股权，幸福=放下欲望+活在当下。</p><span class="go">→ 阅读拆书笔记</span></a>
+    </div>
+  </section>
+
+  <div class="note">
+    <h4>关于这份书单</h4>
+    <p>34 本拆书笔记均按 book-deep-read 流程产出：章节经联网核实、每本含「核心观点 / 难懂概念 / 关键案例 / 行动启发」四问框架、6 条金句、6 类适读人群与一段批判性「清醒提示」。页面页脚自带扫码二维码，手机可随时读。书单来自你的 IMA 知识库「经典必读书单 · 精炼 30 本」；悉达多/秘密/与神对话/纳瓦尔宝典为私房书架，归入「灵性·财富·成长」。如需增删书目或调整分类，告诉我即可。</p>
+  </div>
+
+  <footer>
+    米色纸感 · 护眼阅读 · 响应式单文件 · 由 WorkBuddy 拆书生成
+  </footer>
+</div>
+
+</body>
+</html>

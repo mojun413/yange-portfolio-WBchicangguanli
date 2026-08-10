@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#7ED7F0">
+<title>宝贝学习乐园 · 农场版</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌈</text></svg>">
+<style>
+/* ========================================================================
+   宝贝学习乐园 · 农场版  —— 单文件 HTML 工作台
+   配色：彩虹糖果色（粉蓝黄绿紫）+ 马卡龙浅蓝/嫩绿/米白
+   全部 CSS/JS 内联，零外部依赖，localStorage 当实时同步数据库
+   ======================================================================== */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  /* 糖果主色 */
+  --pink:#FF7FB0; --pink-l:#FFE3EE;
+  --blue:#4FC3F7; --blue-l:#DCF3FD;
+  --yellow:#FFC431; --yellow-l:#FFF3D1;
+  --green:#4CCB8B; --green-l:#DCF7EA;
+  --purple:#A87FF0; --purple-l:#EEE5FF;
+  --orange:#FF9455; --orange-l:#FFE9DC;
+  --bg:#F4FBFF; --card:#FFFFFF;
+  --text:#3B2E4D; --muted:#8B7E9B; --line:#E6F1F6;
+  --danger:#FF4D6A;
+  --sh:0 4px 16px rgba(120,160,190,.16);
+  --sh-lg:0 8px 28px rgba(120,160,190,.22);
+}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);font-size:16px;line-height:1.6;
+  background-image:radial-gradient(circle at 8% 4%,#E3F4FF 0,transparent 34%),radial-gradient(circle at 92% 10%,#E8FBF0 0,transparent 32%),radial-gradient(circle at 50% 100%,#F3EFFF 0,transparent 40%);
+  background-attachment:fixed;-webkit-text-size-adjust:100%;
+}
+button{font-family:inherit;font-size:16px;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit;font-size:16px}
+
+/* ---------- 布局 ---------- */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:220px;flex:0 0 220px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);
+  border-right:3px solid var(--line);padding:18px 12px;position:fixed;top:0;bottom:0;left:0;
+  display:flex;flex-direction:column;gap:8px;overflow-y:auto;z-index:30;
+}
+.logo{display:flex;align-items:center;gap:10px;padding:6px 8px 14px}
+.logo-txt{font-size:18px;font-weight:900;letter-spacing:.5px;
+  background:linear-gradient(90deg,var(--pink),var(--purple),var(--blue),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-btn{display:flex;align-items:center;gap:11px;width:100%;min-height:56px;padding:8px 12px;
+  border-radius:16px;font-size:17px;font-weight:800;color:var(--text);transition:.16s;text-align:left}
+.nav-btn:hover{background:#F2F9FD;transform:translateX(2px)}
+.nav-btn.on{color:#fff;box-shadow:var(--sh)}
+.nav-btn.on.t1{background:linear-gradient(135deg,#7ED7F0,#4FB8E8)}
+.nav-btn.on.t2{background:linear-gradient(135deg,#7ED7A6,#3FBF7F)}
+.nav-btn.on.t3{background:linear-gradient(135deg,#FFD264,#FFAE22)}
+.nav-btn.on.t4{background:linear-gradient(135deg,#BE9BF5,#9A6EEC)}
+.nav-btn.on.t5{background:linear-gradient(135deg,#FF9BC0,#FF6BA6)}
+.nav-ico{width:32px;height:32px;flex:0 0 32px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff3}
+.nav-btn:not(.on) .nav-ico.t1{background:var(--blue-l)}
+.nav-btn:not(.on) .nav-ico.t2{background:var(--green-l)}
+.nav-btn:not(.on) .nav-ico.t3{background:var(--yellow-l)}
+.nav-btn:not(.on) .nav-ico.t4{background:var(--purple-l)}
+.nav-btn:not(.on) .nav-ico.t5{background:var(--pink-l)}
+.side-foot{margin-top:auto;padding:10px 6px 4px;border-top:2px dashed var(--line)}
+.res-bar{display:flex;gap:6px;flex-wrap:wrap}
+.res-chip{display:flex;align-items:center;gap:4px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:5px 9px;font-size:13px;font-weight:800;min-height:38px}
+
+.main{flex:1;margin-left:220px;padding:16px 22px 40px;max-width:1200px}
+.topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.page-title{font-size:24px;font-weight:900;margin:0;display:flex;align-items:center;gap:9px}
+.spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:8px 15px;border-radius:14px;
+  background:#fff;border:2px solid var(--line);font-size:15px;font-weight:800;color:var(--text);transition:.16s}
+.chip:hover{border-color:var(--purple);color:var(--purple)}
+.chip.gold{background:linear-gradient(135deg,#FFE9A8,#FFD264);border-color:#FFCA55;color:#8A5A00}
+.chip.danger:hover{border-color:var(--danger);color:var(--danger)}
+
+/* 移动端底部 Tab */
+.tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:3px solid var(--line);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:58px;padding:6px 2px;border-radius:14px;font-size:11px;font-weight:800;color:var(--muted)}
+.tab-btn .ti{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:9px}
+.tab-btn.on{color:#fff}
+.tab-btn.on.t1{background:linear-gradient(135deg,#7ED7F0,#4FB8E8)}
+.tab-btn.on.t2{background:linear-gradient(135deg,#7ED7A6,#3FBF7F)}
+.tab-btn.on.t3{background:linear-gradient(135deg,#FFD264,#FFAE22)}
+.tab-btn.on.t4{background:linear-gradient(135deg,#BE9BF5,#9A6EEC)}
+.tab-btn.on.t5{background:linear-gradient(135deg,#FF9BC0,#FF6BA6)}
+
+/* ---------- 通用卡片 ---------- */
+.card{background:var(--card);border-radius:22px;padding:18px;box-shadow:var(--sh);margin-bottom:16px;border:2px solid #fff}
+.card-h{display:flex;align-items:center;gap:9px;margin:0 0 14px;font-size:19px;font-weight:900}
+.card-h .sub{font-size:13px;font-weight:600;color:var(--muted);margin-left:auto}
+.view{display:none;animation:fadein .3s ease}
+.view.on{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* 今日计划 */
+.today{background:linear-gradient(135deg,#F4FDFF,#F2FBF2);border:3px solid #CDEEFA;border-radius:22px;padding:16px 18px;margin-bottom:16px;box-shadow:var(--sh)}
+.today-h{display:flex;align-items:center;gap:9px;font-size:19px;font-weight:900;margin-bottom:12px}
+.today-h .cnt{margin-left:auto;font-size:13px;font-weight:700;color:var(--muted);background:#fff;padding:4px 12px;border-radius:20px}
+.tk{display:flex;align-items:center;gap:11px;background:#fff;border-radius:16px;padding:11px 12px;margin-bottom:9px;border:2px solid #EAF4F8;flex-wrap:wrap}
+.tk.over{border-color:#FFC9D3;background:#FFF6F7}
+.tk.done{opacity:.62}
+.tk-dot{width:36px;height:36px;flex:0 0 36px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.tk-body{flex:1;min-width:120px}
+.tk-name{font-weight:800;font-size:16px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.tk.done .tk-name{text-decoration:line-through;color:var(--muted)}
+.badge-late{background:var(--danger);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:9px;letter-spacing:.3px}
+.pbar{height:9px;background:#EAF1F5;border-radius:9px;overflow:hidden;margin-top:5px}
+.pbar>i{display:block;height:100%;border-radius:9px;transition:width .4s}
+.tk-go{min-height:46px;padding:8px 16px;border-radius:13px;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(135deg,#7ED7F0,#4FB8E8);box-shadow:0 3px 10px rgba(79,184,232,.28)}
+.tk-go:active{transform:scale(.95)}
+.tk-ck{min-height:46px;padding:8px 16px;border-radius:13px;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(135deg,#7ED7A6,#3FBF7F);box-shadow:0 3px 10px rgba(60,190,130,.28)}
+.tk-ck:active{transform:scale(.95)}
+.tk-ok{width:36px;height:36px;border-radius:11px;background:var(--green-l);display:flex;align-items:center;justify-content:center}
+.subj-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.subj-card{flex:1;min-width:150px;border-radius:18px;padding:13px;border:3px solid transparent;font-weight:800}
+.subj-card .sc-t{font-size:15px;display:flex;align-items:center;gap:7px}
+.subj-card .sc-s{flex:1;min-height:40px;margin-top:9px;border-radius:12px;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,#7ED7A6,#3FBF7F)}
+.subj-card .sc-s.off{background:#E3ECF1;color:var(--muted)}
+
+/* 字母卡片 */
+.grid-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:11px}
+.lcard{position:relative;min-height:104px;border-radius:18px;padding:9px 6px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1px;font-weight:900;transition:.15s;border:3px solid transparent}
+.lcard:active{transform:scale(.94)}
+.lcard .big{font-size:30px;line-height:1.1;letter-spacing:1px}
+.lcard .wd{font-size:12px;font-weight:800;opacity:.9}
+.lcard .cn{font-size:11px;font-weight:700;opacity:.75}
+.lcard.learned::after{content:'';position:absolute;top:6px;right:6px;width:19px;height:19px;border-radius:50%;
+  background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center/12px no-repeat}
+.speaking{animation:pulse .55s ease infinite alternate}
+@keyframes pulse{to{transform:scale(1.07);box-shadow:0 0 0 7px rgba(168,127,240,.18)}}
+.match-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:430px;margin:0 auto}
+.mcol{display:flex;flex-direction:column;gap:10px}
+.mbtn{min-height:56px;border-radius:16px;font-size:26px;font-weight:900;border:3px solid var(--line);background:#fff;transition:.15s;display:flex;align-items:center;justify-content:center}
+.mbtn.sel{border-color:var(--purple);background:var(--purple-l);transform:scale(1.03)}
+.mbtn.ok{border-color:var(--green);background:var(--green-l);color:var(--green);opacity:.55;pointer-events:none}
+.mbtn.bad{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+/* 古诗 */
+.poem-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:11px}
+.pcard{min-height:88px;border-radius:18px;padding:12px;text-align:left;border:3px solid transparent;transition:.15s;position:relative}
+.pcard:active{transform:scale(.96)}
+.pcard .pt{font-size:18px;font-weight:900}
+.pcard .pa{font-size:12px;font-weight:700;opacity:.8;margin-top:2px}
+.pcard .pf{font-size:12px;font-weight:700;opacity:.7;margin-top:6px}
+.pcard.memo::after{content:'会背啦';position:absolute;top:9px;right:9px;background:var(--green);color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:9px}
+.poem-view{text-align:center}
+.poem-lines{display:flex;flex-direction:column;gap:14px;align-items:center;margin:18px 0}
+.pline{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;cursor:pointer;padding:8px 10px;border-radius:14px;transition:.15s;min-height:44px;align-items:flex-end}
+.pline:hover{background:var(--yellow-l)}
+.pline.active{background:var(--yellow-l);box-shadow:0 0 0 3px #FFE39A inset}
+ruby{ruby-position:over;-webkit-ruby-position:before}
+rt{font-size:12px;color:var(--pink);font-weight:700;line-height:1.4;letter-spacing:0}
+.hz{font-size:29px;font-weight:800;letter-spacing:1px}
+.punc{font-size:29px;font-weight:800;align-self:flex-end;padding-bottom:2px}
+
+/* 抄默 */
+.copy-box{display:flex;flex-direction:column;align-items:center;gap:14px}
+.copy-word{font-size:46px;font-weight:900;letter-spacing:6px;color:var(--pink)}
+.copy-py{font-size:15px;font-weight:700;color:var(--muted)}
+.copy-input{min-height:54px;font-size:24px;text-align:center;border:3px solid var(--line);border-radius:16px;padding:8px 14px;width:220px;max-width:80%;outline:none}
+.copy-input:focus{border-color:var(--pink)}
+.copy-done{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+
+/* 数字 */
+.grid-n{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px}
+.ncard{min-height:78px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;border:3px solid transparent;transition:.15s}
+.ncard:active{transform:scale(.93)}
+.ncard .nn{font-size:29px;line-height:1}
+.ncard .nc{font-size:12px;opacity:.8;font-weight:800}
+.qbox{text-align:center;padding:6px 0}
+.qtitle{font-size:15px;font-weight:800;color:var(--muted);margin-bottom:6px}
+.qmain{font-size:40px;font-weight:900;letter-spacing:2px;margin:10px 0 18px;min-height:52px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:11px;max-width:470px;margin:0 auto}
+.opt{min-height:62px;border-radius:18px;font-size:24px;font-weight:900;border:3px solid var(--line);background:#fff;transition:.15s;display:flex;align-items:center;justify-content:center;padding:8px}
+.opt:hover{border-color:var(--blue)}
+.opt:active{transform:scale(.95)}
+.opt.ok{background:var(--green-l);border-color:var(--green);color:#2E9C68}
+.opt.no{background:#FFE9EC;border-color:var(--danger);color:var(--danger)}
+.opt.sm{font-size:17px;min-height:66px}
+.count-area{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:420px;margin:0 auto 16px;padding:16px;background:var(--blue-l);border-radius:20px;min-height:110px;align-items:center}
+.streak{display:inline-flex;align-items:center;gap:6px;background:var(--orange-l);color:#D2691E;font-weight:800;font-size:14px;padding:6px 13px;border-radius:20px}
+
+/* 逻辑 */
+.shape-row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;align-items:center;margin:8px 0 4px}
+.shape-box{width:58px;height:58px;border-radius:16px;background:#fff;border:3px solid var(--line);display:flex;align-items:center;justify-content:center}
+.shape-box.q{border-style:dashed;border-color:var(--purple);background:var(--purple-l);font-size:28px;font-weight:900;color:var(--purple)}
+
+/* 闯关 */
+.lv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.lv{min-height:118px;border-radius:20px;padding:13px;border:3px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:900;transition:.15s;position:relative}
+.lv:active{transform:scale(.96)}
+.lv.lock{background:#F5F1F7;color:#B7ACC0;cursor:not-allowed}
+.lv .lvn{font-size:16px}
+.lv .lvd{font-size:12px;font-weight:700;opacity:.85}
+.lv-stars{display:flex;gap:3px;margin-top:3px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:11px}
+.bdg{border-radius:18px;padding:13px 7px;text-align:center;border:3px solid var(--line);background:#fff;transition:.2s}
+.bdg .bi{width:50px;height:50px;margin:0 auto 7px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#F3EFF6}
+.bdg .bn{font-size:12.5px;font-weight:800;line-height:1.3}
+.bdg .bd{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px;line-height:1.3}
+.bdg.got{border-color:#FFD264;background:linear-gradient(160deg,#FFFCF0,#FFF4D6);box-shadow:0 4px 14px rgba(255,190,60,.24)}
+.bdg.got .bi{background:linear-gradient(135deg,#FFD98A,#FFB627)}
+.bdg:not(.got){filter:grayscale(1);opacity:.5}
+
+/* ---------- 作业打卡子导航 ---------- */
+.seg{display:flex;gap:8px;background:#EAF4F8;border-radius:16px;padding:5px;margin-bottom:15px;flex-wrap:wrap}
+.seg button{flex:1;min-width:84px;min-height:48px;border-radius:12px;font-weight:800;font-size:14px;color:var(--muted);transition:.15s}
+.seg button.on{background:#fff;color:var(--text);box-shadow:0 2px 8px rgba(110,150,180,.18)}
+
+/* ===================== 农场 ===================== */
+.farm-top{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.farm-res{display:flex;gap:7px;flex-wrap:wrap}
+.fres{display:flex;align-items:center;gap:5px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:7px 12px;font-size:15px;font-weight:900;min-height:44px}
+.farm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.plot{position:relative;border-radius:20px;padding:12px;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  background:linear-gradient(180deg,#FFF7E8,#F3E3C4);border:3px solid #E8D3AA;box-shadow:var(--sh);overflow:hidden;transition:.2s}
+.plot.empty{background:linear-gradient(180deg,#EAF6FF,#DCEFF0);border-color:#C9E6EC;justify-content:center}
+.plot.soil{background:repeating-linear-gradient(45deg,#C9A06A,#C9A06A 8px,#BC9560 8px,#BC9560 16px)}
+.plot .ground{position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(180deg,#B98A55,#A87844);border-top:3px solid #956B3C}
+.plot .crop{position:relative;z-index:2;margin-bottom:8px;transition:transform .3s}
+.plot.withered{filter:grayscale(.85) brightness(.92)}
+.plot.withered .ground{background:linear-gradient(180deg,#9a9a9a,#7d7d7d);border-top-color:#6d6d6d}
+.plot.watering .crop{animation:waterPop .6s ease}
+@keyframes waterPop{0%{transform:scale(1)}40%{transform:scale(1.12) translateY(-4px)}100%{transform:scale(1)}}
+.plot .pbar{width:100%;height:8px;background:#fff8; border-radius:8px;overflow:hidden;margin-top:4px;z-index:2}
+.plot .pbar>i{display:block;height:100%;background:linear-gradient(90deg,#7ED7F0,#4FB8E8)}
+.plot .pname{font-size:12px;font-weight:800;color:#6a4a25;z-index:2;margin-top:2px}
+.plot .pbtn{margin-top:8px;z-index:2;min-height:42px;width:100%;border-radius:12px;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,#7ED7F0,#4FB8E8)}
+.plot .pbtn.green{background:linear-gradient(135deg,#7ED7A6,#3FBF7F)}
+.plot .pbtn.gold{background:linear-gradient(135deg,#FFD264,#FFAE22);color:#7A4E00}
+.plot .pbtn:disabled{background:#D8DEE2;color:#9aa3a9}
+.droplet{position:absolute;top:6px;left:50%;width:8px;height:12px;background:#7ED7F0;border-radius:0 50% 50% 50%;transform:rotate(45deg);opacity:0;z-index:3}
+.plot.watering .droplet{animation:drop 0.7s ease}
+@keyframes drop{0%{opacity:0;top:6px}20%{opacity:1}100%{opacity:0;top:64px}}
+
+/* 小狗熊 */
+.bear{position:absolute;top:-6px;right:-6px;z-index:5;animation:bearBob 1.2s ease-in-out infinite;cursor:pointer}
+@keyframes bearBob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
+.bear.biting{animation:bearBite .5s ease infinite}
+@keyframes bearBite{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(8px) rotate(-8deg)}}
+.bear-tip{position:absolute;top:-30px;right:0;background:var(--danger);color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:9px;white-space:nowrap;z-index:6}
+
+/* 小鸡 */
+.chick-card{background:linear-gradient(170deg,#FFFDF2,#FFF4D6);border:3px solid #FFE3A8;border-radius:22px;padding:18px;box-shadow:var(--sh);display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.chick-stage{flex:0 0 130px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.chick-act{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.chick-info{flex:1;min-width:200px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.bar-row .bl{font-size:13px;font-weight:800;width:48px;color:var(--muted)}
+.bar{flex:1;height:16px;background:#EFE7D6;border-radius:10px;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:10px;transition:width .5s}
+.bar.feed>i{background:linear-gradient(90deg,#FFC36B,#FF9B3D)}
+.bar.clean>i{background:linear-gradient(90deg,#8FD9FF,#4FB8E8)}
+.faint-bubble{background:#fff;border:3px solid var(--danger);border-radius:16px;padding:10px 14px;font-size:14px;font-weight:800;color:var(--danger);position:relative;margin-top:6px}
+.pat-heart{position:absolute;font-size:24px;animation:heartUp 1s ease forwards;pointer-events:none}
+@keyframes heartUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
+
+/* 商店 / 仓库 / 徽章 等弹窗内列表 */
+.shop-grid{display:grid;grid-template-columns:1fr;gap:10px;text-align:left}
+.shop-item{display:flex;align-items:center;gap:12px;background:#F8FCFF;border:2px solid var(--line);border-radius:16px;padding:11px 13px}
+.shop-item .si-ico{width:44px;height:44px;flex:0 0 44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#fff}
+.shop-item .si-b{margin-left:auto;min-height:44px;padding:8px 16px;border-radius:13px;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,#7ED7F0,#4FB8E8);white-space:nowrap}
+.shop-item .si-b:disabled{background:#D8DEE2;color:#9aa3a9}
+.shop-item .si-t{font-weight:800;font-size:15px}
+.shop-item .si-d{font-size:12px;color:var(--muted);font-weight:600}
+.seed-pick{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin:6px 0 14px}
+.seed-btn{min-height:54px;padding:9px 16px;border-radius:16px;font-weight:800;font-size:15px;border:3px solid var(--line);background:#fff}
+.seed-btn.on{border-color:var(--green);background:var(--green-l)}
+.seed-btn:disabled{opacity:.45}
+
+/* 统计 */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{border-radius:20px;padding:16px;text-align:center;border:3px solid transparent;cursor:pointer;transition:.15s}
+.stat-card:active{transform:scale(.97)}
+.stat-card .sc-n{font-size:30px;font-weight:900;line-height:1}
+.stat-card .sc-l{font-size:13px;font-weight:800;margin-top:6px;color:var(--muted)}
+.bar-chart{width:100%;overflow-x:auto}
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.cert{position:relative;border-radius:18px;padding:14px 10px;text-align:center;border:3px solid #FFD98A;background:linear-gradient(160deg,#FFFCF0,#FFF4D6);box-shadow:0 4px 14px rgba(255,190,60,.2)}
+.cert .ct{font-size:15px;font-weight:900;color:#B5780A}
+.cert .cd{font-size:11px;color:#9a7a3a;font-weight:700;margin-top:3px}
+.cert .cx{position:absolute;top:6px;right:8px;font-size:11px;font-weight:800;color:#C98800;background:#FFE9B0;border-radius:8px;padding:1px 6px}
+.wrong-item{display:flex;gap:10px;align-items:flex-start;background:#FFF6F7;border:2px solid #FFD6DD;border-radius:16px;padding:11px 13px;margin-bottom:9px}
+.wrong-item .wq{flex:1;font-weight:800;font-size:15px}
+.wrong-item .wa{font-size:13px;color:var(--green);font-weight:800;margin-top:3px}
+.empty-tip{text-align:center;color:var(--muted);font-weight:700;padding:30px 10px}
+
+/* toast / modal */
+#toast{position:fixed;left:50%;top:22px;transform:translateX(-50%) translateY(-140%);z-index:200;
+  background:#fff;border:3px solid var(--purple);border-radius:18px;padding:12px 22px;font-weight:800;font-size:16px;
+  box-shadow:var(--sh-lg);transition:transform .32s cubic-bezier(.2,1.4,.5,1);max-width:92vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.win{border-color:#FFC431;background:linear-gradient(135deg,#FFFBEE,#FFF0C9)}
+.mask{position:fixed;inset:0;background:rgba(60,70,90,.45);z-index:150;display:none;align-items:center;justify-content:center;padding:18px}
+.mask.on{display:flex}
+.dlg{background:#fff;border-radius:24px;padding:22px;max-width:440px;width:100%;box-shadow:var(--sh-lg);text-align:center;max-height:88vh;overflow:auto}
+.dlg h3{margin:0 0 10px;font-size:20px;font-weight:900}
+.dlg p{margin:0 0 16px;color:var(--muted);font-size:15px}
+.dlg-btns{display:flex;gap:10px;flex-wrap:wrap}
+.dlg-btns button{flex:1;min-height:50px;border-radius:15px;font-weight:800;font-size:16px;min-width:120px}
+.b-gray{background:#F2EDF5;color:var(--muted)}
+.b-red{background:var(--danger);color:#fff}
+.b-purple{background:linear-gradient(135deg,#B78BF3,#8E5CE8);color:#fff}
+.b-green{background:linear-gradient(135deg,#7ED7A6,#3FBF7F);color:#fff}
+.b-blue{background:linear-gradient(135deg,#7ED7F0,#4FB8E8);color:#fff}
+.detail-list{text-align:left;max-height:48vh;overflow:auto;margin:0 0 14px}
+.detail-list .dl{display:flex;gap:8px;padding:9px 4px;border-bottom:1px dashed var(--line);font-size:14px}
+.detail-list .dl .da{font-weight:900;min-width:64px}
+.detail-list .dl .da.plus{color:#2E9C68}
+.detail-list .dl .da.minus{color:var(--danger)}
+.detail-list .dl .dn{color:var(--muted);flex:1}
+.tip-bar{background:linear-gradient(90deg,#FFF3D1,#FFE9C9);border:2px solid #FFDC8A;border-radius:16px;padding:10px 14px;margin-bottom:14px;font-size:14px;font-weight:700;color:#8A5A00;display:flex;align-items:center;gap:9px}
+.tip-bar button{margin-left:auto;min-height:38px;padding:5px 12px;border-radius:11px;background:#fff;font-weight:800;font-size:13px;color:#8A5A00}
+.big-btn{min-height:54px;padding:12px 26px;border-radius:18px;font-size:17px;font-weight:900;color:#fff;box-shadow:var(--sh);transition:.15s}
+.big-btn:active{transform:scale(.96)}
+.bb-blue{background:linear-gradient(135deg,#7ED7F0,#4FB8E8)}
+.bb-green{background:linear-gradient(135deg,#7ED7A6,#3FBF7F)}
+.bb-purple{background:linear-gradient(135deg,#BE9BF5,#9A6EEC)}
+.bb-pink{background:linear-gradient(135deg,#FF9BC0,#FF6BA6)}
+.bb-yellow{background:linear-gradient(135deg,#FFD264,#FFAE22);color:#7A4E00}
+.center{text-align:center}
+.mt{margin-top:14px}
+.row-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hidden{display:none !important}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .tabbar{display:flex}
+  .main{margin-left:0;padding:12px 13px calc(92px + env(safe-area-inset-bottom));max-width:100%}
+  .page-title{font-size:21px}
+  .card{padding:14px;border-radius:20px}
+  .grid-l{grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:9px}
+  .grid-n{grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px}
+  .poem-list{grid-template-columns:1fr 1fr}
+  .hz,.punc{font-size:25px}
+  .qmain{font-size:34px}
+  .chip{font-size:14px;padding:8px 12px}
+  .stat-cards{grid-template-columns:repeat(2,1fr)}
+  .cert-grid{grid-template-columns:repeat(2,1fr)}
+  .badges{grid-template-columns:repeat(3,1fr)}
+  .lv-grid{grid-template-columns:1fr 1fr}
+  .farm-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:360px){
+  .poem-list{grid-template-columns:1fr}
+  .hz,.punc{font-size:22px}
+  .farm-grid{grid-template-columns:1fr}
+}
+</style>
+<script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:false,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'f6df0916331f452b9c9c7fea5711c1c8'
+    });
+  }catch(e){}
+})();
+</script></head>
+<body>
+
+<div class="app">
+  <!-- ===== PC 侧边栏 ===== -->
+  <aside class="sidebar">
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M2 18a10 10 0 0 1 20 0" stroke="#4FB8E8" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="11" r="5.5" stroke="#FF7FB0" stroke-width="2.6"/><path d="M9 11h6" stroke="#FF7FB0" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <span class="logo-txt">宝贝学习乐园</span>
+    </div>
+    <div id="navBox"></div>
+    <div class="side-foot">
+      <div class="res-bar" id="sideRes"></div>
+    </div>
+  </aside>
+
+  <!-- ===== 主区域 ===== -->
+  <main class="main">
+    <div class="topbar">
+      <h1 class="page-title" id="pageTitle">今日计划</h1>
+      <span class="spacer"></span>
+      <button class="chip" onclick="App.exportData()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出备份</button>
+      <button class="chip" onclick="document.getElementById('impFile').click()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>导入恢复</button>
+      <button class="chip danger" onclick="App.askClear()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>清空数据</button>
+      <input type="file" id="impFile" accept=".json,application/json" class="hidden" onchange="App.importData(event)">
+    </div>
+
+    <div id="backupTip" class="tip-bar hidden">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8A5A00" stroke-width="2.4" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      <span id="backupTipTxt">学习记录攒了不少啦，建议导出备份一下～</span>
+      <button onclick="App.exportData()">立即导出</button>
+    </div>
+
+    <!-- 视图容器 -->
+    <section id="view-plan" class="view"></section>
+    <section id="view-homework" class="view"></section>
+    <section id="view-stats" class="view"></section>
+    <section id="view-wrong" class="view"></section>
+    <section id="view-farm" class="view"></section>
+  </main>
+</div>
+
+<nav class="tabbar" id="tabBox"></nav>
+<div id="toast"></div>
+<div class="mask" id="mask"><div class="dlg" id="dlg"></div></div>
+
+<script>
+/* ============================================================================
+   【教程 / 二次开发说明】—— 如何调整本工作台的核心参数
+   ----------------------------------------------------------------------------
+   1) 小狗熊惩罚力度：看 App.rollDay() 与 applyBearDamage(n)。
+      - n = 当天未完成的三科数量（0/1/2/3）。想加重/减轻，改 applyBearDamage 里
+        对 plot.health / plot.withered / stage 的处理逻辑即可。
+      - 想让“1 科未完成”也偷更多金币：改 rollDay 里 Math.floor(f.gold/2) 的 1/2。
+   2) 每日阳光奖励数量：看 App.checkIn() 与 App.addSun()。
+      - 单科完成奖励在 checkIn 里：App.addSun(1, ...) 改数字即可。
+      - 想加“三科全完成额外奖励”，在 checkIn 里判断三科 done 后补 addSun / addSeed。
+   3) 自定义农场作物样式：看 App.cropSvg(plot) 与 CROPS 配置。
+      - CROPS 里每种作物有 name / color / gold(收获金币)。改颜色、金币、或新增作物种类，
+        再在 App.plantSeed() 里随机挑选即可。
+   4) 作业↔农场联动逻辑位置：全局搜索【联动】注释，关键函数在
+      App.checkIn()（作业完成发奖）、App.rollDay()（跨天结算惩罚）、App.afterCheckIn()（补作业发杀虫剂）。
+   ============================================================================ */
+
+/* ================= 一、存储 / 通用工具 ================= */
+var K = { data: 'wb_baby_farm_v1' };   // localStorage 统一前缀键
+
+function today(){
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function yesterday(){
+  var d = new Date(); d.setDate(d.getDate()-1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function rnd(n){ return Math.floor(Math.random()*n); }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=rnd(i+1);var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function $(id){ return document.getElementById(id); }
+function nowTs(){ return Date.now(); }
+
+/* 糖果色板（字母/数字/作物等复用） */
+var CANDY = [
+  {bg:'#FFE3EE', bd:'#FFB6D2', tx:'#E8437F'},
+  {bg:'#DCF3FD', bd:'#9BDDF8', tx:'#1B8FC7'},
+  {bg:'#FFF3D1', bd:'#FFDC8A', tx:'#C98800'},
+  {bg:'#DCF7EA', bd:'#96E6BE', tx:'#219C64'},
+  {bg:'#EEE5FF', bd:'#C9B0F7', tx:'#7B47D8'},
+  {bg:'#FFE9DC', bd:'#FFC0A0', tx:'#D2661F'}
+];
+
+/* 五大主 Tab（底部导航 + 侧边栏共用） */
+var TABS = [
+  {id:'plan',    name:'今日计划', t:'t1', color:'#4FB8E8',
+   icon:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="CUR" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>'},
+  {id:'homework',name:'作业打卡', t:'t2', color:'#3FBF7F',
+   icon:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="CUR" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>'},
+  {id:'stats',   name:'学习统计', t:'t3', color:'#FFAE22',
+   icon:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="CUR" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>'},
+  {id:'wrong',   name:'错题本',   t:'t4', color:'#9A6EEC',
+   icon:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="CUR" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>'},
+  {id:'farm',    name:'我的农场', t:'t5', color:'#FF6BA6',
+   icon:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="CUR" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l4-3 4 3 4-3 4 3v11M9 20v-5h6v5"/></svg>'}
+];
+
+/* 作业打卡：六大模块（子导航） */
+var HW_MODS = [
+  {id:'letters', name:'字母乐园', subject:'英语',   item:'字母乐园',   c:0},
+  {id:'poems',   name:'古诗花园', subject:'语文',   item:'古诗花园',   c:1},
+  {id:'copy',    name:'抄默生字词',subject:'语文',  item:'抄默生字词', c:3},
+  {id:'numbers', name:'数字王国', subject:'数学',   item:'数字王国',   c:2},
+  {id:'logic',   name:'逻辑挑战', subject:'extra',  item:'逻辑挑战',   c:4},
+  {id:'adventure',name:'闯关冒险',subject:'extra',  item:'闯关冒险',   c:5}
+];
+
+/* ================= 二、数据模型 ================= */
+/* 农场作物配置（自定义样式看这里） */
+var CROPS = [
+  {name:'小番茄', color:'#FF6B6B', gold:8},
+  {name:'胡萝卜', color:'#FF9B3D', gold:7},
+  {name:'小青菜', color:'#5FC36B', gold:6},
+  {name:'向日葵', color:'#FFC431', gold:10},
+  {name:'小草莓', color:'#FF7FA8', gold:9}
+];
+
+/* 三科作业默认结构 */
+function freshHomework(d){
+  return {
+    date: d,
+    subj: {
+      英语:{done:false, items:{'字母乐园':false}},
+      语文:{done:false, items:{'古诗花园':false,'抄默生字词':false}},
+      数学:{done:false, items:{'数字王国':false}}
+    },
+    extra:{'逻辑挑战':false,'闯关冒险':false}
+  };
+}
+
+/* 首次打开的示例数据：刻意让“数学”昨天没完成，用来演示【小狗熊惩罚】机制 */
+function demoData(){
+  var f = {
+    gold:20, sun:2, rice:6, soap:1, shield:0, potion:0,
+    seeds:{英语:1,语文:1,数学:0,通用:1},
+    plots:[
+      {id:0, crop:null},{id:1, crop:null},{id:2, crop:null},
+      {id:3, crop:null},{id:4, crop:null},{id:5, crop:null}
+    ],
+    bears:[],
+    chicken:{feed:100, clean:100, lastFeed:nowTs(), lastClean:nowTs(), fainted:false},
+    certificates:[],
+    goldLog:[{date:yesterday(), amt:20, note:'初始金币'}],
+    sunLog:[],
+    incompleteAtReset:[],
+    streakDays:0,
+    lastReset:today(),
+    warnedDate:''
+  };
+  return {
+    ver:2, isDemo:true, stars:12,
+    learnedLetters:['A','B','C','D','E'],
+    memoPoems:['jys'],
+    levels:{1:3,2:0,3:0,4:0,5:0},
+    badges:['first'],
+    stats:{
+      mathRight:6, mathTotal:8, logicRight:2, countRight:3, matchRight:2,
+      copyRight:0, copyTotal:0, days:[yesterday()], poemRead:4,
+      completion:{英语:{done:0,total:0},语文:{done:0,total:0},数学:{done:0,total:0},逻辑挑战:{done:0,total:0},闯关冒险:{done:0,total:0}}
+    },
+    homework: (function(){ var h=freshHomework(yesterday()); h.subj.英语.done=true; h.subj.英语.items['字母乐园']=true; h.subj.语文.done=true; h.subj.语文.items['古诗花园']=true; h.subj.语文.items['抄默生字词']=true; return h; })(),
+    farm: f
+  };
+}
+
+var DB = null;
+var App = {};
+
+App.load = function(){
+  try{ var raw = localStorage.getItem(K.data); DB = raw ? JSON.parse(raw) : demoData(); }
+  catch(e){ DB = demoData(); }
+  if(!DB || typeof DB !== 'object') DB = demoData();
+  // 兼容/补全字段
+  if(!DB.levels) DB.levels={1:0,2:0,3:0,4:0,5:0};
+  if(!DB.badges) DB.badges=[];
+  if(!DB.stats) DB.stats={mathRight:0,mathTotal:0,logicRight:0,countRight:0,matchRight:0,copyRight:0,copyTotal:0,days:[],poemRead:0,completion:{}};
+  if(!DB.stats.days) DB.stats.days=[];
+  if(!DB.learnedLetters) DB.learnedLetters=[];
+  if(!DB.memoPoems) DB.memoPoems=[];
+  if(typeof DB.stars!=='number') DB.stars=0;
+  if(!DB.homework) DB.homework=freshHomework(today());
+  if(!DB.farm) DB.farm={gold:0,sun:0,rice:0,soap:0,shield:0,potion:0,seeds:{英语:0,语文:0,数学:0,通用:0},plots:[],bears:[],chicken:{feed:100,clean:100,lastFeed:nowTs(),lastClean:nowTs(),fainted:false},certificates:[],goldLog:[],sunLog:[],incompleteAtReset:[],streakDays:0,lastReset:today(),warnedDate:''};
+  if(!DB.farm.plots || !DB.farm.plots.length){
+    DB.farm.plots=[]; for(var i=0;i<6;i++) DB.farm.plots.push({id:i, crop:null});
+  }
+  if(!DB.farm.seeds) DB.farm.seeds={英语:0,语文:0,数学:0,通用:0};
+  if(!DB.farm.goldLog) DB.farm.goldLog=[];
+  if(!DB.farm.sunLog) DB.farm.sunLog=[];
+  if(!DB.farm.certificates) DB.farm.certificates=[];
+  if(!DB.farm.bears) DB.farm.bears=[];
+  if(!DB.farm.chicken) DB.farm.chicken={feed:100,clean:100,lastFeed:nowTs(),lastClean:nowTs(),fainted:false};
+  // 【联动】跨天：发现日期变了 → 结算昨天的作业并施加农场惩罚
+  if(DB.homework.date !== today()){ App.rollDay(); }
+  App.save();
+};
+
+App.save = function(){
+  try{ localStorage.setItem(K.data, JSON.stringify(DB)); }
+  catch(e){ App.toast('保存失败，浏览器存储可能已满'); }
+};
+
+/* ================= 三、跨天结算 + 农场惩罚（联动核心） ================= */
+/* 每天首次打开且日期变化触发：统计完成率 → 计算未完成科数 → 偷菜+刷小狗熊+作物受损 */
+App.rollDay = function(){
+  var prev = DB.homework;
+  // 1) 把“昨天”的完成情况写进完成率统计
+  App.updateCompletionStats(prev);
+  // 2) 统计三科未完成数量
+  var inc = [];
+  ['英语','语文','数学'].forEach(function(s){ if(!prev.subj[s].done) inc.push(s); });
+  var f = DB.farm;
+  f.incompleteAtReset = inc;
+  // 3) 额外偷菜机制：当天漏做任意一科 → NPC 偷走一半金币
+  if(inc.length > 0 && f.gold > 0){
+    var steal = Math.floor(f.gold/2);
+    f.gold -= steal;
+    f.goldLog.push({date:today(), amt:-steal, note:'小狗熊偷走了一半金币'});
+  }
+  // 4) 护盾优先抵挡：有护盾则消耗 1 个，小狗熊不出现
+  if(inc.length > 0 && f.shield > 0){
+    f.shield--;
+    f.bears = [];
+  } else if(inc.length > 0){
+    // 5) 夜晚刷新小狗熊（数量 = 未完成科数）
+    f.bears = [];
+    for(var i=0;i<inc.length;i++){ f.bears.push({id:'bear_'+nowTs()+'_'+i, hp:1}); }
+    // 6) 施加作物惩罚
+    App.applyBearDamage(inc.length);
+  } else {
+    f.bears = [];
+  }
+  // 7) 连续打卡天数（三科全完成才 +1）
+  var allDone = prev.subj.英语.done && prev.subj.语文.done && prev.subj.数学.done;
+  f.streakDays = allDone ? (f.streakDays||0)+1 : 0;
+  f.lastReset = today();
+  f.warnedDate = '';
+  // 8) 重置今日作业
+  DB.homework = freshHomework(today());
+  if(DB.stats.days.indexOf(today()) < 0) DB.stats.days.push(today());
+};
+
+App.updateCompletionStats = function(hw){
+  var c = DB.stats.completion;
+  if(!c) c = DB.stats.completion = {};
+  [['英语',hw.subj.英语.done],['语文',hw.subj.语文.done],['数学',hw.subj.数学.done],
+   ['逻辑挑战',hw.extra['逻辑挑战']],['闯关冒险',hw.extra['闯关冒险']]].forEach(function(p){
+    if(!c[p[0]]) c[p[0]] = {done:0, total:0};
+    c[p[0]].total++;
+    if(p[1]) c[p[0]].done++;
+  });
+};
+
+/* 小狗熊对作物的破坏（惩罚力度调节看这里） */
+App.applyBearDamage = function(n){
+  var f = DB.farm;
+  var planted = f.plots.filter(function(p){ return p.crop; });
+  if(n >= 3){
+    // 三科全没写：成熟作物全部枯萎，当天无法收获
+    f.plots.forEach(function(p){ if(p.crop && p.crop.stage>=3) p.crop.withered = true; });
+  } else if(n === 2){
+    // 两科没写：直接毁掉半株成熟植物（成熟作物降一级，若无成熟则一株枯萎）
+    var mature = f.plots.filter(function(p){ return p.crop && p.crop.stage>=3; });
+    if(mature.length){ var p = mature[0]; if(p.crop.stage>1) p.crop.stage--; else p.crop.withered = true; }
+    else if(planted.length){ planted[0].crop.withered = true; }
+  } else {
+    // 一科没写：一只小狗熊攻击当天种下的植物，枯萎 1 格健康度
+    if(planted.length){
+      var p = planted[0];
+      p.crop.health = (p.crop.health==null?3:p.crop.health) - 1;
+      if(p.crop.health <= 0) p.crop.withered = true;
+    }
+  }
+};
+
+/* ================= 四、朗读引擎（Web Speech API） ================= */
+var Speech = {
+  ok: ('speechSynthesis' in window),
+  voices: [],
+  init: function(){
+    if(!Speech.ok) return;
+    var load = function(){ Speech.voices = window.speechSynthesis.getVoices() || []; };
+    load();
+    if(window.speechSynthesis.onvoiceschanged !== undefined){ window.speechSynthesis.onvoiceschanged = load; }
+  },
+  pick: function(lang){
+    var vs = Speech.voices;
+    for(var i=0;i<vs.length;i++){ if(vs[i].lang && vs[i].lang.replace('_','-').toLowerCase().indexOf(lang.toLowerCase())===0) return vs[i]; }
+    var p = lang.split('-')[0].toLowerCase();
+    for(var j=0;j<vs.length;j++){ if(vs[j].lang && vs[j].lang.toLowerCase().indexOf(p)===0) return vs[j]; }
+    return null;
+  },
+  say: function(text, lang, rate){
+    if(!Speech.ok){ App.toast('这个浏览器不支持朗读，换 Chrome / Safari 试试～'); return; }
+    try{
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = lang || 'zh-CN'; u.rate = rate || 0.85; u.pitch = 1.15;
+      var v = Speech.pick(u.lang); if(v) u.voice = v;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+};
+function flash(el){ if(!el) return; el.classList.add('speaking'); setTimeout(function(){ el.classList.remove('speaking'); }, 700); }
+
+/* ================= 五、导航 / 渲染入口 ================= */
+App.cur = 'plan';
+App.buildNav = function(){
+  var nav='', tab='';
+  TABS.forEach(function(m){
+    nav += '<button class="nav-btn '+m.t+'" data-t="'+m.id+'"><span class="nav-ico '+m.t+'">'+m.icon.replace('CUR',m.color)+'</span>'+m.name+'</button>';
+    tab += '<button class="tab-btn '+m.t+'" data-t="'+m.id+'"><span class="ti">'+m.icon.replace('CUR','currentColor')+'</span>'+m.name+'</button>';
+  });
+  $('navBox').innerHTML = nav;
+  $('tabBox').innerHTML = tab;
+  var all = document.querySelectorAll('[data-t]');
+  for(var i=0;i<all.length;i++){
+    (function(n){ n.onclick = function(){ App.go(n.getAttribute('data-t')); }; })(all[i]);
+  }
+};
+App.go = function(id){
+  App.cur = id;
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  TABS.forEach(function(m){ var v=$('view-'+m.id); if(v) v.className='view'+(m.id===id?' on':''); });
+  var btns = document.querySelectorAll('[data-t]');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i], on = b.getAttribute('data-t')===id;
+    var base = b.classList.contains('tab-btn') ? 'tab-btn ' : 'nav-btn ';
+    var mm = TABS.filter(function(x){return x.id===b.getAttribute('data-t');})[0];
+    b.className = base + mm.t + (on?' on':'');
+  }
+  var m = TABS.filter(function(x){return x.id===id;})[0];
+  $('pageTitle').innerHTML = '<span style="display:inline-flex;width:32px;height:32px;border-radius:10px;align-items:center;justify-content:center;background:'+m.color+'22">'+m.icon.replace('CUR',m.color)+'</span>'+m.name;
+  if(id==='plan') App.renderPlan();
+  else if(id==='homework') App.renderHomework();
+  else if(id==='stats') App.renderStats();
+  else if(id==='wrong') App.renderWrong();
+  else if(id==='farm'){ App.renderFarm(); App.maybeWarnFarm(); }
+  window.scrollTo({top:0, behavior:'smooth'});
+};
+
+/* 资源条（顶栏/侧栏通用） */
+App.paintRes = function(){
+  var f = DB.farm;
+  $('sideRes').innerHTML =
+    '<span class="res-chip">🪙 '+f.gold+'</span>'+
+    '<span class="res-chip">☀️ '+f.sun+'</span>'+
+    '<span class="res-chip">🌾 '+f.rice+'</span>'+
+    '<span class="res-chip">🍞 '+f.soap+'</span>'+
+    '<span class="res-chip">⭐ '+DB.stars+'</span>';
+};
+
+/* ================= 六、今日计划（三科打卡总览） ================= */
+App.renderPlan = function(){
+  var hw = DB.homework, html='';
+  var doneCount = (hw.subj.英语.done?1:0)+(hw.subj.语文.done?1:0)+(hw.subj.数学.done?1:0);
+  // 三科总览卡
+  html += '<div class="card"><div class="card-h">'
+    + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#4FB8E8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l4-3 4 3 4-3 4 3v11M9 20v-5h6v5"/></svg>'
+    + '三科作业打卡 <span class="sub">今天已完成 '+doneCount+'/3 科</span></div><div class="subj-row">';
+  [['英语','#E8437F','#FFE3EE'],['语文','#219C64','#DCF7EA'],['数学','#1B8FC7','#DCF3FD']].forEach(function(s){
+    var done = hw.subj[s[0]].done;
+    var items = hw.subj[s[0]].items;
+    var itemTxt = Object.keys(items).map(function(k){ return (items[k]?'✅':'⬜')+k; }).join(' · ');
+    html += '<div class="subj-card" style="background:'+s[2]+';border-color:'+s[1]+'">'
+      + '<div class="sc-t" style="color:'+s[1]+'">📘 '+s[0]+(done?' · 已完成':'')+'</div>'
+      + '<div style="font-size:12px;font-weight:700;color:'+s[1]+';opacity:.85;margin-top:5px">'+itemTxt+'</div>'
+      + '<button class="sc-s'+(done?'':' off')+'" '+(done?'disabled':'')+' onclick="App.goHomework(\''+s[0]+'\')">'+(done?'太棒啦！':'去完成 →')+'</button>'
+      + '</div>';
+  });
+  html += '</div></div>';
+
+  // 今日任务清单（含逾期顺延 + 打卡按钮）
+  html += '<div class="today"><div class="today-h">'
+    + '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6BA6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>'
+    + '今天要做的事 <span class="cnt" id="planCnt"></span></div><div id="planList"></div></div>';
+  $('view-plan').innerHTML = html;
+
+  // 任务项：三科 + 两拓展
+  var tasks = [
+    {key:'英语', label:'英语作业（字母乐园）', done:hw.subj.英语.done, mod:'英语', color:'#E8437F'},
+    {key:'语文', label:'语文作业（古诗+抄默）', done:hw.subj.语文.done, mod:'语文', color:'#219C64'},
+    {key:'数学', label:'数学作业（数字王国）', done:hw.subj.数学.done, mod:'数学', color:'#1B8FC7'},
+    {key:'逻辑挑战', label:'逻辑挑战（选做）', done:hw.extra['逻辑挑战'], mod:'逻辑挑战', color:'#7B47D8'},
+    {key:'闯关冒险', label:'闯关冒险（选做）', done:hw.extra['闯关冒险'], mod:'闯关冒险', color:'#FFAE22'}
+  ];
+  var done=0, lh='';
+  tasks.forEach(function(t){
+    if(t.done) done++;
+    lh += '<div class="tk'+(t.done?' done':'')+'">'
+      + '<span class="tk-dot" style="background:'+t.color+'22">'
+      + (t.done
+          ? '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#4CCB8B" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+          : '<svg width="17" height="17" viewBox="0 0 24 24" fill="'+t.color+'"><circle cx="12" cy="12" r="7"/></svg>')
+      + '</span>'
+      + '<div class="tk-body"><div class="tk-name">'+t.label+'</div></div>'
+      + (t.done
+          ? '<span class="tk-ok"><svg width="18" height="18" viewBox="0 0 24 24" fill="#4CCB8B"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg></span>'
+          : '<button class="tk-ck" onclick="App.goHomework(\''+t.mod+'\')">去打卡</button>')
+      + '</div>';
+  });
+  $('planList').innerHTML = lh;
+  $('planCnt').textContent = done+'/'+tasks.length;
+  App.checkTip();
+};
+
+/* 从计划页跳到对应作业模块 */
+App.goHomework = function(subjectOrMod){
+  App.cur = 'homework';
+  TABS.forEach(function(m){ var v=$('view-'+m.id); if(v) v.className='view'+(m.id==='homework'?' on':''); });
+  var btns = document.querySelectorAll('[data-t]');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i], on=b.getAttribute('data-t')==='homework';
+    var base=b.classList.contains('tab-btn')?'tab-btn ':'nav-btn ';
+    var mm=TABS.filter(function(x){return x.id==='homework';})[0];
+    b.className=base+mm.t+(on?' on':'');
+  }
+  // 找到对应模块 id
+  var mod = HW_MODS.filter(function(x){ return x.subject===(subjectOrMod==='英语'||subjectOrMod==='语文'||subjectOrMod==='数学'?subjectOrMod:subjectOrMod) && (subjectOrMod==='逻辑挑战'||subjectOrMod==='闯关冒险'?x.item===subjectOrMod:true); })[0];
+  App.hwMod = mod ? mod.id : 'letters';
+  App.renderHomework();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+/* ================= 七、作业打卡（六大模块） ================= */
+App.hwMod = 'letters';
+App.renderHomework = function(){
+  var h = '<div class="seg">';
+  HW_MODS.forEach(function(m){
+    h += '<button class="'+(App.hwMod===m.id?'on':'')+'" onclick="App.hwSwitch(\''+m.id+'\')">'+m.name+'</button>';
+  });
+  h += '</div><div id="hwContent"></div>';
+  $('view-homework').innerHTML = h;
+  App.renderHWModule();
+};
+App.hwSwitch = function(id){ App.hwMod=id; App.renderHomework(); };
+
+/* 通用：模块顶部的“今日打卡”按钮 */
+App.checkInBtn = function(subject, item, label){
+  var hw = DB.homework;
+  var done = subject==='extra' ? hw.extra[item] : hw.subj[subject].items[item];
+  return '<div class="row-btns" style="margin:14px 0 4px">'
+    + '<button class="big-btn '+(done?'bb-green':'bb-blue')+'" '+(done?'disabled':'')+' onclick="App.checkIn(\''+subject+'\',\''+item+'\')">'
+    + (done?'✅ 今日已打卡':'📝 完成今日打卡（'+label+'）')+'</button></div>';
+};
+
+App.renderHWModule = function(){
+  var id = App.hwMod;
+  if(id==='letters') App.renderLetters();
+  else if(id==='poems') App.renderPoems();
+  else if(id==='copy') App.renderCopy();
+  else if(id==='numbers') App.renderNumbers();
+  else if(id==='logic') App.renderLogic();
+  else if(id==='adventure') App.renderAdventure();
+};
+
+/* ---- 【联动】作业打卡发奖：细分 +2 米粒；整科完成 +1 阳光 +1 学科种子 ---- */
+App.checkIn = function(subject, item){
+  var hw = DB.homework;
+  if(subject==='extra'){
+    if(hw.extra[item]){ App.toast('今天已经打卡过啦～'); return; }
+    hw.extra[item] = true;
+    App.addRice(2);
+    App.addSun(1, '完成「'+item+'」');
+    App.save(); App.afterCheckIn();
+    App.toast('打卡成功！+2 米粒 +1 阳光 ☀️', true);
+  } else {
+    if(hw.subj[subject].items[item]){ App.toast('这一项今天已经打卡啦～'); return; }
+    hw.subj[subject].items[item] = true;
+    App.addRice(2);  // 细分打卡项奖励 2 粒米
+    // 判断是否整科完成
+    var items = hw.subj[subject].items, all=true;
+    for(var k in items){ if(!items[k]) all=false; }
+    if(all && !hw.subj[subject].done){
+      hw.subj[subject].done = true;
+      App.addSun(1, subject+'作业完成');            // 单科完成奖励 1 颗阳光
+      DB.farm.seeds[subject] = (DB.farm.seeds[subject]||0) + 1;  // 单科完成奖励 1 颗学科专属种子
+      DB.farm.sunLog.push({date:today(), amt:1, note:subject+'作业完成'});
+      App.save(); App.afterCheckIn();
+      App.toast(subject+'作业全部完成！+1 阳光 +1'+subject+'种子 🌱', true);
+    } else {
+      App.save(); App.afterCheckIn();
+      App.toast('打卡成功！+2 米粒 🌾', true);
+    }
+  }
+  App.paintRes();
+  App.renderPlan(); App.renderHomework();
+  if(App.cur==='farm') App.renderFarm();
+};
+
+/* 【联动】补完未完成作业 → 领取杀虫剂，清除小狗熊+恢复植物健康 */
+App.afterCheckIn = function(){
+  var f = DB.farm;
+  if(!f.bears || f.bears.length===0) return;
+  var allDone = DB.homework.subj.英语.done && DB.homework.subj.语文.done && DB.homework.subj.数学.done;
+  if(allDone && f.incompleteAtReset && f.incompleteAtReset.length>0){
+    f.potion = (f.potion||0) + 1;
+    f.incompleteAtReset = [];
+    App.toast('补完作业啦！获得 1 瓶杀虫剂 🧴，去农场清除小狗熊～', true);
+  }
+};
+
+/* 资源增减小工具 */
+App.addRice = function(n){ DB.farm.rice = (DB.farm.rice||0)+n; };
+App.addSun  = function(n, why){ DB.farm.sun = (DB.farm.sun||0)+n; if(why) DB.farm.sunLog.push({date:today(), amt:n, note:why}); };
+App.addGold = function(n, note){ DB.farm.gold = (DB.farm.gold||0)+n; DB.farm.goldLog.push({date:today(), amt:n, note:note||'获得金币'}); };
+
+/* toast / dialog */
+App.toast = function(html, win){
+  var el=$('toast'); el.innerHTML=html; el.className = win?'show win':'show';
+  clearTimeout(App._tt); App._tt=setTimeout(function(){ el.className=''; }, 2100);
+};
+App.dialog = function(title, body, btns){
+  var h='<h3>'+title+'</h3>'+(body?'<p>'+body+'</p>':'')+'<div class="dlg-btns">';
+  btns.forEach(function(b,i){ h+='<button class="'+b.cls+'" data-i="'+i+'">'+b.txt+'</button>'; });
+  h+='</div>';
+  $('dlg').innerHTML=h; $('mask').className='mask on';
+  var nodes=$('dlg').querySelectorAll('.dlg-btns button');
+  for(var i=0;i<nodes.length;i++){ (function(node,fn){ node.onclick=function(){ $('mask').className='mask'; if(fn) fn(); }; })(nodes[i], btns[i].fn); }
+};
+
+/* ================= 八、模块1：字母乐园 ================= */
+var LETTERS = [
+  ['A','Apple','苹果'],['B','Bear','小熊'],['C','Cat','小猫'],['D','Dog','小狗'],
+  ['E','Egg','鸡蛋'],['F','Fish','小鱼'],['G','Grape','葡萄'],['H','Hat','帽子'],
+  ['I','Ice','冰块'],['J','Juice','果汁'],['K','Kite','风筝'],['L','Lion','狮子'],
+  ['M','Moon','月亮'],['N','Nose','鼻子'],['O','Orange','橙子'],['P','Panda','熊猫'],
+  ['Q','Queen','女王'],['R','Rabbit','兔子'],['S','Sun','太阳'],['T','Tiger','老虎'],
+  ['U','Umbrella','雨伞'],['V','Violin','小提琴'],['W','Water','水'],['X','Xylophone','木琴'],
+  ['Y','Yellow','黄色'],['Z','Zebra','斑马']
+];
+var LT = { mode:'learn', pairs:[], sel:null, okCount:0, matched:[] };
+App.renderLetters = function(){
+  var learned = DB.learnedLetters;
+  var h='<div class="seg">'
+    + '<button class="'+(LT.mode==='learn'?'on':'')+'" onclick="App.ltMode(\'learn\')">认字母</button>'
+    + '<button class="'+(LT.mode==='match'?'on':'')+'" onclick="App.ltMode(\'match\')">大小写配对</button></div>';
+  if(LT.mode==='learn'){
+    h+='<div class="card"><div class="card-h">'
+      + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FF7FB0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>'
+      + '点一点，听发音<span class="sub">已学 '+learned.length+'/26</span></div>'
+      + '<div class="pbar" style="margin-bottom:14px"><i style="width:'+Math.round(learned.length/26*100)+'%;background:linear-gradient(90deg,#FF9BC0,#FF6BA6)"></i></div>'
+      + '<div class="grid-l">';
+    LETTERS.forEach(function(L,i){
+      var c=CANDY[i%CANDY.length], on=learned.indexOf(L[0])>=0;
+      h+='<button class="lcard'+(on?' learned':'')+'" id="lc_'+L[0]+'" style="background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+'" onclick="App.sayLetter(\''+L[0]+'\')">'
+        + '<span class="big">'+L[0]+L[0].toLowerCase()+'</span><span class="wd">'+L[1]+'</span><span class="cn">'+L[2]+'</span></button>';
+    });
+    h+='</div><div class="center mt"><button class="big-btn bb-pink" onclick="App.sayAllLetters()">从 A 唱到 Z</button></div>'
+      + App.checkInBtn('英语','字母乐园','字母乐园') + '</div>';
+  } else {
+    h+='<div class="card"><div class="card-h">'
+      + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#A87FF0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h6M4 17h6M14 7h6M14 17h6"/><path d="M7 4v6M17 14v6"/></svg>'
+      + '把大写和小写连起来<span class="sub">配对 '+LT.okCount+'/5</span></div>'
+      + '<p class="center" style="color:var(--muted);font-size:14px;margin:0 0 14px">先点左边的大写字母，再点右边对应的小写字母</p>'
+      + '<div class="match-wrap" id="matchWrap"></div>'
+      + '<div class="center mt"><button class="big-btn bb-purple" onclick="App.newMatch()">换一批</button></div></div>';
+  }
+  $('hwContent').innerHTML=h;
+  if(LT.mode==='match'){ if(!LT.pairs.length) App.newMatch(); else App.paintMatch(); }
+};
+App.ltMode = function(m){ LT.mode=m; if(m==='match'){ LT.pairs=[]; LT.okCount=0; LT.matched=[]; } App.renderLetters(); };
+App.sayLetter = function(ch){
+  var L = LETTERS.filter(function(x){return x[0]===ch;})[0];
+  Speech.say(ch+'. '+L[1],'en-US',0.75); flash($('lc_'+ch));
+  if(DB.learnedLetters.indexOf(ch)<0){ DB.learnedLetters.push(ch); App.save(); App.renderLetters(); }
+};
+App.sayAllLetters = function(){ Speech.say(LETTERS.map(function(x){return x[0];}).join(' '),'en-US',0.7); };
+App.newMatch = function(){
+  var pick = shuffle(LETTERS).slice(0,5).map(function(x){return x[0];});
+  LT.pairs=pick; LT.sel=null; LT.okCount=0; LT.matched=[]; LT.right=shuffle(pick);
+  App.renderLetters();
+};
+App.paintMatch = function(){
+  var w=$('matchWrap'); if(!w) return; var l='<div class="mcol">', r='<div class="mcol">';
+  LT.pairs.forEach(function(c){ var ok=LT.matched.indexOf(c)>=0;
+    l+='<button class="mbtn'+(ok?' ok':'')+(LT.sel===c?' sel':'')+'" id="mL_'+c+'" onclick="App.mPick(\''+c+'\')">'+c+'</button>'; });
+  LT.right.forEach(function(c){ var ok=LT.matched.indexOf(c)>=0;
+    r+='<button class="mbtn'+(ok?' ok':'')+'" id="mR_'+c+'" onclick="App.mDrop(\''+c+'\')">'+c.toLowerCase()+'</button>'; });
+  w.innerHTML=l+'</div>'+r+'</div>';
+};
+App.mPick = function(c){ LT.sel=c; Speech.say(c,'en-US',0.8); App.paintMatch(); };
+App.mDrop = function(c){
+  if(!LT.sel){ App.toast('先点左边的大写字母哦～'); return; }
+  if(LT.sel===c){
+    LT.matched.push(c); LT.sel=null; LT.okCount++;
+    DB.stats.matchRight=(DB.stats.matchRight||0)+1; App.save(); App.paintMatch();
+    if(LT.okCount>=5){
+      setTimeout(function(){
+        App.dialog('太棒啦！全部配对成功','小手真快，要不要再来一批？',[{txt:'休息一下',cls:'b-gray'},{txt:'再来一批',cls:'b-purple',fn:App.newMatch}]);
+      },400);
+    } else { App.renderLetters(); }
+  } else {
+    var el=$('mR_'+c); if(el){ el.classList.add('bad'); setTimeout(function(){ el.classList.remove('bad'); },400); }
+    App.toast('再看看哦，这个不是 '+LT.sel+' 的小写～');
+  }
+};
+
+/* ================= 九、模块2：古诗花园（每日随机 8 首） ================= */
+var POEMS_ALL = [
+  {id:'jys', t:'静夜思', a:'唐·李白', c:0, lines:[['床前明月光','chuáng qián míng yuè guāng','，'],['疑是地上霜','yí shì dì shàng shuāng','。'],['举头望明月','jǔ tóu wàng míng yuè','，'],['低头思故乡','dī tóu sī gù xiāng','。']]},
+  {id:'ye', t:'咏鹅', a:'唐·骆宾王', c:1, lines:[['鹅鹅鹅','é é é','，'],['曲项向天歌','qū xiàng xiàng tiān gē','。'],['白毛浮绿水','bái máo fú lǜ shuǐ','，'],['红掌拨清波','hóng zhǎng bō qīng bō','。']]},
+  {id:'cx', t:'春晓', a:'唐·孟浩然', c:2, lines:[['春眠不觉晓','chūn mián bù jué xiǎo','，'],['处处闻啼鸟','chù chù wén tí niǎo','。'],['夜来风雨声','yè lái fēng yǔ shēng','，'],['花落知多少','huā luò zhī duō shǎo','。']]},
+  {id:'mn', t:'悯农', a:'唐·李绅', c:3, lines:[['锄禾日当午','chú hé rì dāng wǔ','，'],['汗滴禾下土','hàn dī hé xià tǔ','。'],['谁知盘中餐','shuí zhī pán zhōng cān','，'],['粒粒皆辛苦','lì lì jiē xīn kǔ','。']]},
+  {id:'dgql', t:'登鹳雀楼', a:'唐·王之涣', c:4, lines:[['白日依山尽','bái rì yī shān jìn','，'],['黄河入海流','huáng hé rù hǎi liú','。'],['欲穷千里目','yù qióng qiān lǐ mù','，'],['更上一层楼','gèng shàng yī céng lóu','。']]},
+  {id:'jx', t:'江雪', a:'唐·柳宗元', c:5, lines:[['千山鸟飞绝','qiān shān niǎo fēi jué','，'],['万径人踪灭','wàn jìng rén zōng miè','。'],['孤舟蓑笠翁','gū zhōu suō lì wēng','，'],['独钓寒江雪','dú diào hán jiāng xuě','。']]},
+  {id:'cs', t:'池上', a:'唐·白居易', c:1, lines:[['小娃撑小艇','xiǎo wá chēng xiǎo tǐng','，'],['偷采白莲回','tōu cǎi bái lián huí','。'],['不解藏踪迹','bù jiě cáng zōng jì','，'],['浮萍一道开','fú píng yí dào kāi','。']]},
+  {id:'cj', t:'村居', a:'清·高鼎', c:3, lines:[['草长莺飞二月天','cǎo zhǎng yīng fēi èr yuè tiān','，'],['拂堤杨柳醉春烟','fú dī yáng liǔ zuì chūn yān','。'],['儿童散学归来早','ér tóng sàn xué guī lái zǎo','，'],['忙趁东风放纸鸢','máng chèn dōng fēng fàng zhǐ yuān','。']]},
+  {id:'xzh', t:'小池', a:'宋·杨万里', c:2, lines:[['泉眼无声惜细流','quán yǎn wú shēng xī xì liú','，'],['树阴照水爱晴柔','shù yīn zhào shuǐ ài qíng róu','。'],['小荷才露尖尖角','xiǎo hé cái lù jiān jiān jiǎo','，'],['早有蜻蜓立上头','zǎo yǒu qīng tíng lì shàng tóu','。']]},
+  {id:'ms', t:'梅花', a:'宋·王安石', c:4, lines:[['墙角数枝梅','qiáng jiǎo shù zhī méi','，'],['凌寒独自开','líng hán dú zì kāi','。'],['遥知不是雪','yáo zhī bú shì xuě','，'],['为有暗香来','wèi yǒu àn xiāng lái','。']]}
+];
+function dailyPoems(){
+  // 每日随机 8 首（按日期做种子，保证当天稳定）
+  var seed = today().split('-').join('');
+  var arr = POEMS_ALL.slice();
+  // 简易洗牌（以日期为伪随机）
+  var s = parseInt(seed,10) || 1;
+  for(var i=arr.length-1;i>0;i--){ s=(s*9301+49297)%233280; var j=Math.floor(s/233280*(i+1)); var t=arr[i];arr[i]=arr[j];arr[j]=t; }
+  return arr.slice(0,8);
+}
+var PM = { open:null };
+function poemFull(p){ return p.lines.map(function(l){return l[0]+l[2];}).join(''); }
+App.renderPoems = function(){
+  var h='';
+  if(!PM.open){
+    var list = dailyPoems();
+    h+='<div class="card"><div class="card-h">'
+      + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#4CCB8B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>'
+      + '今日古诗（随机 8 首）<span class="sub">会背 '+DB.memoPoems.length+' 首</span></div>'
+      + '<div class="poem-list">';
+    list.forEach(function(p){
+      var c=CANDY[p.c], memo=DB.memoPoems.indexOf(p.id)>=0;
+      h+='<button class="pcard'+(memo?' memo':'')+'" style="background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+'" onclick="App.openPoem(\''+p.id+'\')">'
+        + '<div class="pt">'+p.t+'</div><div class="pa">'+p.a+'</div><div class="pf">'+p.lines[0][0].slice(0,5)+'…</div></button>';
+    });
+    h+='</div>'+App.checkInBtn('语文','古诗花园','古诗花园')+'</div>';
+  } else {
+    var p = POEMS_ALL.filter(function(x){return x.id===PM.open;})[0];
+    if(!p){ PM.open=null; App.renderPoems(); return; }
+    var c=CANDY[p.c], memo=DB.memoPoems.indexOf(p.id)>=0;
+    h+='<div class="card poem-view" style="background:linear-gradient(170deg,#fff,'+c.bg+')">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+      + '<button class="chip" onclick="App.closePoem()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>返回</button>'
+      + '<span class="spacer"></span>'+(memo?'<span class="chip" style="background:var(--green-l);border-color:#96E6BE;color:#219C64">已经会背啦</span>':'')+'</div>'
+      + '<div style="font-size:12px;color:'+c.tx+';font-weight:700;letter-spacing:1px">'+p.tp+'</div>'
+      + '<div style="font-size:26px;font-weight:900;color:'+c.tx+'">'+p.t+'</div>'
+      + '<div style="font-size:13px;color:var(--muted);font-weight:700;margin-top:2px">'+p.a+'</div>'
+      + '<div class="poem-lines">';
+    p.lines.forEach(function(l,i){
+      var chars=l[0].split(''), pys=l[1].split(' ');
+      var line='<div class="pline" id="pl_'+i+'" onclick="App.sayLine('+i+')">';
+      chars.forEach(function(ch,j){ line+='<ruby><span class="hz" style="color:'+c.tx+'">'+ch+'</span><rt>'+(pys[j]||'')+'</rt></ruby>'; });
+      line+='<span class="punc" style="color:'+c.tx+'">'+l[2]+'</span></div>'; h+=line;
+    });
+    h+='</div><div class="row-btns">'
+      + '<button class="big-btn bb-green" onclick="App.sayPoem()">朗读整首</button>'
+      + (memo?'':'<button class="big-btn bb-yellow" onclick="App.memoPoem()">我会背啦</button>')
+      + '</div><p style="color:var(--muted);font-size:13px;margin:14px 0 0">点每一句可以单独听哦～</p></div>';
+  }
+  $('hwContent').innerHTML=h;
+};
+App.openPoem = function(id){ PM.open=id; App.renderPoems(); window.scrollTo({top:0,behavior:'smooth'}); };
+App.closePoem = function(){ PM.open=null; try{window.speechSynthesis.cancel();}catch(e){} App.renderPoems(); };
+App.sayLine = function(i){
+  var p=POEMS_ALL.filter(function(x){return x.id===PM.open;})[0];
+  var els=document.querySelectorAll('.pline'); for(var k=0;k<els.length;k++) els[k].classList.remove('active');
+  var el=$('pl_'+i); if(el) el.classList.add('active');
+  Speech.say(p.lines[i][0],'zh-CN',0.72);
+  setTimeout(function(){ if(el) el.classList.remove('active'); },2600);
+};
+App.sayPoem = function(){
+  var p=POEMS_ALL.filter(function(x){return x.id===PM.open;})[0];
+  Speech.say(p.t+'。'+p.a+'。'+poemFull(p),'zh-CN',0.72);
+  DB.stats.poemRead=(DB.stats.poemRead||0)+1; App.save();
+};
+App.memoPoem = function(){
+  var p=POEMS_ALL.filter(function(x){return x.id===PM.open;})[0];
+  if(DB.memoPoems.indexOf(p.id)<0){ DB.memoPoems.push(p.id); App.save(); App.renderPoems(); }
+};
+
+/* ================= 十、模块3：抄默生字词 ================= */
+var COPY_WORDS = [
+  ['鸟','niǎo'],['虫','chóng'],['花','huā'],['水','shuǐ'],['火','huǒ'],
+  ['木','mù'],['山','shān'],['月','yuè'],['日','rì'],['田','tián'],
+  ['爸','bà'],['妈','mā'],['大','dà'],['小','xiǎo'],['天','tiān']
+];
+var CP = { idx:0, done:[] };
+App.renderCopy = function(){
+  var w = COPY_WORDS[CP.idx];
+  var learned = CP.done;
+  var h='<div class="card"><div class="card-h">'
+    + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9A6EEC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>'
+    + '抄一抄，写一写<span class="sub">已会写 '+learned.length+'/'+COPY_WORDS.length+'</span></div>'
+    + '<div class="pbar" style="margin-bottom:14px"><i style="width:'+Math.round(learned.length/COPY_WORDS.length*100)+'%;background:linear-gradient(90deg,#BE9BF5,#9A6EEC)"></i></div>'
+    + '<div class="copy-box">'
+    + '<div class="copy-word">'+w[0]+'</div>'
+    + '<div class="copy-py">拼音：'+w[1]+'</div>'
+    + '<input class="copy-input" id="copyInput" maxlength="4" placeholder="在这里写出这个字" onkeydown="if(event.key===\'Enter\')App.checkCopy()">'
+    + '<button class="big-btn bb-purple" onclick="App.checkCopy()">我写好了 ✓</button>'
+    + '</div>';
+  if(learned.length){
+    h+='<div class="copy-done">';
+    learned.forEach(function(x){ h+='<span class="chip" style="background:var(--purple-l);border-color:#C9B0F7;color:#7B47D8">'+x+' 会写啦</span>'; });
+    h+='</div>';
+  }
+  h+= App.checkInBtn('语文','抄默生字词','抄默生字词') + '</div>';
+  $('hwContent').innerHTML=h;
+};
+App.checkCopy = function(){
+  var w=COPY_WORDS[CP.idx];
+  var v=($('copyInput').value||'').trim();
+  if(v===w[0]){
+    if(CP.done.indexOf(w[0])<0){ CP.done.push(w[0]); DB.stats.copyRight=(DB.stats.copyRight||0)+1; }
+    DB.stats.copyTotal=(DB.stats.copyTotal||0)+1; App.save();
+    App.toast('写对啦！✏️', true);
+    CP.idx = (CP.idx+1)%COPY_WORDS.length;
+    App.renderCopy();
+  } else {
+    DB.stats.copyTotal=(DB.stats.copyTotal||0)+1; App.save();
+    App.toast('再看看这个字怎么写～（正确答案是「'+w[0]+'」）');
+    var inp=$('copyInput'); if(inp) inp.value='';
+  }
+};
+
+/* ================= 十一、模块4：数字王国（20-50 认知 + 20以内加减 + 数数） ================= */
+var CN_NUM = ['零','一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','二十一','二十二','二十三','二十四','二十五','二十六','二十七','二十八','二十九','三十','三十一','三十二','三十三','三十四','三十五','三十六','三十七','三十八','三十九','四十','四十一','四十二','四十三','四十四','四十五','四十六','四十七','四十八','四十九','五十'];
+var EN_NUM = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty','twenty-one','twenty-two','twenty-three','twenty-four','twenty-five','twenty-six','twenty-seven','twenty-eight','twenty-nine','thirty','thirty-one','thirty-two','thirty-three','thirty-four','thirty-five','thirty-six','thirty-seven','thirty-eight','thirty-nine','forty','forty-one','forty-two','forty-three','forty-four','forty-five','forty-six','forty-seven','forty-eight','forty-nine','fifty'];
+var NM = { mode:'know', q:null, locked:false, streak:0, cq:null };
+var FRUIT = [
+  '<svg width="30" height="30" viewBox="0 0 24 24" fill="#FF6B81"><circle cx="12" cy="14" r="7.4"/><path d="M12 6.6c0-2 1.4-3.4 3.4-3.6-.2 2-1.5 3.3-3.4 3.6z" fill="#4CCB8B"/></svg>',
+  '<svg width="30" height="30" viewBox="0 0 24 24" fill="#FFC431"><path d="M12 2.6l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.9 5.9 21.2l1.4-6.8L2.2 9.7l6.9-.8z"/></svg>',
+  '<svg width="30" height="30" viewBox="0 0 24 24" fill="#4FC3F7"><circle cx="12" cy="12" r="8.4"/></svg>',
+  '<svg width="30" height="30" viewBox="0 0 24 24" fill="#A87FF0"><path d="M12 20.6l-1.4-1.3C5.4 14.6 2 11.6 2 7.9 2 5 4.2 2.9 7 2.9c1.6 0 3.2.8 4 2 .9-1.2 2.4-2 4-2 2.8 0 5 2.1 5 5 0 3.7-3.4 6.7-8.6 11.4z"/></svg>'
+];
+App.renderNumbers = function(){
+  var h='<div class="seg">'
+    + '<button class="'+(NM.mode==='know'?'on':'')+'" onclick="App.nmMode(\'know\')">认数字</button>'
+    + '<button class="'+(NM.mode==='math'?'on':'')+'" onclick="App.nmMode(\'math\')">加减法</button>'
+    + '<button class="'+(NM.mode==='count'?'on':'')+'" onclick="App.nmMode(\'count\')">数一数</button></div>';
+  if(NM.mode==='know'){
+    h+='<div class="card"><div class="card-h">'
+      + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2.6" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>'
+      + '0 到 50，点着读<span class="sub">中文 + 英文</span></div><div class="grid-n">';
+    for(var i=0;i<=50;i++){
+      var c=CANDY[i%CANDY.length];
+      h+='<button class="ncard" id="nc_'+i+'" style="background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+'" onclick="App.sayNum('+i+')">'
+        + '<span class="nn">'+i+'</span><span class="nc">'+CN_NUM[i]+'</span></button>';
+    }
+    h+='</div>'+App.checkInBtn('数学','数字王国','数字王国')+'</div>';
+  } else if(NM.mode==='math'){
+    if(!NM.q) NM.q=App.newMath();
+    var q=NM.q;
+    h+='<div class="card"><div class="card-h">'
+      + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2.6" stroke-linecap="round"><path d="M4 8h6M7 5v6M14.5 7.5h5M14.5 16.5h5M4.5 17.5l4-4M8.5 17.5l-4-4"/></svg>'
+      + '20 以内加减法<span class="sub">答对 '+DB.stats.mathRight+' / 共 '+DB.stats.mathTotal+' 题</span></div>'
+      + (NM.streak>1?'<div class="center" style="margin-bottom:10px"><span class="streak"><svg width="15" height="15" viewBox="0 0 24 24" fill="#FF9455"><path d="M12 2c1 4-3 5-3 9a5 5 0 0 0 10 0c0-1.6-.6-3-1.6-4.2.2 2-1 3.2-2.4 3.2 1.2-3.4-1-6.4-3-8z"/></svg>连对 '+NM.streak+' 题</span></div>':'')
+      + '<div class="qbox"><div class="qtitle">算一算，答案是多少？</div>'
+      + '<div class="qmain" style="color:#1B8FC7">'+q.a+' '+q.op+' '+q.b+' = ?</div><div class="opts">';
+    q.opts.forEach(function(o,i){ h+='<button class="opt" id="mo_'+i+'" onclick="App.answerMath('+i+')">'+o+'</button>'; });
+    h+='</div><div class="mt"><button class="chip" onclick="App.skipMath()">换一题</button></div></div>'
+      + App.checkInBtn('数学','数字王国','数字王国')+'</div>';
+  } else {
+    if(!NM.cq) NM.cq=App.newCount();
+    var cq=NM.cq;
+    h+='<div class="card"><div class="card-h">'
+      + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2.6" stroke-linecap="round"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg>'
+      + '数一数，有几个？<span class="sub">数对 '+(DB.stats.countRight||0)+' 次</span></div>'
+      + '<div class="count-area">';
+    for(var k=0;k<cq.n;k++) h+=FRUIT[cq.icon];
+    h+='</div><div class="opts">';
+    cq.opts.forEach(function(o,i){ h+='<button class="opt" id="co_'+i+'" onclick="App.answerCount('+i+')">'+o+'</button>'; });
+    h+='</div><div class="mt center"><button class="chip" onclick="App.skipCount()">换一题</button></div>'
+      + App.checkInBtn('数学','数字王国','数字王国')+'</div>';
+  }
+  $('hwContent').innerHTML=h;
+};
+App.nmMode = function(m){ NM.mode=m; NM.locked=false; App.renderNumbers(); };
+App.sayNum = function(n){ Speech.say(CN_NUM[n],'zh-CN',0.75); flash($('nc_'+n)); setTimeout(function(){ Speech.say(EN_NUM[n],'en-US',0.75); },900); };
+App.newMath = function(){
+  var a,b,op,ans;
+  if(rnd(2)===0){ a=rnd(18)+1; b=rnd(19-a)+1; op='+'; ans=a+b; }
+  else { a=rnd(18)+3; b=rnd(a-1)+1; op='−'; ans=a-b; }
+  var set=[ans];
+  while(set.length<4){ var d=ans+rnd(9)-4; if(d>=0 && d<=40 && set.indexOf(d)<0) set.push(d); }
+  return {a:a,b:b,op:op,ans:ans,opts:shuffle(set)};
+};
+App.answerMath = function(i){
+  if(NM.locked) return; NM.locked=true;
+  var q=NM.q, val=q.opts[i], right=(val===q.ans);
+  DB.stats.mathTotal++; var el=$('mo_'+i);
+  if(right){ DB.stats.mathRight++; NM.streak++; if(el) el.className='opt ok'; App.save();
+    Speech.say(q.a+(q.op==='+'?' 加 ':' 减 ')+q.b+' 等于 '+q.ans,'zh-CN',0.8);
+    setTimeout(function(){ NM.q=App.newMath(); NM.locked=false; App.renderNumbers(); },1100);
+  } else { NM.streak=0; if(el) el.className='opt no';
+    for(var k=0;k<q.opts.length;k++){ if(q.opts[k]===q.ans){ var g=$('mo_'+k); if(g) g.className='opt ok'; } }
+    App.save(); App.toast('差一点点，正确答案是 '+q.ans+' 哦～');
+    setTimeout(function(){ NM.q=App.newMath(); NM.locked=false; App.renderNumbers(); },1500);
+  }
+};
+App.skipMath = function(){ NM.q=App.newMath(); NM.locked=false; App.renderNumbers(); };
+App.newCount = function(){
+  var n=rnd(9)+3; var set=[n];
+  while(set.length<4){ var d=n+rnd(5)-2; if(d>=1 && d<=20 && set.indexOf(d)<0) set.push(d); }
+  return {n:n, icon:rnd(FRUIT.length), opts:shuffle(set)};
+};
+App.answerCount = function(i){
+  if(NM.locked) return; NM.locked=true;
+  var q=NM.cq, val=q.opts[i], el=$('co_'+i);
+  if(val===q.n){ if(el) el.className='opt ok'; DB.stats.countRight=(DB.stats.countRight||0)+1; App.save();
+    Speech.say('一共 '+CN_NUM[q.n]+' 个','zh-CN',0.8);
+    setTimeout(function(){ NM.cq=App.newCount(); NM.locked=false; App.renderNumbers(); },1100);
+  } else { if(el) el.className='opt no';
+    for(var k=0;k<q.opts.length;k++){ if(q.opts[k]===q.n){ var g=$('co_'+k); if(g) g.className='opt ok'; } }
+    App.toast('再数一遍试试，一共是 '+q.n+' 个～');
+    setTimeout(function(){ NM.cq=App.newCount(); NM.locked=false; App.renderNumbers(); },1500);
+  }
+};
+App.skipCount = function(){ NM.cq=App.newCount(); NM.locked=false; App.renderNumbers(); };
+App.addWrong = function(type, q, a){
+  DB.wrongs = DB.wrongs || [];
+  DB.wrongs.unshift({type:type, q:q, a:a, date:today()});
+  if(DB.wrongs.length>60) DB.wrongs = DB.wrongs.slice(0,60);
+  App.save();
+};
+
+/* ================= 十二、模块5：逻辑挑战 ================= */
+var SHAPES = ['circle','square','triangle','star','heart'];
+var SCOLOR = ['#FF7FB0','#4FC3F7','#FFC431','#4CCB8B','#A87FF0','#FF9455'];
+function shapeSvg(type, color, size){
+  var s=size||34, p='';
+  if(type==='circle') p='<circle cx="12" cy="12" r="9"/>';
+  else if(type==='square') p='<rect x="3.4" y="3.4" width="17.2" height="17.2" rx="3.4"/>';
+  else if(type==='triangle') p='<path d="M12 3l9.2 16.4H2.8z"/>';
+  else if(type==='star') p='<path d="M12 2.4l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.7 5.9 21l1.4-6.8L2.2 9.5l6.9-.8z"/>';
+  else p='<path d="M12 20.8l-1.4-1.3C5.3 14.7 2 11.7 2 8a5 5 0 0 1 9-3.1A5 5 0 0 1 20 8c0 3.7-3.3 6.7-8.6 11.5z"/>';
+  return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="'+color+'">'+p+'</svg>';
+}
+var LG = { q:null, locked:false, right:0, total:0 };
+App.newLogic = function(){
+  var kind=rnd(4), q={opts:[]};
+  if(kind===0){
+    var pool=shuffle(SHAPES).slice(0,2+rnd(2)), cols=shuffle(SCOLOR).slice(0,pool.length), seq=[];
+    for(var i=0;i<5;i++) seq.push(i%pool.length);
+    var nextIdx=5%pool.length;
+    q.title='看看排队的规律，问号处应该是哪个？';
+    var show='<div class="shape-row">';
+    seq.forEach(function(s){ show+='<div class="shape-box">'+shapeSvg(pool[s],cols[s])+'</div>'; });
+    show+='<div class="shape-box q">?</div></div>'; q.show=show;
+    q.opts.push({html:shapeSvg(pool[nextIdx],cols[nextIdx],32), right:true});
+    var usedShape=[pool[nextIdx]];
+    pool.forEach(function(s,si){ if(q.opts.length<4 && usedShape.indexOf(s)<0){ usedShape.push(s); q.opts.push({html:shapeSvg(s,cols[si],32), right:false}); } });
+    var rest=shuffle(SHAPES.filter(function(s){return usedShape.indexOf(s)<0;})), restCol=shuffle(SCOLOR);
+    for(var k=0; q.opts.length<4 && k<rest.length; k++){ q.opts.push({html:shapeSvg(rest[k],restCol[k%restCol.length],32), right:false}); }
+  } else if(kind===1){
+    var pair=shuffle(SHAPES).slice(0,2), c1=SCOLOR[rnd(SCOLOR.length)], c2=shuffle(SCOLOR.filter(function(c){return c!==c1;}))[0];
+    q.title='下面 4 个图形里，哪一个和其它的不一样？'; q.show=''; var pos=rnd(4);
+    for(var m=0;m<4;m++){ q.opts.push(m===pos?{html:shapeSvg(pair[1],c2,32),right:true}:{html:shapeSvg(pair[0],c1,32),right:false}); }
+    q.noShuffle=true;
+  } else if(kind===2){
+    var step=[1,2,2,3,5][rnd(5)], start=rnd(4)+1, arr=[start,start+step,start+step*2,start+step*3], ans=start+step*4;
+    q.title='数字排队走，下一个是几？';
+    q.show='<div class="qmain" style="color:#7B47D8">'+arr.join('、')+'、?</div>';
+    var set=[ans]; while(set.length<4){ var d=ans+rnd(7)-3; if(d>0 && set.indexOf(d)<0) set.push(d); }
+    shuffle(set).forEach(function(v){ q.opts.push({html:'<b style="font-size:24px">'+v+'</b>', right:(v===ans)}); });
+    q.noShuffle=true;
+  } else {
+    var nums=[]; while(nums.length<4){ var v=rnd(20)+1; if(nums.indexOf(v)<0) nums.push(v); }
+    var askMax=rnd(2)===0, target=askMax?Math.max.apply(null,nums):Math.min.apply(null,nums);
+    q.title=askMax?'哪个数字最大呀？':'哪个数字最小呀？';
+    q.show='<div style="color:var(--muted);font-size:15px;font-weight:700;margin-bottom:6px">'+nums.join('　')+'</div>';
+    nums.forEach(function(v){ q.opts.push({html:'<b style="font-size:24px">'+v+'</b>', right:(v===target)}); });
+    q.noShuffle=true;
+  }
+  if(!q.noShuffle) q.opts=shuffle(q.opts);
+  q.opts=q.opts.slice(0,4); return q;
+};
+App.renderLogic = function(){
+  if(!LG.q) LG.q=App.newLogic();
+  var q=LG.q;
+  var h='<div class="card"><div class="card-h">'
+    + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#A87FF0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.7 18h4.6M10.4 21h3.2"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.6.5-.9 1.1-.9 1.8v.4H9.3v-.4c0-.7-.3-1.3-.9-1.8A6 6 0 0 1 12 3z"/></svg>'
+    + '动动小脑筋<span class="sub">本次答对 '+LG.right+' / '+LG.total+'</span></div>'
+    + '<div class="qbox"><div class="qtitle">'+q.title+'</div>'+(q.show||'')
+    + '<div class="opts" style="margin-top:14px">';
+  q.opts.forEach(function(o,i){ h+='<button class="opt sm" id="lo_'+i+'" onclick="App.answerLogic('+i+')">'+o.html+'</button>'; });
+  h+='</div><div class="mt"><button class="chip" onclick="App.skipLogic()">换一题</button></div></div>'
+    + App.checkInBtn('extra','逻辑挑战','逻辑挑战')+'</div>';
+  $('hwContent').innerHTML=h;
+};
+App.answerLogic = function(i){
+  if(LG.locked) return; LG.locked=true; LG.total++;
+  var q=LG.q, el=$('lo_'+i);
+  if(q.opts[i].right){ LG.right++; DB.stats.logicRight=(DB.stats.logicRight||0)+1; if(el) el.className='opt sm ok'; App.save();
+    setTimeout(function(){ LG.q=App.newLogic(); LG.locked=false; App.renderLogic(); },1000);
+  } else { if(el) el.className='opt sm no';
+    for(var k=0;k<q.opts.length;k++){ if(q.opts[k].right){ var g=$('lo_'+k); if(g) g.className='opt sm ok'; } }
+    App.toast('再想想～看看绿色的那个才对哦');
+    setTimeout(function(){ LG.q=App.newLogic(); LG.locked=false; App.renderLogic(); },1600);
+  }
+};
+App.skipLogic = function(){ LG.q=App.newLogic(); LG.locked=false; App.renderLogic(); };
+
+/* ================= 十三、模块6：闯关冒险 + 徽章墙 ================= */
+var LEVELS = [
+  {n:1, name:'字母启程', desc:'26 个字母', kind:'letter', c:0},
+  {n:2, name:'数字小径', desc:'20以内算术', kind:'math',   c:1},
+  {n:3, name:'古诗小桥', desc:'背诗接龙',   kind:'poem',   c:3},
+  {n:4, name:'逻辑森林', desc:'动脑筋',     kind:'logic',  c:4},
+  {n:5, name:'智慧城堡', desc:'全部混合',   kind:'mix',    c:2}
+];
+var BADGES = [
+  {id:'first',  name:'初来乍到', desc:'打开乐园',      chk:function(){return true;}},
+  {id:'abc10',  name:'字母小达人', desc:'认识10个字母', chk:function(){return DB.learnedLetters.length>=10;}},
+  {id:'abc26',  name:'字母全通关', desc:'26个全认识',   chk:function(){return DB.learnedLetters.length>=26;}},
+  {id:'poem3',  name:'古诗小才子', desc:'会背3首诗',    chk:function(){return DB.memoPoems.length>=3;}},
+  {id:'poem8',  name:'诗词小状元', desc:'8首全会背',    chk:function(){return DB.memoPoems.length>=8;}},
+  {id:'copy5',  name:'小小书法家', desc:'抄对5个字',    chk:function(){return (DB.stats.copyRight||0)>=5;}},
+  {id:'math20', name:'算术小超人', desc:'算对20道题',   chk:function(){return DB.stats.mathRight>=20;}},
+  {id:'logic10',name:'逻辑小天才', desc:'逻辑对10题',   chk:function(){return (DB.stats.logicRight||0)>=10;}},
+  {id:'lv3',    name:'闯关小勇士', desc:'通过第3关',    chk:function(){return (DB.levels[3]||0)>0;}},
+  {id:'lv5',    name:'城堡征服者', desc:'通关全部5关',  chk:function(){return (DB.levels[5]||0)>0;}},
+  {id:'star50', name:'星光闪闪',   desc:'攒够50颗星',   chk:function(){return DB.stars>=50;}},
+  {id:'star150',name:'超级明星',   desc:'攒够150颗星',  chk:function(){return DB.stars>=150;}},
+  {id:'gold50', name:'农场小富翁', desc:'攒够50金币',   chk:function(){return DB.farm.gold>=50;}},
+  {id:'day3',   name:'坚持之星',   desc:'学习满3天',    chk:function(){return DB.stats.days.length>=3;}}
+];
+var BICON = '<svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>';
+var AV = { lv:null, idx:0, qs:[], right:0, locked:false, over:false };
+
+App.checkBadges = function(){
+  var got=[];
+  BADGES.forEach(function(b){ if(DB.badges.indexOf(b.id)<0 && b.chk()){ DB.badges.push(b.id); got.push(b); } });
+  if(got.length){
+    App.save();
+    setTimeout(function(){
+      App.dialog('解锁新徽章！', got.map(function(b){return '「'+b.name+'」—— '+b.desc;}).join('<br>'),
+        [{txt:'去徽章墙看看', cls:'b-purple', fn:function(){ App.go('homework'); App.hwMod='adventure'; App.renderHomework(); }},
+         {txt:'知道啦', cls:'b-gray'}]);
+    },800);
+  }
+};
+function qLetter(){
+  var L=LETTERS[rnd(26)], mode=rnd(2), q={opts:[]};
+  if(mode===0){ q.title='这个小写字母，大写长什么样？'; q.show='<div class="qmain" style="color:#E8437F">'+L[0].toLowerCase()+'</div>';
+    var wrong=shuffle(LETTERS.filter(function(x){return x[0]!==L[0];})).slice(0,3);
+    q.opts.push({html:'<b style="font-size:26px">'+L[0]+'</b>', right:true});
+    wrong.forEach(function(w){ q.opts.push({html:'<b style="font-size:26px">'+w[0]+'</b>', right:false}); });
+  } else { q.title='「'+L[2]+'」的英文，是哪个字母开头？'; q.show='<div class="qmain" style="color:#E8437F;font-size:26px">'+L[1]+'</div>';
+    var wr=shuffle(LETTERS.filter(function(x){return x[0]!==L[0];})).slice(0,3);
+    q.opts.push({html:'<b style="font-size:26px">'+L[0]+'</b>', right:true});
+    wr.forEach(function(w){ q.opts.push({html:'<b style="font-size:26px">'+w[0]+'</b>', right:false}); });
+  }
+  q.opts=shuffle(q.opts); q.speak={t:L[1], l:'en-US'}; return q;
+}
+function qMath(){ var m=App.newMath(), q={opts:[]}; q.title='算一算，等于几？';
+  q.show='<div class="qmain" style="color:#1B8FC7">'+m.a+' '+m.op+' '+m.b+' = ?</div>';
+  m.opts.forEach(function(v){ q.opts.push({html:'<b style="font-size:24px">'+v+'</b>', right:(v===m.ans)}); }); return q; }
+function qPoem(){ var p=POEMS_ALL[rnd(POEMS_ALL.length)], i=rnd(p.lines.length-1), q={opts:[], title:'下一句是什么呀？'};
+  q.show='<div style="font-size:13px;color:var(--muted);font-weight:700">《'+p.t+'》</div><div class="qmain" style="color:#219C64;font-size:28px">'+p.lines[i][0]+p.lines[i][2]+'</div>';
+  var right=p.lines[i+1][0], pool=[]; POEMS_ALL.forEach(function(o){ o.lines.forEach(function(l){ if(l[0]!==right) pool.push(l[0]); }); });
+  q.opts.push({html:'<span style="font-size:16px;font-weight:800">'+right+'</span>', right:true});
+  shuffle(pool).slice(0,3).forEach(function(t){ q.opts.push({html:'<span style="font-size:16px;font-weight:800">'+t+'</span>', right:false}); });
+  q.opts=shuffle(q.opts); q.speak={t:p.lines[i][0], l:'zh-CN'}; return q; }
+function qLogic(){ return App.newLogic(); }
+function qCount(){ var c=App.newCount(), q={opts:[], title:'数一数，一共有几个？'};
+  var s='<div class="count-area" style="max-width:340px">'; for(var i=0;i<c.n;i++) s+=FRUIT[c.icon]; s+='</div>';
+  q.show=s; c.opts.forEach(function(v){ q.opts.push({html:'<b style="font-size:24px">'+v+'</b>', right:(v===c.n)}); }); return q; }
+function genQuestions(kind, n){ var out=[]; for(var i=0;i<n;i++){ var k=kind; if(kind==='mix') k=['letter','math','poem','logic','count'][rnd(5)];
+  if(k==='letter') out.push(qLetter()); else if(k==='math') out.push(rnd(3)===0?qCount():qMath());
+  else if(k==='poem') out.push(qPoem()); else if(k==='logic') out.push(qLogic()); else out.push(qCount()); } return out; }
+App.renderAdventure = function(){
+  var h='';
+  if(AV.lv===null){
+    h+='<div class="card"><div class="card-h">'
+      + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FFAE22" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V6l6-3 6 3 6-3v14l-6 3-6-3-6 3z"/><path d="M9 3v14M15 6v14"/></svg>'
+      + '闯关地图<span class="sub">每关 5 题，答对 3 题即可通关</span></div><div class="lv-grid">';
+    LEVELS.forEach(function(L,i){ var got=DB.levels[L.n]||0, prev=i===0?1:(DB.levels[LEVELS[i-1].n]||0), lock=prev===0, c=CANDY[L.c];
+      var stars=''; for(var s=1;s<=3;s++){ stars+='<svg width="16" height="16" viewBox="0 0 24 24" fill="'+(s<=got?'#FFC431':'#DDD3E2')+'"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>'; }
+      h+='<button class="lv'+(lock?' lock':'')+'" '+(lock?'':'style="background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+'" onclick="App.startLevel('+L.n+')"')+'>'
+        + (lock?'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#B7ACC0" stroke-width="2.6"><rect x="4" y="10.5" width="16" height="10.5" rx="2.6"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>'
+                :'<div style="font-size:22px;font-weight:900">第 '+L.n+' 关</div>')
+        + '<div class="lvn">'+L.name+'</div><div class="lvd">'+L.desc+'</div>'
+        + (lock?'<div class="lvd">先过上一关</div>':'<div class="lv-stars">'+stars+'</div>')+'</button>';
+    });
+    h+='</div></div><div class="card"><div class="card-h">'
+      + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FFAE22" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.2 14.2L7 22l5-2.6L17 22l-1.2-7.8"/></svg>'
+      + '我的成就徽章墙<span class="sub">已获得 '+DB.badges.length+'/'+BADGES.length+'</span></div><div class="badges">';
+    BADGES.forEach(function(b){ var got=DB.badges.indexOf(b.id)>=0;
+      h+='<div class="bdg'+(got?' got':'')+'"><div class="bi">'+BICON.replace('#fff',got?'#fff':'#B7ACC0')+'</div><div class="bn">'+b.name+'</div><div class="bd">'+b.desc+'</div></div>'; });
+    h+='</div></div>'+(DB.isDemo?'<div class="center" style="margin:6px 0 20px"><button class="chip" onclick="App.clearDemo()">清空示例数据，从零开始</button></div>':'');
+  } else if(!AV.over){
+    var L=LEVELS[AV.lv-1], c=CANDY[L.c], q=AV.qs[AV.idx], dots='';
+    for(var i=0;i<AV.qs.length;i++){ dots+='<span style="display:inline-block;width:11px;height:11px;border-radius:50%;margin:0 3px;background:'+(i<AV.idx?'#4CCB8B':(i===AV.idx?c.tx:'#E6DEEA'))+'"></span>'; }
+    var qHtml = q.show||'';
+    if(q.type==='math'||q.type==='count'||q.type==='logic'||q.type==='letter'||q.type==='poem'){
+      // 记录错题用：构造题干文本
+    }
+    h+='<div class="card" style="background:linear-gradient(170deg,#fff,'+c.bg+')">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+      + '<button class="chip" onclick="App.quitLevel()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>退出</button>'
+      + '<span style="font-weight:900;font-size:17px;color:'+c.tx+'">第 '+L.n+' 关 · '+L.name+'</span>'
+      + '<span class="spacer"></span><span class="chip gold">答对 '+AV.right+'</span></div>'
+      + '<div class="center" style="margin-bottom:6px">'+dots+'</div>'
+      + '<div class="qbox"><div class="qtitle">第 '+(AV.idx+1)+' / '+AV.qs.length+' 题 · '+q.title+'</div>'+qHtml+'<div class="opts" style="margin-top:12px">';
+    q.opts.forEach(function(o,i){ h+='<button class="opt sm" id="ao_'+i+'" onclick="App.answerAdv('+i+')">'+o.html+'</button>'; });
+    h+='</div></div></div>';
+  } else {
+    var L2=LEVELS[AV.lv-1], c2=CANDY[L2.c];
+    var got=AV.right>=5?3:(AV.right===4?2:(AV.right>=3?1:0));
+    var stars2=''; for(var s2=1;s2<=3;s2++){ stars2+='<svg width="44" height="44" viewBox="0 0 24 24" fill="'+(s2<=got?'#FFC431':'#E4DCE8')+'"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>'; }
+    h+='<div class="card center" style="background:linear-gradient(170deg,#fff,'+c2.bg+')">'
+      + '<div style="font-size:23px;font-weight:900;color:'+c2.tx+';margin-bottom:4px">'+(got>0?'通关成功！':'差一点点～')+'</div>'
+      + '<div style="color:var(--muted);font-weight:700;margin-bottom:12px">第 '+L2.n+' 关 · '+L2.name+'　答对 '+AV.right+' / '+AV.qs.length+' 题</div>'
+      + '<div style="margin:10px 0 18px">'+stars2+'</div><div class="row-btns">'
+      + '<button class="big-btn bb-purple" onclick="App.startLevel('+AV.lv+')">再玩一次</button>'
+      + (got>0&&AV.lv<5?'<button class="big-btn bb-yellow" onclick="App.startLevel('+(AV.lv+1)+')">挑战下一关</button>':'')
+      + '<button class="big-btn bb-green" onclick="App.quitLevel()">回到地图</button></div></div>';
+  }
+  $('hwContent').innerHTML=h;
+};
+App.startLevel = function(n){
+  var L=LEVELS[n-1];
+  AV={lv:n, idx:0, qs:genQuestions(L.kind,5), right:0, locked:false, over:false};
+  // 给每题打标记，便于收集错题
+  AV.qs.forEach(function(q){ q.type=L.kind; });
+  App.renderAdventure(); window.scrollTo({top:0,behavior:'smooth'});
+};
+App.quitLevel = function(){ AV.lv=null; AV.over=false; App.renderAdventure(); };
+App.answerAdv = function(i){
+  if(AV.locked) return; AV.locked=true;
+  var q=AV.qs[AV.idx], el=$('ao_'+i);
+  if(q.opts[i].right){ AV.right++; if(el) el.className='opt sm ok'; if(q.speak) Speech.say(q.speak.t,q.speak.l,0.78); }
+  else {
+    if(el) el.className='opt sm no';
+    for(var k=0;k<q.opts.length;k++){ if(q.opts[k].right){ var g=$('ao_'+k); if(g) g.className='opt sm ok'; } }
+    // 收集错题（题干文本 + 正确答案）
+    var qtxt = (q.show? q.show.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim() : q.title);
+    var ans = q.opts.filter(function(o){return o.right;})[0];
+    App.addWrong('闯关·'+q.type, qtxt, (ans&&ans.html?ans.html.replace(/<[^>]+>/g,''):''));
+  }
+  setTimeout(function(){ AV.locked=false;
+    if(AV.idx<AV.qs.length-1){ AV.idx++; App.renderAdventure(); } else { App.finishLevel(); }
+  }, q.opts[i].right?850:1500);
+};
+App.finishLevel = function(){
+  AV.over=true;
+  var got=AV.right>=5?3:(AV.right===4?2:(AV.right>=3?1:0));
+  var old=DB.levels[AV.lv]||0; if(got>old) DB.levels[AV.lv]=got;
+  App.save(); App.renderAdventure();
+  if(got>0){
+    App.addGold(got*4, '闯关第'+AV.lv+'关通关');   // 【联动】闯关奖励金币
+    App.toast('通关！获得 '+(got*4)+' 金币 🪙', true);
+  } else { App.toast('再试一次就能过关啦，加油！'); }
+  App.checkBadges();
+};
+
+/* ================= 十四、学习统计 ================= */
+App.renderStats = function(){
+  var f=DB.farm, s=DB.stats;
+  // 顶部 4 张统一风格卡片（累计阳光/金币/打卡天数/星星）点击可看明细
+  var html='<div class="stat-cards">'
+    + statCard('☀️', f.sun, '累计阳光', 'sun')
+    + statCard('🪙', f.gold, '累计金币', 'gold')
+    + statCard('📅', s.days.length, '打卡天数', '')
+    + statCard('⭐', DB.stars, '我的星星', '');
+  html+='</div>';
+
+  // 各科完成率柱状图（与“我的奖状”同级卡片样式）
+  html+='<div class="card"><div class="card-h">'
+    + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FFAE22" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>'
+    + '各科完成率 <span class="sub">按天统计</span></div>'
+    + '<div class="bar-chart">'+App.barChart()+'</div></div>';
+
+  // 我的奖状（与完成率卡片同风格）
+  html+='<div class="card"><div class="card-h">'
+    + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FF6BA6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.3 11.5l5.2 2.3 2.3 5.2 2.3-5.2 5.2-2.3-5.2-2.3L13.1 4l-2.3 5.2z"/></svg>'
+    + '我的奖状 <span class="sub">金币商城兑换 · 可重复</span></div>';
+  if(f.certificates.length){
+    html+='<div class="cert-grid">';
+    f.certificates.forEach(function(c){
+      html+='<div class="cert"><span class="cx">×'+c.count+'</span><div class="ct">'+c.name+'</div><div class="cd">'+c.date+' 兑换</div></div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div class="empty-tip">还没有奖状，去「我的农场 → 金币商城」用金币兑换吧！</div>';
+  }
+  html+='</div>';
+
+  $('view-stats').innerHTML=html;
+
+  // 绑定卡片点击明细
+  ['sun','gold'].forEach(function(t){
+    var el=$('stat_'+t); if(el) el.onclick=function(){ App.showDetail(t); };
+  });
+};
+function statCard(ico, num, label, key){
+  return '<div class="stat-card" id="'+(key?'stat_'+key:'')+'" style="background:linear-gradient(160deg,#fff,#F4FBFF);border-color:#CFEBF5'+(key?'':'')+'">'
+    + '<div style="font-size:26px">'+ico+'</div><div class="sc-n" style="color:#2E86C1">'+num+'</div><div class="sc-l">'+label+(key?'（点我看明细）':'')+'</div></div>';
+}
+App.barChart = function(){
+  var c=DB.stats.completion||{};
+  var data=[['英语',c.英语],['语文',c.语文],['数学',c.数学],['逻辑',c.逻辑挑战],['闯关',c.闯关冒险]];
+  var W=520,H=220, pad=30, bw=64, gap=(W-pad*2-bw*data.length)/(data.length-1);
+  var maxV=1; // 以百分比展示
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+W+'px">';
+  // 轴线
+  svg+='<line x1="'+pad+'" y1="'+(H-30)+'" x2="'+(W-pad)+'" y2="'+(H-30)+'" stroke="#CFE0E8" stroke-width="2"/>';
+  var colors=['#E8437F','#219C64','#1B8FC7','#7B47D8','#FFAE22'];
+  data.forEach(function(d,i){
+    var rate=0; if(d[1] && d[1].total>0) rate=Math.round(d[1].done/d[1].total*100);
+    var bh=Math.round(rate/100*(H-30-pad));
+    var x=pad+i*(bw+gap), y=(H-30)-bh;
+    svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="10" fill="'+colors[i]+'"/>';
+    svg+='<text x="'+(x+bw/2)+'" y="'+(y-6)+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+colors[i]+'">'+rate+'%</text>';
+    svg+='<text x="'+(x+bw/2)+'" y="'+(H-10)+'" text-anchor="middle" font-size="13" font-weight="800" fill="#6a7c86">'+d[0]+'</text>';
+  });
+  svg+='</svg>';
+  return svg;
+};
+App.showDetail = function(t){
+  var f=DB.farm, list = t==='sun'?f.sunLog:f.goldLog;
+  var title = t==='sun'?'☀️ 阳光明细':'🪙 金币明细';
+  var h='<div class="detail-list">';
+  if(!list || !list.length){ h+='<div class="empty-tip">还没有记录哦～</div>'; }
+  else {
+    list.slice().reverse().slice(0,40).forEach(function(r){
+      var cls = r.amt>=0?'plus':'minus';
+      h+='<div class="dl"><span class="da '+cls+'">'+(r.amt>=0?'+':'')+r.amt+'</span><span class="dn">'+esc(r.note||'')+' · '+r.date+'</span></div>';
+    });
+  }
+  h+='</div>';
+  App.dialog(title, h, [{txt:'关闭', cls:'b-blue'}]);
+};
+
+/* ================= 十五、错题本 ================= */
+App.renderWrong = function(){
+  DB.wrongs = DB.wrongs || [];
+  var html='<div class="card"><div class="card-h">'
+    + '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9A6EEC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>'
+    + '错题本 <span class="sub">共 '+DB.wrongs.length+' 道</span></div>';
+  if(!DB.wrongs.length){
+    html+='<div class="empty-tip">还没有错题，真棒！做错的题会自动收集到这里～</div></div>';
+  } else {
+    DB.wrongs.forEach(function(w,i){
+      html+='<div class="wrong-item"><div class="wq">'+esc(w.q||'')+'<div class="wa">正确答案：'+(w.a||'')+'</div></div>'
+        + '<button class="chip" style="min-height:40px" onclick="App.removeWrong('+i+')">学会了</button></div>';
+    });
+    html+='<div class="center mt"><button class="chip danger" onclick="App.clearWrong()">清空错题本</button></div></div>';
+  }
+  $('view-wrong').innerHTML=html;
+};
+App.removeWrong = function(i){ DB.wrongs.splice(i,1); App.save(); App.renderWrong(); };
+App.clearWrong = function(){ App.dialog('清空错题本？','学会了的题目都会消失哦～',[{txt:'取消',cls:'b-gray'},{txt:'清空',cls:'b-red',fn:function(){ DB.wrongs=[]; App.save(); App.renderWrong(); }}]); };
+
+/* ================= 十六、我的农场（游戏引擎） ================= */
+App.cropSvg = function(plot){
+  var cr=plot.crop, stage=cr.stage, withered=cr.withered;
+  var col = withered? '#9a9a9a' : cr.color;
+  var s='<svg width="64" height="78" viewBox="0 0 64 78">';
+  // 茎
+  s+='<rect x="30" y="40" width="4" height="'+(20+stage*4)+'" rx="2" fill="'+(withered?'#9a9a9a':'#5FC36B')+'"/>';
+  if(stage===0){ // 播种：土里一颗种子
+    s+='<ellipse cx="32" cy="60" rx="7" ry="5" fill="'+(withered?'#aaa':'#A87844')+'"/>';
+  } else if(stage===1){ // 发芽
+    s+='<path d="M32 44 q-12 -6 -14 -16 q12 2 14 14z" fill="'+(withered?'#aaa':'#7ED7A6')+'"/>';
+    s+='<path d="M32 44 q12 -6 14 -16 q-12 2 -14 14z" fill="'+(withered?'#bbb':'#9FE3Bf')+'"/>';
+  } else if(stage===2){ // 开花
+    s+='<circle cx="32" cy="30" r="9" fill="'+col+'"/>';
+    s+='<circle cx="32" cy="30" r="3.5" fill="#FFE08A"/>';
+  } else { // 成熟：果实
+    s+='<circle cx="32" cy="28" r="11" fill="'+col+'"/>';
+    s+='<path d="M32 17 q4 -6 9 -6 q-2 6 -9 8z" fill="'+(withered?'#aaa':'#5FC36B')+'"/>';
+  }
+  s+='</svg>';
+  return s;
+};
+App.bearSvg = function(){
+  return '<svg width="46" height="46" viewBox="0 0 24 24" fill="#8B5A2B">'
+    + '<circle cx="12" cy="13" r="8"/>'
+    + '<circle cx="6.5" cy="6" r="3" fill="#8B5A2B"/><circle cx="17.5" cy="6" r="3" fill="#8B5A2B"/>'
+    + '<circle cx="6.5" cy="6" r="1.4" fill="#3a2410"/><circle cx="17.5" cy="6" r="1.4" fill="#3a2410"/>'
+    + '<circle cx="9.5" cy="12" r="1.4" fill="#3a2410"/><circle cx="14.5" cy="12" r="1.4" fill="#3a2410"/>'
+    + '<ellipse cx="12" cy="16" rx="2.6" ry="2" fill="#5a3a1a"/></svg>';
+};
+App.chickSvg = function(state){
+  var face = state==='faint' ? '#d9c27a' : '#FFD24D';
+  var eye = state==='faint'
+    ? '<path d="M9 13 q2 2 4 0" stroke="#7a5a10" stroke-width="1.4" fill="none"/><path d="M15 13 q2 2 4 0" stroke="#7a5a10" stroke-width="1.4" fill="none"/>'
+    : '<circle cx="11" cy="12" r="1.7" fill="#5a3a10"/><circle cx="17" cy="12" r="1.7" fill="#5a3a10"/>';
+  return '<svg width="96" height="96" viewBox="0 0 32 32">'
+    + '<ellipse cx="16" cy="18" rx="11" ry="10" fill="'+face+'"/>'
+    + '<circle cx="16" cy="9" r="7" fill="'+face+'"/>'
+    + eye
+    + '<path d="M13 15 l3 3 l3 -3 z" fill="#FF8C1A"/>'
+    + (state==='faint'?'<text x="16" y="28" text-anchor="middle" font-size="5" fill="#7a5a10">x x</text>':'')
+    + '</svg>';
+};
+
+/* 农场主渲染 */
+App.renderFarm = function(){
+  var f=DB.farm;
+  App.paintRes();
+  // 资源条
+  var html='<div class="farm-top"><div class="farm-res">'
+    + '<span class="fres">🪙 '+f.gold+'</span><span class="fres">☀️ '+f.sun+'</span>'
+    + '<span class="fres">🌾 '+f.rice+'</span><span class="fres">🍞 '+f.soap+'</span>'
+    + '<span class="fres">🛡️ '+f.shield+'</span><span class="fres">🧴 '+(f.potion||0)+'</span></div>'
+    + '<span class="spacer"></span>'
+    + '<button class="big-btn bb-blue" onclick="App.openShop()">🛒 商店</button>'
+    + '<button class="big-btn bb-green" onclick="App.openSeeds()">🌱 我的种子('+App.totalSeeds()+')</button></div>';
+
+  // 小狗熊提示
+  if(f.bears && f.bears.length){
+    html+='<div class="tip-bar" style="background:linear-gradient(90deg,#FFE3E8,#FFD6DD);border-color:#FFB6C2;color:#C0294A">'
+      + '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#C0294A" stroke-width="2.4"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>'
+      + '菜园里有 '+f.bears.length+' 只小狗熊在搞破坏！'
+      + '<button onclick="App.usePotion()">用杀虫剂清除</button></div>';
+  }
+
+  // 地块网格
+  html+='<div class="farm-grid">';
+  f.plots.forEach(function(p){
+    if(!p.crop){
+      html+='<div class="plot empty" onclick="App.openPlant('+p.id+')">'
+        + '<div style="font-size:40px">🟫</div><div style="font-weight:800;color:#6a8a98;margin-top:6px">空地</div>'
+        + '<button class="pbtn" style="margin-top:10px;background:linear-gradient(135deg,#7ED7A6,#3FBF7F)">种点东西</button></div>';
+    } else {
+      var cr=p.crop, withered=cr.withered;
+      var hasBear = f.bears && f.bears.length>0 && p.id % 2===0;
+      html+='<div class="plot'+(withered?' withered':'')+'">'
+        + '<div class="ground"></div>'
+        + (hasBear?'<div class="bear'+(true?' biting':'')+'" onclick="App.usePotion()">'+App.bearSvg()+'<div class="bear-tip">啃！</div></div>':'')
+        + '<div class="crop">'+App.cropSvg(p)+'</div>'
+        + '<div class="pname">'+(withered?'（枯萎了）':cr.name+'·'+['播种','发芽','开花','成熟'][cr.stage])+'</div>'
+        + '<div class="pbar"><i style="width:'+(cr.growth||0)+'%"></i></div>';
+      if(withered){
+        html+='<button class="pbtn" disabled>已枯萎</button>';
+      } else if(cr.stage>=3){
+        html+='<button class="pbtn gold" onclick="App.harvestPlot('+p.id+')">收获 🪙'+cr.gold+'</button>';
+      } else {
+        html+='<button class="pbtn" onclick="App.waterPlot('+p.id+')">💧 浇水</button>';
+      }
+      html+='</div>';
+    }
+  });
+  html+='</div>';
+
+  // 小鸡宠物
+  html+=App.renderChicken();
+
+  $('view-farm').innerHTML=html;
+};
+
+App.totalSeeds = function(){
+  var s=DB.farm.seeds; return (s.英语||0)+(s.语文||0)+(s.数学||0)+(s.通用||0);
+};
+
+/* 小鸡渲染（含衰减 + 饿倒） */
+App.renderChicken = function(){
+  var c=DB.farm.chicken, now=nowTs();
+  // 按时间衰减：喂食进度 12h 归零，清洁 24h 归零（每分钟体现）
+  var feedDecay = (now - (c.lastFeed||now)) / (12*3600*1000);
+  var cleanDecay = (now - (c.lastClean||now)) / (24*3600*1000);
+  var feed = Math.max(0, Math.min(100, (c.feed==null?100:c.feed) - feedDecay*100));
+  var clean = Math.max(0, Math.min(100, (c.clean==null?100:c.clean) - cleanDecay*100));
+  c.feed=feed; c.clean=clean;
+  var faint = feed<=0;
+  c.fainted=faint;
+  var state = faint?'faint':'ok';
+  var h='<div class="chick-card" id="chickCard">'
+    + '<div class="chick-stage"><div id="chickImg">'+App.chickSvg(state)+'</div>'
+    + '<div class="chick-act">'
+    + '<button class="seed-btn" style="min-height:46px;padding:8px 12px" onclick="App.feedChicken()">🍚 喂食</button>'
+    + '<button class="seed-btn" style="min-height:46px;padding:8px 12px" onclick="App.batheChicken()">🛁 洗澡</button>'
+    + '<button class="seed-btn" style="min-height:46px;padding:8px 12px" onclick="App.patChicken()">👆 拍拍头</button>'
+    + '</div></div>'
+    + '<div class="chick-info">'
+    + '<div style="font-weight:900;font-size:17px;color:#B5780A">🐤 我的小鸡仔</div>'
+    + '<div class="bar-row"><span class="bl">饱食</span><div class="bar feed"><i style="width:'+feed+'%"></i></div></div>'
+    + '<div class="bar-row"><span class="bl">清洁</span><div class="bar clean"><i style="width:'+clean+'%"></i></div></div>';
+  if(faint){
+    h+='<div class="faint-bubble">我好饿啊，小主人，快给我喂食吧！</div>';
+  } else {
+    h+='<div style="font-size:13px;color:var(--muted);font-weight:700">喂食每次 10 米粒（饱食 +30%，12 小时慢慢饿）；洗澡每次 1 肥皂（清洁拉满，24 小时变脏）</div>';
+  }
+  h+='</div></div>';
+  return h;
+};
+
+/* --- 农场操作 --- */
+App.openPlant = function(plotId){
+  if(App.totalSeeds()===0){
+    App.dialog('还没有种子','先把语数英作业打卡完成，就能领到专属种子啦！也可以去金币商城买种子。',[{txt:'知道啦',cls:'b-green'}]);
+    return;
+  }
+  // 列出可用种子（学科种子需该科今天已打卡解锁）
+  var s=DB.farm.seeds, hw=DB.homework;
+  var opts=[];
+  if(s.英语>0) opts.push({key:'英语', n:s.英语, ok:hw.subj.英语.done, label:'英语种子'});
+  if(s.语文>0) opts.push({key:'语文', n:s.语文, ok:hw.subj.语文.done, label:'语文种子'});
+  if(s.数学>0) opts.push({key:'数学', n:s.数学, ok:hw.subj.数学.done, label:'数学种子'});
+  if(s.通用>0) opts.push({key:'通用', n:s.通用, ok:true, label:'通用种子'});
+  var h='<div class="seed-pick">';
+  opts.forEach(function(o){
+    h+='<button class="seed-btn'+(o.ok?'':'')+'" '+(o.ok?'onclick="App.plantSeed('+plotId+',\''+o.key+'\')"':'disabled')+'>'
+      + o.label+' ×'+o.n+(o.ok?'':'（今天'+o.key+'作业未完成，暂未解锁）')+'</button>';
+  });
+  h+='</div>';
+  App.dialog('选一颗种子种下', h, [{txt:'取消',cls:'b-gray'}]);
+};
+App.plantSeed = function(plotId, key){
+  var s=DB.farm.seeds;
+  if((s[key]||0)<=0){ App.toast('这种子用完啦～'); return; }
+  s[key]--;
+  var crop = CROPS[rnd(CROPS.length)];
+  DB.farm.plots[plotId].crop = {name:crop.name, color:crop.color, gold:crop.gold, stage:0, growth:0, health:3, withered:false, plantedDate:today()};
+  App.save(); $('mask').className='mask';
+  App.toast('种下 '+crop.name+' 啦！记得浇水哦 💧', true);
+  App.renderFarm();
+};
+App.waterPlot = function(plotId){
+  var p=DB.farm.plots[plotId]; if(!p.crop || p.crop.withered) return;
+  // 每次浇水升 1 级（封顶成熟），生长进度条同步显示
+  if(p.crop.stage < 3){
+    p.crop.stage++;
+    p.crop.growth = Math.round(p.crop.stage/3*100);
+    if(p.crop.stage>=3) p.crop.growth = 100;
+  }
+  App.save();
+  var el=document.querySelectorAll('.plot')[plotId];
+  if(el){ el.classList.add('watering'); setTimeout(function(){ el.classList.remove('watering'); },700); }
+  App.renderFarm();
+};
+App.harvestPlot = function(plotId){
+  var p=DB.farm.plots[plotId]; if(!p.crop || p.crop.stage<3 || p.crop.withered) return;
+  var g=p.crop.gold;
+  App.addGold(g, '收获'+p.crop.name);
+  p.crop=null;
+  App.save(); App.paintRes();
+  App.toast('收获成功！获得 '+g+' 金币 🪙', true);
+  App.renderFarm();
+};
+/* 杀虫剂：清除小狗熊 + 恢复植物健康 */
+App.usePotion = function(){
+  var f=DB.farm;
+  if(!f.bears || f.bears.length===0){ App.toast('现在没有小狗熊哦～'); return; }
+  if((f.potion||0)<=0){ App.dialog('没有杀虫剂了','补完今天没写的作业，就能领取杀虫剂！或者去道具商店用阳光换。',[{txt:'去补作业',cls:'b-green',fn:function(){App.go('homework');}},{txt:'知道啦',cls:'b-gray'}]); return; }
+  f.potion--;
+  f.bears=[];
+  f.plots.forEach(function(p){ if(p.crop){ p.crop.withered=false; p.crop.health=3; if(p.crop.stage<1) p.crop.stage=1; } });
+  App.save();
+  App.toast('小狗熊被赶跑啦！植物恢复健康 🌿', true);
+  App.renderFarm();
+};
+
+/* 小鸡操作 */
+App.feedChicken = function(){
+  var c=DB.farm.chicken;
+  if((DB.farm.rice||0)<10){ App.dialog('米粒不够','喂食一次需要 10 米粒。去做作业打卡领米粒，或去金币商城买米粒～',[{txt:'去商店',cls:'b-blue',fn:App.openShop},{txt:'知道啦',cls:'b-gray'}]); return; }
+  DB.farm.rice-=10; c.feed=Math.min(100,(c.feed==null?0:c.feed)+30); c.lastFeed=nowTs();
+  App.save(); App.paintRes(); App.renderFarm();
+  App.toast('小鸡吃饱啦！🍚', true);
+};
+App.batheChicken = function(){
+  var c=DB.farm.chicken;
+  if((DB.farm.soap||0)<1){ App.dialog('没有肥皂了','洗澡一次需要 1 块肥皂。去金币商城用 5 金币买 1 块肥皂吧～',[{txt:'去商店',cls:'b-blue',fn:App.openShop},{txt:'知道啦',cls:'b-gray'}]); return; }
+  DB.farm.soap-=1; c.clean=100; c.lastClean=nowTs();
+  App.save(); App.paintRes(); App.renderFarm();
+  App.toast('小鸡洗得香喷喷！🛁', true);
+};
+App.patChicken = function(){
+  var card=$('chickCard');
+  if(card){ var ht=document.createElement('div'); ht.className='pat-heart'; ht.textContent='💛'; ht.style.left='60px'; ht.style.top='30px'; card.appendChild(ht); setTimeout(function(){ if(ht.parentNode) ht.parentNode.removeChild(ht); },1000); }
+  Speech.say('叽叽！','zh-CN',1);
+  App.toast('小鸡开心地叫了一声～💛');
+};
+
+/* 商店：金币商城 + 道具商店 */
+App.openShop = function(){
+  var f=DB.farm;
+  var h='<div class="shop-grid">'
+    + '<div class="shop-item"><div class="si-ico">🌾</div><div><div class="si-t">买米粒</div><div class="si-d">5 金币 = 5 粒米</div></div>'
+    +   '<button class="si-b" '+(f.gold>=5?'onclick="App.buyRice()"':'disabled')+'>5 🪙</button></div>'
+    + '<div class="shop-item"><div class="si-ico">🍞</div><div><div class="si-t">买肥皂</div><div class="si-d">5 金币 = 1 块肥皂</div></div>'
+    +   '<button class="si-b" '+(f.gold>=5?'onclick="App.buySoap()"':'disabled')+'>5 🪙</button></div>'
+    + '<div class="shop-item"><div class="si-ico">🏅</div><div><div class="si-t">兑换「学习小标兵」奖状</div><div class="si-d">10 金币</div></div>'
+    +   '<button class="si-b" '+(f.gold>=10?'onclick="App.redeemCert(\'学习小标兵\')"':'disabled')+'>10 🪙</button></div>'
+    + '<div class="shop-item"><div class="si-ico">🎖️</div><div><div class="si-t">兑换「全能小学者」奖状</div><div class="si-d">20 金币</div></div>'
+    +   '<button class="si-b" '+(f.gold>=20?'onclick="App.redeemCert(\'全能小学者\')"':'disabled')+'>20 🪙</button></div>'
+    + '<div class="shop-item"><div class="si-ico">🖼️</div><div><div class="si-t">兑换「卡通头像框」</div><div class="si-d">15 金币</div></div>'
+    +   '<button class="si-b" '+(f.gold>=15?'onclick="App.redeemCert(\'卡通头像框\')"':'disabled')+'>15 🪙</button></div>'
+    + '<div class="shop-item"><div class="si-ico">🎨</div><div><div class="si-t">兑换「彩虹学习皮肤」</div><div class="si-d">25 金币</div></div>'
+    +   '<button class="si-b" '+(f.gold>=25?'onclick="App.redeemCert(\'彩虹学习皮肤\')"':'disabled')+'>25 🪙</button></div>'
+    + '</div>';
+  App.dialog('🛒 金币商城（农场功能）', h, [{txt:'关闭',cls:'b-blue'}]);
+};
+App.openSeeds = function(){
+  // 道具商店：阳光 / 杀虫剂 / 护盾
+  var f=DB.farm;
+  var h='<div class="shop-grid">'
+    + '<div class="shop-item"><div class="si-ico">🌱</div><div><div class="si-t">阳光换通用种子</div><div class="si-d">5 阳光 = 1 通用种子</div></div>'
+    +   '<button class="si-b" '+(f.sun>=5?'onclick="App.buySeedBySun()"':'disabled')+'>5 ☀️</button></div>'
+    + '<div class="shop-item"><div class="si-ico">🧴</div><div><div class="si-t">阳光换杀虫剂</div><div class="si-d">10 阳光 = 1 杀虫剂</div></div>'
+    +   '<button class="si-b" '+(f.sun>=10?'onclick="App.buyPotion()"':'disabled')+'>10 ☀️</button></div>'
+    + '<div class="shop-item"><div class="si-ico">🛡️</div><div><div class="si-t">兑换护盾（连续打卡3天）</div><div class="si-d">当前连续 '+f.streakDays+' 天</div></div>'
+    +   '<button class="si-b" '+(f.streakDays>=3?'onclick="App.claimShield()"':'disabled')+'>领取</button></div>'
+    + '</div>';
+  App.dialog('🌱 我的种子 / 道具商店', h, [{txt:'关闭',cls:'b-green'}]);
+};
+App.buyRice = function(){ var f=DB.farm; if(f.gold<5) return; f.gold-=5; f.rice+=5; f.goldLog.push({date:today(),amt:-5,note:'金币商城买米粒'}); App.save(); App.paintRes(); App.openShop(); App.toast('买了 5 粒米 🌾', true); };
+App.buySoap = function(){ var f=DB.farm; if(f.gold<5) return; f.gold-=5; f.soap+=1; f.goldLog.push({date:today(),amt:-5,note:'金币商城买肥皂'}); App.save(); App.paintRes(); App.openShop(); App.toast('买了 1 块肥皂 🍞', true); };
+App.redeemCert = function(name){ var f=DB.farm; var cost={ '学习小标兵':10,'全能小学者':20,'卡通头像框':15,'彩虹学习皮肤':25 }[name]; if(f.gold<cost) return; f.gold-=cost; f.goldLog.push({date:today(),amt:-cost,note:'兑换'+name});
+  var ex=f.certificates.filter(function(c){return c.name===name;})[0];
+  if(ex) ex.count++; else f.certificates.push({name:name, date:today(), count:1});
+  App.save(); App.paintRes(); if(App.cur==='stats') App.renderStats(); App.openShop();
+  App.toast('兑换成功：'+name+' 🏅', true);
+};
+App.buySeedBySun = function(){ var f=DB.farm; if(f.sun<5) return; f.sun-=5; f.seeds.通用=(f.seeds.通用||0)+1; f.sunLog.push({date:today(),amt:-5,note:'阳光换通用种子'}); App.save(); App.paintRes(); App.openSeeds(); App.toast('换了 1 颗通用种子 🌱', true); };
+App.buyPotion = function(){ var f=DB.farm; if(f.sun<10) return; f.sun-=10; f.potion=(f.potion||0)+1; f.sunLog.push({date:today(),amt:-10,note:'阳光换杀虫剂'}); App.save(); App.paintRes(); App.openSeeds(); App.toast('换了 1 瓶杀虫剂 🧴', true); };
+App.claimShield = function(){ var f=DB.farm; if(f.streakDays<3) return; f.streakDays-=3; f.shield=(f.shield||0)+1; App.save(); App.paintRes(); App.openSeeds(); App.toast('领取护盾成功！🛡️ 可挡一次小狗熊', true); };
+
+/* 进入农场时的未完成作业提醒弹窗 */
+App.maybeWarnFarm = function(){
+  var f=DB.farm, hw=DB.homework;
+  if(f.warnedDate===today()) return;
+  var inc=[];
+  ['英语','语文','数学'].forEach(function(s){ if(!hw.subj[s].done) inc.push(s); });
+  if(inc.length>0){
+    f.warnedDate=today(); App.save();
+    App.dialog('⚠️ 今晚有小狗熊！',
+      '还有 '+inc.length+' 科作业没完成（'+inc.join('、')+'）。今晚小狗熊会来破坏你的菜园！快去「作业打卡」完成任务吧～',
+      [{txt:'去补作业',cls:'b-pink',fn:function(){ App.go('homework'); }},{txt:'先看农场',cls:'b-gray'}]);
+  } else if(f.bears && f.bears.length>0){
+    f.warnedDate=today(); App.save();
+  }
+};
+
+/* ================= 十七、导出 / 导入 / 清空 ================= */
+App.exportData = function(){
+  var out=JSON.stringify(DB,null,2);
+  var blob=new Blob([out],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='宝贝学习乐园农场版-备份-'+today()+'.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); document.body.removeChild(a); },300);
+  App.toast('备份已下载，收好啦！');
+};
+App.importData = function(ev){
+  var f=ev.target.files&&ev.target.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var o=JSON.parse(r.result); if(!o||typeof o!=='object') throw 0;
+      DB=o; DB.isDemo=false;
+      if(DB.homework.date!==today()) App.rollDay();
+      App.save(); App.paintRes(); App.renderAll();
+      App.toast('恢复成功！继续加油～', true);
+    }catch(e){ App.toast('文件读不懂，请选择本工作台导出的 JSON'); }
+    ev.target.value='';
+  };
+  r.readAsText(f);
+};
+App.askClear = function(){
+  App.dialog('确定要清空全部数据吗？','星星、金币、农场、徽章都会消失，无法找回。建议先点「导出备份」。',[
+    {txt:'我再想想',cls:'b-gray'},
+    {txt:'先导出备份',cls:'b-purple',fn:App.exportData},
+    {txt:'确定清空',cls:'b-red',fn:function(){
+      App.dialog('最后确认一次','真的要全部清空吗？',[
+        {txt:'取消',cls:'b-gray'},
+        {txt:'确定清空',cls:'b-red',fn:function(){
+          localStorage.removeItem(K.data);
+          DB={ver:2,isDemo:false,stars:0,learnedLetters:[],memoPoems:[],levels:{1:0,2:0,3:0,4:0,5:0},badges:[],
+              stats:{mathRight:0,mathTotal:0,logicRight:0,countRight:0,matchRight:0,copyRight:0,copyTotal:0,days:[today()],poemRead:0,completion:{}},
+              homework:freshHomework(today()),
+              farm:{gold:0,sun:0,rice:0,soap:0,shield:0,potion:0,seeds:{英语:0,语文:0,数学:0,通用:0},plots:[],bears:[],chicken:{feed:100,clean:100,lastFeed:nowTs(),lastClean:nowTs(),fainted:false},certificates:[],goldLog:[],sunLog:[],incompleteAtReset:[],streakDays:0,lastReset:today(),warnedDate:''}};
+          for(var i=0;i<6;i++) DB.farm.plots.push({id:i,crop:null});
+          App.save(); App.paintRes(); App.renderAll();
+          App.toast('已清空，从头开始吧！');
+        }}
+      ]);
+    }}
+  ]);
+};
+App.clearDemo = function(){
+  App.dialog('清空示例数据？','会清掉预置的星星、已学字母等演示记录，换成全新空白进度。',[
+    {txt:'保留',cls:'b-gray'},
+    {txt:'清空示例',cls:'b-purple',fn:function(){
+      DB.isDemo=false; DB.stars=0; DB.learnedLetters=[]; DB.memoPoems=[]; DB.levels={1:0,2:0,3:0,4:0,5:0}; DB.badges=[];
+      DB.stats={mathRight:0,mathTotal:0,logicRight:0,countRight:0,matchRight:0,copyRight:0,copyTotal:0,days:[today()],poemRead:0,completion:{}};
+      DB.homework=freshHomework(today());
+      App.save(); App.paintRes(); App.renderAll();
+      App.toast('示例已清空，全新开始～');
+    }}
+  ]);
+};
+App.checkTip = function(){
+  var f=DB.farm, n = DB.learnedLetters.length + DB.memoPoems.length + DB.stats.mathTotal + DB.stats.logicRight + DB.badges.length + f.gold + f.sun;
+  if(n>=30){ $('backupTip').className='tip-bar'; $('backupTipTxt').textContent='学习记录已积累 '+n+' 条，建议导出备份一下，换手机也不怕丢～'; }
+  else { $('backupTip').className='tip-bar hidden'; }
+};
+
+/* ================= 十八、总渲染 + 启动 ================= */
+App.renderAll = function(){
+  App.paintRes();
+  App.renderPlan();
+};
+
+(function boot(){
+  Speech.init();
+  App.load();
+  App.buildNav();
+  App.renderAll();
+  App.go('plan');
+  App.checkBadges();
+  // iOS 首次手势唤醒语音
+  var wake=function(){
+    if(Speech.ok){ try{ var u=new SpeechSynthesisUtterance(' '); u.volume=0; window.speechSynthesis.speak(u); }catch(e){} }
+    document.removeEventListener('touchstart',wake); document.removeEventListener('click',wake);
+  };
+  document.addEventListener('touchstart',wake,{passive:true});
+  document.addEventListener('click',wake);
+  // 跨天自动重置（每分钟检查；实际惩罚在打开时 rollDay 已处理）
+  setInterval(function(){ if(DB.homework.date!==today()){ App.rollDay(); if(App.cur==='plan') App.renderPlan(); if(App.cur==='farm') App.renderFarm(); } }, 60000);
+  // 农场小鸡衰减：每分钟刷新一次进度条
+  setInterval(function(){ if(App.cur==='farm'){ App.renderChickenTick(); } }, 60000);
+})();
+
+/* 仅刷新小鸡进度条，避免整页重绘打断交互 */
+App.renderChickenTick = function(){
+  var c=DB.farm.chicken, now=nowTs();
+  var feedDecay=(now-(c.lastFeed||now))/(12*3600*1000);
+  var cleanDecay=(now-(c.lastClean||now))/(24*3600*1000);
+  c.feed=Math.max(0,Math.min(100,(c.feed==null?100:c.feed)-feedDecay*100));
+  c.clean=Math.max(0,Math.min(100,(c.clean==null?100:c.clean)-cleanDecay*100));
+  App.save();
+  var fb=document.querySelector('.bar.feed>i'), cb=document.querySelector('.bar.clean>i');
+  if(fb) fb.style.width=c.feed+'%';
+  if(cb) cb.style.width=c.clean+'%';
+  var bubble=document.querySelector('.faint-bubble');
+  if(c.feed<=0 && !bubble){ App.renderFarm(); }
+  else if(c.feed>0 && bubble){ App.renderFarm(); }
+};
+</script>
+</body>
+</html>
