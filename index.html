@@ -476,12 +476,6 @@ tr.hold-total .tf-note{display:block;font-weight:400;font-size:11px;color:var(--
 .mkt-chip.up .mkt-val,.mkt-chip.up .mkt-pct{color:var(--up)}
 .mkt-chip.down .mkt-val,.mkt-chip.down .mkt-pct{color:var(--down)}
 .mkt-chip.flat .mkt-val,.mkt-chip.flat .mkt-pct{color:var(--text)}
-/* 分时图内主力资金流条 */
-.kline-ff{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;font-size:12.5px}
-.kline-ff-t{font-size:11.5px;color:var(--muted);margin-bottom:4px}
-.kline-ff-row{display:flex;align-items:center;gap:12px;font-variant-numeric:tabular-nums}
-.kline-ff-row .up{color:var(--up);font-weight:600}
-.kline-ff-row .down{color:var(--down);font-weight:600}
 th[data-sort]{cursor:pointer;user-select:none}
 th[data-sort]:hover{color:var(--text);background:#eef2f8}
 th .si{display:inline-block;margin-left:3px;font-size:9px;opacity:.26;vertical-align:1px}
@@ -649,10 +643,6 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
 
 .spin{display:inline-block;width:11px;height:11px;border:2px solid #c8d2e6;border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px;margin-right:5px}
 @keyframes sp{to{transform:rotate(360deg)}}
-/* 分时图最新价呼吸光点（交易时段每 2 秒随价跳动，强化实时观感） */
-.min-pulse{transform-box:fill-box;transform-origin:center;animation:minPulse 1.6s ease-out infinite}
-@keyframes minPulse{0%{transform:scale(.5);opacity:.55}70%{transform:scale(2.4);opacity:0}100%{transform:scale(2.4);opacity:0}}
-
 /* v53.25：侧栏折叠/开关已随「方案 B 底部导航」移除 */
 
 
@@ -777,7 +767,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.8</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.9</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1170,7 +1160,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.8 · 2026-08-11 00:28 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.9 · 2026-08-11 00:44 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1229,8 +1219,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.8';
-const APP_BUILD   = '2026-08-11 00:28';
+const APP_VERSION = '1BK_V68.13.9';
+const APP_BUILD   = '2026-08-11 00:44';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3904,204 +3894,6 @@ function bindKlineCross(svg, rows){
   });
   svg.addEventListener('mouseleave', hide);
 }
-/* ============================ 分时图（同花顺风格） ============================
-   数据源：腾讯 minute/query，返回 data.<sym>.data.data = ["0930 38.90 2304 8962560.00", ...]
-   格式：时间 价格 累计成交量(手) 累计成交额；均价 = 累计额 / 累计量（同花顺黄线） */
-function minuteJsonp(sym){
-  return new Promise((resolve, reject) => {
-    const cbName = '_mncb_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
-    const t = setTimeout(() => { try { delete window[cbName]; } catch(e){} reject(new Error('分时请求超时')); }, CONFIG.jsonpTimeout);
-    window[cbName] = data => { clearTimeout(t); try { delete window[cbName]; } catch(e){} resolve(data); };
-    const src = 'https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=' + sym + '&_callback=' + cbName;
-    injectScript(src).catch(e => { clearTimeout(t); try { delete window[cbName]; } catch(e){} reject(e); });
-  });
-}
-function parseMinute(data, sym){
-  const node = data && data.data && data.data[sym];
-  const arr = node && node.data && node.data.data;
-  /* 昨收优先从分时响应自带的 qt 行情取（字段[4]，与 parseQuote 同口径），避免再发一次 fetchQuotes 失败时回退到首根价导致分时图画成直线 */
-  let preClose = NaN;
-  try {
-    const qtNode = node && node.qt;
-    const qtArr = qtNode && (qtNode[sym] || qtNode['v_ff_' + sym]);
-    if (Array.isArray(qtArr) && isFinite(Number(qtArr[4])) && Number(qtArr[4]) > 0) preClose = Number(qtArr[4]);
-  } catch (e) {}
-  if (!Array.isArray(arr) || !arr.length) return { rows: [], date: '', preClose };
-  let prevCum = 0;
-  const rows = [];
-  arr.forEach(str => {
-    const p = String(str).split(' ');
-    if (p.length < 4) return;
-    const t = p[0], price = Number(p[1]), cum = Number(p[2]) || 0, amt = Number(p[3]) || 0;
-    if (!isFinite(price) || price <= 0) return;
-    const vol = Math.max(0, cum - prevCum);        // 增量成交量（首根 = 累计量）
-    prevCum = cum;
-    rows.push({ t, price, avg: (cum > 0 ? amt / cum : price), vol, cum, amt });
-  });
-  return { rows, date: (node.data && node.data.date) || '', preClose };
-}
-/* 分时 SVG：价格线 + 均价线(黄) + 昨收基准 + 涨跌面积 + 成交量（对标同花顺） */
-function minuteSVG(rows, name, preClose){
-  const W = 720, H = 430, padL = 56, padR = 16, padT = 30, padB = 34;
-  const volArea = 66, volGap = 12;
-  const n = rows.length;
-  if (!n) return '';
-  const up = '#e5484d', down = '#15a34a', flat = '#8a93a6';
-  if (!isFinite(preClose) || preClose <= 0) preClose = rows[0].price;
-  /* 涨跌范围：昨收上下对称（自适应，最小 ±3%） */
-  let maxDev = preClose * 0.03;
-  rows.forEach(r => {
-    maxDev = Math.max(maxDev, Math.abs(r.price - preClose), Math.abs(r.avg - preClose));
-  });
-  const hi = preClose + maxDev, lo = preClose - maxDev;
-  const range = (hi - lo) || 1;
-  const volMax = Math.max.apply(null, rows.map(r => r.vol)) || 1;
-  const cw = (W - padL - padR) / n;
-  const plotH = H - padT - padB - volArea - volGap;
-  const plotB = padT + plotH;
-  const yOf = v => padT + (hi - v) / range * plotH;
-  const xOf = i => padL + i * cw + cw / 2;
-  const pcY = yOf(preClose).toFixed(1);
-  /* 涨跌面积：价格折线 + 昨收线闭合（当日收涨红 / 收跌绿，同花顺式半透明） */
-  const dirC = rows[n - 1].price >= preClose ? up : down;
-  const areaPts = rows.map((r, i) => xOf(i).toFixed(1) + ',' + yOf(r.price).toFixed(1)).join(' ');
-  const area = '<polygon points="' + areaPts + ' ' + (padL + (n - 1) * cw + cw).toFixed(1) + ',' + pcY + ' ' + padL + ',' + pcY + '" fill="' + dirC + '" opacity="0.07"/>';
-  /* 昨收虚线 + 刻度 */
-  let gridY = '', yLbl = '';
-  for (let i = 0; i <= 4; i++){
-    const v = hi - range * i / 4;
-    const y = yOf(v);
-    const isPc = Math.abs(v - preClose) < range / 40;
-    if (isPc){
-      gridY += '<line x1="' + padL + '" y1="' + pcY + '" x2="' + (W - padR) + '" y2="' + pcY + '" stroke="#c3cad9" stroke-width="1" stroke-dasharray="4,3"/>';
-    } else {
-      gridY += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#eef0f5" stroke-width="1"/>';
-    }
-    const pct = (v - preClose) / preClose * 100;
-    yLbl += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="' + (isPc ? '#8a93a6' : '#9aa3b5') + '">' + v.toFixed(2) + (Math.abs(pct) >= 0.5 ? '  ' + (pct > 0 ? '+' : '') + pct.toFixed(2) + '%' : '') + '</text>';
-  }
-  gridY += '<line x1="' + padL + '" y1="' + (plotB + volGap) + '" x2="' + (W - padR) + '" y2="' + (plotB + volGap) + '" stroke="#eef0f5" stroke-width="1"/>';
-  /* 成交量柱（按该分钟价 vs 昨收着色） */
-  let vol = '';
-  for (let i = 0; i < n; i++){
-    const r = rows[i], x = xOf(i);
-    const vc = r.price > preClose ? up : (r.price < preClose ? down : flat);
-    const vh = Math.max(1, r.vol / volMax * (volArea - 8));
-    vol += '<rect x="' + (x - Math.max(1.5, cw * 0.34)).toFixed(1) + '" y="' + (H - padB - vh).toFixed(1) + '" width="' + Math.max(1.5, cw * 0.68).toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + vc + '" opacity="0.55"/>';
-  }
-  /* x 轴时间刻度：09:30 / 10:30 / 11:30 / 14:00 / 15:00（按索引均分） */
-  const T = t => t.length >= 4 ? t.slice(0, 2) + ':' + t.slice(2, 4) : t;
-  const xPts = [0, Math.floor(n * 0.25), Math.floor(n * 0.5), Math.floor(n * 0.75), n - 1];
-  const xLabels = ['09:30', '10:30', '11:30/13:00', '14:00', '15:00'];
-  let xLbl = '';
-  xPts.forEach((i, k) => {
-    const anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
-    xLbl += '<text x="' + xOf(i).toFixed(1) + '" y="' + (H - padB + 15) + '" text-anchor="' + anchor + '" font-size="10" fill="#9aa3b5">' + xLabels[k] + '</text>';
-  });
-  const last = rows[n - 1];
-  const chg = (last.price - preClose) / preClose * 100;
-  const chgAmt = last.price - preClose;
-  const chgC = chg >= 0 ? up : down;
-  const sgn2 = v => (v >= 0 ? '+' : '') + v.toFixed(2);
-  /* 头部信息条（同花顺式：名称/现价/涨跌额/涨跌幅 + 均价/昨收/量/额/最新时间，跟随实时跳动） */
-  const timeTxt = last.t && last.t.length >= 4 ? last.t.slice(0, 2) + ':' + last.t.slice(2, 4) : '';
-  const amtTxt = last.amt >= 1e8 ? (last.amt / 1e8).toFixed(2) + '亿' : (last.amt / 1e4).toFixed(0) + '万';
-  const title =
-    '<text x="' + padL + '" y="' + (padT - 6) + '" font-size="13.5" font-weight="700" fill="#161a22">' + esc(name) + ' · 分时</text>' +
-    '<text x="' + (padL + 148) + '" y="' + (padT - 6) + '" font-size="12" font-weight="700" fill="' + chgC + '">' + last.price.toFixed(2) + '</text>' +
-    '<text x="' + (padL + 215) + '" y="' + (padT - 6) + '" font-size="11.5" font-weight="600" fill="' + chgC + '">' + sgn2(chgAmt) + '</text>' +
-    '<text x="' + (padL + 278) + '" y="' + (padT - 6) + '" font-size="11.5" font-weight="600" fill="' + chgC + '">' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</text>' +
-    '<text x="' + (W - padR) + '" y="' + (padT - 6) + '" text-anchor="end" font-size="10.5" fill="#8a93a6">均价 ' + last.avg.toFixed(2) + '</text>' +
-    '<text x="' + padL + '" y="' + (padT + 12) + '" font-size="10" fill="#2563eb">— 价格</text>' +
-    '<text x="' + (padL + 58) + '" y="' + (padT + 12) + '" font-size="10" fill="#e0a83e">— 均价</text>' +
-    '<text x="' + (padL + 118) + '" y="' + (padT + 12) + '" font-size="10" fill="#8a93a6">昨收 ' + preClose.toFixed(2) + '</text>' +
-    '<text x="' + (padL + 200) + '" y="' + (padT + 12) + '" font-size="10" fill="#8a93a6">量 ' + fmtVol(last.cum) + '</text>' +
-    '<text x="' + (padL + 300) + '" y="' + (padT + 12) + '" font-size="10" fill="#8a93a6">额 ' + amtTxt + '</text>' +
-    '<text x="' + (W - padR) + '" y="' + (padT + 12) + '" text-anchor="end" font-size="10.5" font-weight="700" fill="' + chgC + '">' + timeTxt + '</text>';
-  /* 价格线 + 均价线 */
-  const line = pts => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
-  const pricePts = rows.map((r, i) => [xOf(i), yOf(r.price)]);
-  const avgPts = rows.map((r, i) => [xOf(i), yOf(r.avg)]);
-  const cross =
-    '<g id="klCross" style="display:none">' +
-      '<line id="klVL" stroke="rgba(30,41,59,.45)" stroke-width="1" stroke-dasharray="3,3"/>' +
-      '<line id="klHL" stroke="rgba(30,41,59,.45)" stroke-width="1" stroke-dasharray="3,3"/>' +
-      '<circle id="klDot" r="3" fill="#334155" stroke="#fff" stroke-width="1.2"/>' +
-    '</g>' +
-    '<rect id="klOverlay" x="' + padL + '" y="' + padT + '" width="' + (W - padL - padR) + '" height="' + (H - padT - padB) + '" fill="transparent" style="cursor:crosshair"/>';
-  /* 最新价光点（交易时段每 2 秒随价跳动；脉冲呼吸圈强化"实时"观感，对标同花顺） */
-  const lx = xOf(n - 1).toFixed(1), ly = yOf(last.price).toFixed(1);
-  const liveDot =
-    '<circle class="min-pulse" cx="' + lx + '" cy="' + ly + '" r="3.4" fill="' + dirC + '"/>' +
-    '<circle cx="' + lx + '" cy="' + ly + '" r="2.6" fill="' + dirC + '" stroke="#fff" stroke-width="1.1"/>';
-  /* 当前时刻竖线（最新时刻标记，同花顺式） */
-  const nowLine = '<line x1="' + lx + '" y1="' + padT + '" x2="' + lx + '" y2="' + plotB + '" stroke="rgba(37,99,235,.16)" stroke-width="1"/>';
-  return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;display:block" data-kl="1" data-period="min" data-n="' + n + '" data-cw="' + cw.toFixed(4) + '" data-pl="' + padL + '" data-pt="' + padT + '" data-pc="' + preClose + '">' +
-      title + gridY + yLbl + area +
-      '<path d="' + line(pricePts) + '" fill="none" stroke="#2563eb" stroke-width="1.4"/>' +
-      '<path d="' + line(avgPts) + '" fill="none" stroke="#e0a83e" stroke-width="1.2"/>' +
-      liveDot + nowLine +
-      vol + xLbl + cross + '</svg>';
-}
-/* 分时十字光标读数 */
-function bindMinuteCross(svg, rows, preClose){
-  if (!svg || !rows.length) return;
-  const W = 720, padL = 56, padR = 16, padT = 30, padB = 34;
-  const n = rows.length, cw = (W - padL - padR) / n;
-  const cross = svg.querySelector('#klCross'), vl = svg.querySelector('#klVL'),
-    hl = svg.querySelector('#klHL'), dot = svg.querySelector('#klDot');
-  const SVGNS = 'http://www.w3.org/2000/svg';
-  const info = document.createElementNS(SVGNS, 'g');
-  info.id = 'klInfo';
-  info.setAttribute('style', 'display:none');
-  const infoRect = document.createElementNS(SVGNS, 'rect');
-  infoRect.setAttribute('width', '212'); infoRect.setAttribute('height', '78');
-  infoRect.setAttribute('rx', '6'); infoRect.setAttribute('fill', 'rgba(255,255,255,.96)');
-  infoRect.setAttribute('stroke', '#e2e8f0');
-  info.appendChild(infoRect);
-  const infoT = document.createElementNS(SVGNS, 'text');
-  infoT.setAttribute('x', '8'); infoT.setAttribute('y', '15');
-  infoT.setAttribute('font-size', '10.5'); infoT.setAttribute('fill', '#334155');
-  info.appendChild(infoT);
-  const T = t => t.length >= 4 ? t.slice(0, 2) + ':' + t.slice(2, 4) : t;
-  const hide = () => { if (cross) cross.style.display = 'none'; if (info) info.style.display = 'none'; };
-  svg.addEventListener('mousemove', e => {
-    const rect = svg.getBoundingClientRect();
-    if (!rect.width) return;
-    const x = (e.clientX - rect.left) / rect.width * W;
-    const y = (e.clientY - rect.top) / rect.height * 430;
-    let i = Math.round((x - padL) / cw - 0.5);
-    i = Math.max(0, Math.min(n - 1, i));
-    const r = rows[i], cx = padL + i * cw + cw / 2;
-    if (cross) cross.style.display = '';
-    if (info) info.style.display = '';
-    if (vl){ vl.setAttribute('x1', cx.toFixed(1)); vl.setAttribute('x2', cx.toFixed(1)); vl.setAttribute('y1', padT); vl.setAttribute('y2', 430 - padB); }
-    if (hl){ hl.setAttribute('x1', padL); hl.setAttribute('x2', 720 - padR); hl.setAttribute('y1', y.toFixed(1)); hl.setAttribute('y2', y.toFixed(1)); }
-    if (dot){ dot.setAttribute('cx', cx.toFixed(1)); dot.setAttribute('cy', y.toFixed(1)); }
-    let ix = cx + 12, iy = Math.max(padT, Math.min(430 - padB - 66 - 12 - 66, y - 30));
-    if (ix + 212 > 720 - 4) ix = cx - 224;
-    if (info) info.setAttribute('transform', 'translate(' + ix + ',' + iy + ')');
-    if (infoT){
-      while (infoT.firstChild) infoT.removeChild(infoT.firstChild);
-      const d = preClose > 0 ? (r.price - preClose) / preClose * 100 : 0;
-      const dC = d > 0 ? 'var(--up)' : (d < 0 ? 'var(--down)' : 'var(--flat)');
-      const mk = (txt, x, fill, dy, wt) => {
-        const t = document.createElementNS(SVGNS, 'tspan');
-        t.setAttribute('x', x); if (dy !== null) t.setAttribute('dy', dy);
-        if (fill) t.setAttribute('fill', fill); if (wt) t.setAttribute('font-weight', wt);
-        t.textContent = txt; return t;
-      };
-      infoT.appendChild(mk(T(r.t), 8, null, 0, 700));
-      infoT.appendChild(mk((d >= 0 ? '+' : '') + d.toFixed(2) + '%', 118, dC, 0, 700));
-      infoT.appendChild(mk('价格 ' + r.price.toFixed(2), 8, null, 14, 700));
-      infoT.appendChild(mk('  均价 ' + r.avg.toFixed(2), null, '#e0a83e', null, 700));
-      infoT.appendChild(mk('量 ' + fmtVol(r.vol) + '  累计 ' + fmtVol(r.cum) + '手', 8, null, 14, null));
-      infoT.appendChild(mk('额 ¥' + (isFinite(r.amt) ? (r.amt >= 1e8 ? (r.amt / 1e8).toFixed(2) + '亿' : (r.amt >= 1e4 ? (r.amt / 1e4).toFixed(1) + '万' : String(Math.round(r.amt)))) : '—'), 8, null, 14, null));
-    }
-  });
-  svg.addEventListener('mouseleave', hide);
-}
-
 /* 打开 K 线弹窗（总览实时行情：持仓索引 → 与 renderLive 同口径列表） */
 function openKline(idx){
   const list = liveSortedList();
@@ -4126,15 +3918,14 @@ function showKlineDialog(name, sym){
     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
       '<h3 style="margin:0">' + esc(name) + ' · K线（前复权）</h3>' +
       '<div class="kl-tabs" id="klTabs">' +
-        '<span class="kt active" data-p="min">分时</span>' +
-        '<span class="kt" data-p="day">日K</span>' +
+        '<span class="kt active" data-p="day">日K</span>' +
         '<span class="kt" data-p="week">周K</span>' +
         '<span class="kt" data-p="month">月K</span>' +
       '</div>' +
     '</div>' +
     '<div class="mb" id="klBody" style="text-align:center;padding:22px">' + (isFund ? '<div class="dim" style="padding:20px">场外基金无K线行情</div>' : '<span class="spin"></span> 加载K线数据…') + '</div>' +
     '<div class="mf"><button class="btn-primary">关闭</button></div></div>';
-  let refreshTimer = null;                 /* 弹窗内自动刷新定时器（分时15s / K线60s），关闭即停 */
+  let refreshTimer = null;                 /* 弹窗内自动刷新定时器（K线 60s），关闭即停 */
   const clearRefresh = () => { clearTimeout(refreshTimer); refreshTimer = null; };
   const close = () => { clearRefresh(); mask.remove(); document.removeEventListener('keydown', onKey); };
   mask.querySelector('button').onclick = close;
@@ -4146,19 +3937,17 @@ function showKlineDialog(name, sym){
   const body = mask.querySelector('#klBody');
   const tabs = mask.querySelector('#klTabs');
   let loading = false;
-  /* 自动刷新调度：分时 2 秒（交易时段）、日/周/月K 60 秒；非交易时段分时冻结不轮询（零请求）；弹窗隐藏时暂停 */
+  /* 自动刷新调度：日/周/月K 60 秒（v68.13.9 已移除分时图与 2 秒轮询）；弹窗隐藏时暂停 */
   const schedule = (period) => {
     clearRefresh();
-    if (!isTradingTime()) return;                 /* 休市分时数据冻结，不轮询 */
     refreshTimer = setTimeout(() => {
       if (document.hidden){ schedule(period); return; }
       load(period, true);
-    }, period === 'min' ? 2000 : 60000);
+    }, 60000);
   };
   const load = (period, silent) => {
     if (loading) return;
     loading = true;
-    if (period === 'min'){ loadMinute(silent); return; }
     if (!silent) body.innerHTML = '<span class="spin"></span> 加载' + ({day:'日K', week:'周K', month:'月K'})[period] + '…';
     klineJsonp(sym, period).then(data => {
       const rows = parseKline(data, sym, period);
@@ -4187,59 +3976,10 @@ function showKlineDialog(name, sym){
       load(t.dataset.p);
     };
   });
-  const loadMinute = (silent) => {
-    if (!silent) body.innerHTML = '<span class="spin"></span> 加载分时…';
-    minuteJsonp(sym).then(async data => {
-      const pm = parseMinute(data, sym);
-      if (!pm.rows.length){
-        if (!silent) body.innerHTML = '<div class="dim" style="padding:20px">分时数据拉取失败（' + esc(sym) + '）</div>';
-        loading = false; schedule('min'); return;
-      }
-      /* 昨收优先用分时响应自带的 qt（同一份数据，零额外请求）；缺失时再回退 fetchQuotes；再缺失才用首根价兜底 */
-      let preClose = isFinite(pm.preClose) && pm.preClose > 0 ? pm.preClose : NaN;
-      if (!isFinite(preClose) || preClose <= 0){
-        try {
-          const m = await fetchQuotes([sym]);
-          const q = m && m[sym];
-          if (q && isFinite(q.preClose) && q.preClose > 0) preClose = q.preClose;
-        } catch (e) {}
-      }
-      const holder = document.createElement('div');
-      holder.innerHTML = minuteSVG(pm.rows, name, preClose);
-      if (silent){ const old = body.querySelector('svg'); if (old) old.remove(); } else { body.innerHTML = ''; }
-      body.appendChild(holder.firstElementChild);
-      bindMinuteCross(body.firstElementChild, pm.rows, isFinite(preClose) && preClose > 0 ? preClose : (pm.rows[0] ? pm.rows[0].price : 0));
-      loading = false;
-      schedule('min');
-    }).catch(e => {
-      if (!silent) body.innerHTML = '<div class="dim" style="padding:20px">分时加载失败：' + esc(e.message) + '</div>';
-      loading = false;
-      schedule('min');
-    });
-  };
-  load('min');
+  load('day');   /* v68.13.9：默认日K（分时图已移除） */
 }
 
 /* 分时图内展示该标的的主力资金流（东财，仅股票）；持仓行已不再展示，集中到分时图 */
-function appendFundFlowStrip(body, sym){
-  if (!body) return;
-  const c = String(sym || '').replace(/\D/g, '');
-  const h = state.holdings.find(x => String(x.code || '').replace(/\D/g, '') === c);
-  if (!h || !isFinite(h.fundFlow)) return;
-  const v = h.fundFlow, up = v >= 0, wan = v / 1e4;
-  const fmt = w => (Math.abs(w) >= 1e4 ? (w / 1e4).toFixed(2) + '亿' : w.toFixed(0) + '万');
-  const maxAbs = Math.max(1, ...state.holdings.filter(x => isFinite(x.fundFlow)).map(x => Math.abs(x.fundFlow)));
-  const w = Math.min(100, Math.abs(v) / maxAbs * 100).toFixed(0);
-  const div = document.createElement('div');
-  div.className = 'kline-ff';
-  div.innerHTML = '<div class="kline-ff-t">主力资金流（东财 · 仅股票）</div>' +
-    '<div class="kline-ff-row"><span>' + esc(h.name || h.code) + '</span>' +
-    '<span class="' + (up ? 'up' : 'down') + '">' + (up ? '净流入 ' : '净流出 ') + fmt(wan) + '</span>' +
-    '<span class="dim">近5日 ' + (isFinite(h.fundFlow5) ? (h.fundFlow5 >= 0 ? '+' : '') + fmt(h.fundFlow5 / 1e4) : '—') + '</span></div>' +
-    '<div class="ff-track" style="margin-top:6px"><div class="ff-bar ' + (up ? 'up' : 'down') + '" style="width:' + w + '%"></div></div>';
-  body.appendChild(div);
-}
-
 /* 总览 6 张卡片金额隐藏（小眼睛）：每张卡独立开关，掩码 = 首个字符 ***** 尾字符 */
 const ICON_EYE_ON  = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
 const ICON_EYE_OFF = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
