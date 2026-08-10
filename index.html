@@ -50,12 +50,14 @@ body{
 ::selection{background:var(--accent-soft)}
 
 /* ===================== 应用外壳：侧栏 + 主区 ===================== */
-.app{display:flex;min-height:100vh;align-items:stretch}
+.app{display:flex;min-height:100vh;align-items:stretch;background:var(--bg)}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 
 /* 左侧导航栏：暗色金融质感 + 金色品牌点缀 */
 .sidebar{
-  width:240px;flex-shrink:0;position:sticky;top:0;height:100vh;z-index:40;overflow-y:auto;
+  width:240px;flex-shrink:0;position:sticky;top:0;min-height:100vh;z-index:40;overflow-y:auto;
+  /* v53.17：flex 父容器交叉轴自适应延申到底（与 main 同高），避免 main 比 viewport 高时侧栏底部留白 */
+  align-self:stretch;
   display:flex;flex-direction:column;
   background:linear-gradient(180deg,#0e1320 0%,#0b0f1a 100%);
   color:#c7d2e2;border-right:1px solid rgba(255,255,255,.05);
@@ -107,7 +109,8 @@ body{
   -webkit-backdrop-filter:saturate(180%) blur(14px);
   border-bottom:1px solid var(--line);
 }
-.topbar-in{max-width:1400px;margin:0 auto;padding:12px 22px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+/* v53.17：顶栏延申到主区宽度（原 max-width:1400px 居中在宽屏下右侧留白过多） */
+.topbar-in{max-width:var(--page-maxw);margin:0 auto;padding:12px 22px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-start}
 .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;white-space:nowrap}
 .brand .dot{width:10px;height:10px;border-radius:3px;background:var(--accent)}
 .spacer{flex:1 1 auto}
@@ -750,7 +753,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.16 · 2026-08-10 13:32</div>
+      <div class="sf-ver" id="sfVer">v53.17 · 2026-08-10 14:00</div>
     </div>
   </aside>
 
@@ -761,7 +764,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.16</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.17</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1139,7 +1142,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.16 · 2026-08-10 13:32 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.17 · 2026-08-10 14:00 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1185,8 +1188,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.16';
-const APP_BUILD   = '2026-08-10 13:32';
+const APP_VERSION = 'v53.17';
+const APP_BUILD   = '2026-08-10 14:00';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1241,8 +1244,8 @@ function switchPage(page){
   const t = document.getElementById('pageTitleCurrent');
   if (t) t.textContent = PAGE_TITLES[page] || page;
   try { localStorage.setItem(K('page'), page); } catch(e){}
-  /* 移动端：切页后自动收起侧边栏（避免遮住内容区） */
-  if (window.innerWidth <= 900){
+  /* 移动端（≤640）：切页后自动收起抽屉（避免遮住内容区）；平板保留手动控制 */
+  if (window.innerWidth <= 640){
     const sb = document.getElementById('sidebar');
     if (sb && sb.classList.contains('open')) sb.classList.remove('open');
   }
