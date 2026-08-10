@@ -337,6 +337,16 @@ tr.div-row .mono.down{color:#c2185b;font-weight:600}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .dim{color:var(--muted)}
+/* 总览持仓表：列高紧凑化（一屏显示更多标的）+ 金额数字放大（类型/持股数/成本价/现价） */
+#holdTable th, #holdTable td{padding:7px 12px;line-height:1.3}
+#holdTable .name-cell{gap:0;line-height:1.2}
+#holdTable .name-cell .n{font-size:13.5px}
+#holdTable .name-cell .c{font-size:11px}
+#holdTable .tags-row{margin-top:1px}
+#holdTable .chip{font-size:10.5px;padding:1px 7px}
+#holdTable .hold-amt{font-size:15px;line-height:1.2}
+#holdTable .hold-amt .tag{font-size:12.5px;padding:2px 10px}
+.chip-src{display:inline-block;font-size:10px;color:#b45309;background:#fff7e8;border:1px solid #ffe0b2;border-radius:6px;padding:1px 6px;font-weight:600;margin-right:3px;vertical-align:1px}
 
 /* 表格：可排序 / 负成本 / 导入态 */
 .neg-cost{color:#c2185b;font-weight:600}
@@ -662,7 +672,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <a href="https://docs.qq.com/sheet/DUXhVc3N0SFpDRHBR" target="_blank" rel="noopener">数据源 · 腾讯文档「养鹅Ⅱ6813」</a>
       <div class="sf-snap" id="ydSnap" style="display:none" title="内嵌初始数据快照时间；后续数据均在本机维护（腾讯文档同步已停用）"></div>
       <div class="sf-status" id="status">未刷新</div>
-      <div class="sf-ver" id="sfVer">v53.6 · 2026-08-10 09:30</div>
+      <div class="sf-ver" id="sfVer">v53.7 · 2026-08-10 09:52</div>
     </div>
   </aside>
 
@@ -673,7 +683,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <button class="btn-sm side-toggle" id="btnSideToggle" title="收起 / 展开导航">☰</button>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.6</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">v53.7</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -936,7 +946,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.6 · 2026-08-10 09:30 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">v53.7 · 2026-08-10 09:52 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -982,8 +992,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = 'v53.6';
-const APP_BUILD   = '2026-08-10 09:30';
+const APP_VERSION = 'v53.7';
+const APP_BUILD   = '2026-08-10 09:52';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2535,9 +2545,9 @@ async function autoIdentifyIndustries(force){
   for (const h of targets){
     const ind = await fetchIndustry(h.code, h.name);
     if (ind && ind !== h.industry){ h.industry = ind; changed++; }
-    /* 概念标签：名称关键词即时推断（零请求），仅在为空时填，非破坏性 */
+    /* 概念标签：优先东财离线管道抓取的题材（精准），缺失回退名称关键词推断，仅在为空时填，非破坏性 */
     if (!Array.isArray(h.concepts) || !h.concepts.length){
-      const cs = inferConceptsFromName(h.name);
+      const cs = getConcepts(h);
       if (cs.length){ h.concepts = cs; changed++; }
     }
     await new Promise(r => setTimeout(r, 120));   /* 对东财友好，避免突发并发 */
@@ -2578,7 +2588,22 @@ function inferConceptsFromName(name){
   for (const [re, tag] of map) if (re.test(n) && out.indexOf(tag) < 0) out.push(tag);
   return out;
 }
-async function fetchConcepts(code, name){ return inferConceptsFromName(name); }
+/* 概念标签权威数据源：服务端 Python 管道（concept_fetch.py）离线抓取东财 F10 题材板块后注入。
+   仅保留「概念板块」——已剔除 行业(t2) / 地域(t1) / 指数·因子·地域题材(t3 中的非概念项)。
+   运行时 h.concepts 优先取此表（精准），缺失时回退名称关键词推断。 */
+const CONCEPT_MAP = {"000100": ["显示技术", "AI眼镜", "柔性屏(折叠屏)", "AI芯片", "电子纸概念", "绿色电力", "MicroLED", "屏下摄像", "半导体概念", "MiniLED", "华为概念", "工业互联", "小米概念", "OLED", "虚拟现实", "光伏概念"], "000657": ["可控核聚变", "工业母机", "PCB", "小金属概念", "央国企改革", "医疗器械概念", "新材料"], "002025": ["通信技术", "铜缆高速连接", "液冷概念", "光通信模块", "CPO概念", "商业航天", "数据中心", "华为概念", "5G概念", "央国企改革", "军工"], "002050": ["电池技术", "机器人执行器", "液冷概念", "空气能热泵", "机器人概念", "汽车热管理", "华为汽车", "冷链物流", "新能源车", "燃料电池概念", "智能家居", "特斯拉概念"], "002099": ["减肥药", "肝炎概念", "生物疫苗", "化工原料"], "002378": ["小金属概念", "稀缺资源"], "002438": ["低空经济", "可控核聚变", "液冷概念", "超超临界发电", "数据中心", "氢能源", "风能", "核能核电", "节能环保", "军工"], "002517": ["文娱消费", "AI应用", "AI眼镜", "短剧互动游戏", "元宇宙概念", "华为概念", "电子竞技", "区块链", "虚拟现实", "网络游戏"], "600759": ["油气资源", "氦气概念", "天然气"], "601628": ["蚂蚁概念", "央国企改革"], "601838": ["央国企改革", "互联网金融"], "601975": ["一带一路", "央国企改革"], "605006": ["央国企改革", "风能"]}; /*CONCEPT_MAP_MARKER*/
+async function fetchConcepts(code, name){
+  const c = (code || '').toString().replace(/\D/g, '');
+  if (CONCEPT_MAP[c] && CONCEPT_MAP[c].length) return CONCEPT_MAP[c];
+  return inferConceptsFromName(name);
+}
+/* 同步版：直接返回某持仓的概念标签（优先东财 CONCEPT_MAP，缺失回退名称推断）。
+   render 与预警统一走这里，保证「概念异动 / 概念标签」始终用服务端离线管道抓取的东财题材。 */
+function getConcepts(h){
+  const c = (h.code || '').toString().replace(/\D/g, '');
+  if (CONCEPT_MAP[c] && CONCEPT_MAP[c].length) return CONCEPT_MAP[c];
+  return inferConceptsFromName(h.name);
+}
 /* ===================== 主力资金流（东财 push2his，浏览器直连 CORS 开放） ===================== */
 /* 返回 {today:今日主力净流入(元), d5:近5日累计(元), ts}；仅股票有意义（ETF/基金无主力资金维度） */
 async function fetchFundFlow(code){
@@ -2624,10 +2649,14 @@ function refreshFundFlowUI(){
 }
 function conceptChipsHtml(h){
   const ind = (h.industry || '').trim();
-  const cs = Array.isArray(h.concepts) ? h.concepts : [];
+  const cs = getConcepts(h);
+  const fromMap = !!(h.code && CONCEPT_MAP[(h.code || '').toString().replace(/\D/g, '')]);
   let s = '<div class="tags-row">';
   if (ind) s += '<span class="chip chip-ind">' + esc(ind) + '</span>';
-  cs.slice(0, 4).forEach(t => { s += '<span class="chip">' + esc(t) + '</span>'; });
+  if (cs.length){
+    s += '<span class="chip-src">' + (fromMap ? '东财题材' : '主题推断') + '</span>';
+    cs.slice(0, 4).forEach(t => { s += '<span class="chip">' + esc(t) + '</span>'; });
+  }
   s += '</div>';
   return s;
 }
@@ -2695,10 +2724,10 @@ function checkAlerts(){
     if (ratio >= FUND_FLOW_WARN_PCT && !h.alertState.fflow){ h.alertState.fflow = Date.now(); fireAlertInfo(h, '主力净流出', fundFlowText(h) + '（占持仓市值 ' + ratio.toFixed(1) + '%）'); fired++; }
     else if (ratio < FUND_FLOW_WARN_PCT && h.alertState.fflow) delete h.alertState.fflow;   /* 回流后重新武装 */
   });
-  /* 概念异动预警（按名称标签聚合；成分股单日大幅波动即视为该概念异动） */
+  /* 概念异动预警（按东财题材标签聚合；成分股单日大幅波动即视为该概念异动） */
   const byConcept = {};
   state.holdings.forEach(h => {
-    const cs = Array.isArray(h.concepts) ? h.concepts : [];
+    const cs = getConcepts(h);
     if (!cs.length) return;
     const c = calcHolding(h); const pct = isFinite(c.pct) ? c.pct : NaN;
     if (!isFinite(pct)) return;
@@ -2843,10 +2872,11 @@ function renderAnalysis(){
     const ratio = Math.abs(h.fundFlow) / mv * 100;
     if (ratio >= FUND_FLOW_WARN_PCT) disc += warnRow('🔻', '主力净流出：『' + esc(h.name || h.code) + '』' + fundFlowText(h) + '，占持仓市值 <b>' + ratio.toFixed(1) + '%</b>');
   });
-  /* 概念异动预警（按名称标签聚合，成分股单日大幅波动） */
+  /* 概念异动预警（按东财题材标签聚合，成分股单日大幅波动） */
   const byC = {};
   state.holdings.forEach(h => {
-    const cs = Array.isArray(h.concepts) ? h.concepts : [];
+    const cs = getConcepts(h);
+    if (!cs.length) return;
     const c = calcHolding(h); const pct = isFinite(c.pct) ? c.pct : NaN;
     if (!isFinite(pct)) return;
     cs.forEach(tag => { (byC[tag] = byC[tag] || []).push({ h, pct }); });
@@ -3936,10 +3966,10 @@ function renderHoldings(){
         conceptChipsHtml(h) +
         '<span class="ff-inline q-ff ' + (isFinite(h.fundFlow) ? (h.fundFlow >= 0 ? 'up' : 'down') : 'dim') + '" data-q="' + qkey(h) + '">' + fundFlowText(h) + '</span>' +
         '</div></td>' +
-      '<td class="l"><span class="tag ' + effType(h.code, h.type) + '">' + typeLabel(h.code, h.type) + '</span></td>' +
-      '<td class="mono">' + shr(c.shares) + '</td>' +
-      '<td class="mono">' + (c.shares > 0 ? '<span class="' + (c.spreadAvg < 0 ? 'neg-cost' : '') + '">' + price4(c.spreadAvg) + '</span>' : '—') + '</td>' +
-      '<td class="mono q-price ' + cls(c.pct) + '" data-q="' + qkey(h) + '">' + price4(c.price) + '</td>' +
+      '<td class="l hold-amt"><span class="tag ' + effType(h.code, h.type) + '">' + typeLabel(h.code, h.type) + '</span></td>' +
+      '<td class="mono hold-amt">' + shr(c.shares) + '</td>' +
+      '<td class="mono hold-amt">' + (c.shares > 0 ? '<span class="' + (c.spreadAvg < 0 ? 'neg-cost' : '') + '">' + price4(c.spreadAvg) + '</span>' : '—') + '</td>' +
+      '<td class="mono q-price hold-amt ' + cls(c.pct) + '" data-q="' + qkey(h) + '">' + price4(c.price) + '</td>' +
       '<td class="mono q-mv" data-q="' + qkey(h) + '">' + money(c.mv) + '</td>' +
       '<td class="mono' + ((c.shares > 0 && c.spreadCost < 0) ? ' neg-cost' : '') + '">' + (c.shares > 0 ? money(c.spreadCost) : '—') + '</td>' +
       '<td class="mono q-fpnl ' + cls(c.floatPnl) + '" data-q="' + qkey(h) + '">' + (isFinite(c.floatPnl) ? sign2(c.floatPnl) : '—') + '</td>' +
@@ -6627,9 +6657,11 @@ function init(){
         btn.textContent = t0; btn.disabled = false;
       } else if (btn.id === 'e_ident_c'){
         const cEl = document.getElementById('e_concepts'); if (!cEl) return;
-        const cs = inferConceptsFromName(nameEl ? nameEl.value : '');
+        const code = codeEl.value, name = nameEl ? nameEl.value : '';
+        const c = (code || '').toString().replace(/\D/g, '');
+        const cs = (CONCEPT_MAP[c] && CONCEPT_MAP[c].length) ? CONCEPT_MAP[c] : inferConceptsFromName(name);
         cEl.value = cs.join('、');
-        toast(cs.length ? ('已按名称推断概念：' + cs.join('、')) : '未从名称推断出概念，可手动填写', cs.length ? 'ok' : 'info');
+        toast(cs.length ? ('已按东财题材识别概念：' + cs.join('、')) : '未识别到概念，可手动填写', cs.length ? 'ok' : 'info');
       }
     });
   }
