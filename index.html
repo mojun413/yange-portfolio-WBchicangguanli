@@ -786,7 +786,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.007</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.008</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1180,7 +1180,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.007 · 2026-08-11 10:36 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.008 · 2026-08-11 10:46 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1202,7 +1202,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <details class="about-box" id="aboutBox">
               <summary>关于本工具 · 数据说明与免责声明</summary>
               <div class="ab-body">
-                <p><b>版本：</b><span class="mono" id="aboutVer">v53.27</span> · 养鹅持仓管理工具 · 自用记账与组合跟踪 · 2026-08-10</p>
+                <p><b>版本：</b><span class="mono" id="aboutVer">1BK_V68.13.1.007</span> · 养鹅持仓管理工具 · 自用记账与组合跟踪 · 2026-08-11</p>
                 <p><b>行情数据来源：</b>腾讯行情公开接口（<span class="mono">qt.gtimg.cn / web.ifzq.gtimg.cn</span>）+ 天天基金公开接口（场外基金估值）；仅用于个人记账参考，<b>不构成任何投资建议</b>。</p>
                 <p><b>数据存储：</b>配置云端数据库（Supabase）后，数据将<b>实时同步到云端</b>，手机 / 电脑打开同一页面即共享一份数据，一处修改处处同步；未配置时自动使用本机 localStorage（键前缀 <span class="mono">pm_</span>）。</p>
                 <p><b>操作联动：</b>建仓 / 加减仓 / 记分红 / 每日操作均在本页录入，自动联动所有汇总（总览 / 持仓明细 / 清仓结算 / 交易统计 / 现金流）。腾讯文档同步已停用，内嵌数据即初始快照；点「恢复初始数据」可重置。</p>
@@ -1240,8 +1240,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.007';
-const APP_BUILD   = '2026-08-11 10:36';
+const APP_VERSION = '1BK_V68.13.1.008';
+const APP_BUILD   = '2026-08-11 10:46';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4106,7 +4106,6 @@ function showKlineDialog(name, sym){
   load('day');   /* v68.13.9：默认日K（分时图已移除） */
 }
 
-/* 分时图内展示该标的的主力资金流（东财，仅股票）；持仓行已不再展示，集中到分时图 */
 /* 总览 6 张卡片金额隐藏（小眼睛）：每张卡独立开关，掩码 = 首个字符 ***** 尾字符 */
 const ICON_EYE_ON  = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
 const ICON_EYE_OFF = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
