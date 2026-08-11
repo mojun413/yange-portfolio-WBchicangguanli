@@ -339,6 +339,24 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .mf-bar.sell{background:var(--down)}
 .mf-net{font-size:11.5px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
 .mf-net.up{color:var(--up)} .mf-net.down{color:var(--down)}
+/* 1BK_V68.13.1.012 ①：月度复盘面板 */
+.monthly-review{display:flex;flex-direction:column;gap:8px}
+.mr-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px}
+.mr-m{font-weight:700;color:var(--text);min-width:52px}
+.mr-stat{font-variant-numeric:tabular-nums}
+.mr-stat b{font-size:13px}
+.mr-codes{color:var(--muted);font-size:11px;margin-left:auto}
+/* 1BK_V68.13.1.012 ②：每日收盘小结面板 */
+.daily-summary{display:flex;flex-direction:column;gap:6px}
+.ds-head{font-size:12.5px;color:var(--muted);margin-bottom:2px}
+.ds-head b{color:var(--text)}
+.ds-sub{font-size:11px;color:var(--muted);font-weight:600;margin-top:6px}
+.ds-move{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--line-2)}
+.ds-date{color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;min-width:34px}
+.ds-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.ds-watch{font-size:12.5px;padding:4px 10px;border-radius:6px;margin-top:2px}
+.ds-watch.up{background:rgba(229,72,77,.08);color:var(--up);border:1px solid rgba(229,72,77,.25)}
+.ds-watch.down{background:rgba(21,163,74,.08);color:var(--down);border:1px solid rgba(21,163,74,.25)}
 .an-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:1px}
 .an-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .an-metric{background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:8px 10px}
@@ -791,7 +809,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.011</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.012</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1185,7 +1203,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.011 · 2026-08-11 12:13 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.012 · 2026-08-11 12:23 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1245,8 +1263,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.011';
-const APP_BUILD   = '2026-08-11 12:13';
+const APP_VERSION = '1BK_V68.13.1.012';
+const APP_BUILD   = '2026-08-11 12:23';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3135,6 +3153,92 @@ function monthlyFlowHTML(){
   return '<div class="monthly-flow">' + cells + '</div>';
 }
 
+/* ===== 月度复盘面板（1BK_V68.13.1.012 ①）：近 2 个月资金进出 / 做T / 操作标的 Top ===== */
+function monthlyReviewHTML(){
+  /* 按 'YYYY-MM' 聚合：买入额/卖出额/做T笔数/做T收益 */
+  const mon = new Map();
+  const M = k => { if (!mon.has(k)) mon.set(k, { buy:0, sell:0, tN:0, tPnl:0, codes:new Set() }); return mon.get(k); };
+  state.holdings.forEach(h => (h.txs || []).forEach(t => {
+    const d = String(t.date || ''); if (!/^\d{4}-\d{2}/.test(d)) return;
+    const m = M(d.slice(0, 7));
+    const amt = Math.abs(Number(t.amount) || 0);
+    if (t.side === 'buy') m.buy += amt; else m.sell += amt;
+    m.codes.add(h.name || h.code);
+  }));
+  (state.trades || []).forEach(t => {
+    const d = String(t.date || ''); if (!/^\d{4}-\d{2}/.test(d)) return;
+    const m = M(d.slice(0, 7));
+    m.tN++; m.tPnl += calcTrade(t).pnl;
+    m.codes.add(t.name || t.code || '');
+  });
+  if (!mon.size) return '<div class="empty">暂无流水——录入交易后这里按月生成复盘</div>';
+  const keys = [...mon.keys()].sort().slice(-2);   // 近 2 个月
+  const rows = keys.map(k => {
+    const m = mon.get(k);
+    const net = m.buy - m.sell;
+    return '<div class="mr-row"><span class="mr-m">' + k + '</span>' +
+      '<span class="mr-stat">买 <b class="up">' + money(m.buy) + '</b></span>' +
+      '<span class="mr-stat">卖 <b class="down">' + money(m.sell) + '</b></span>' +
+      '<span class="mr-stat">净 <b class="' + (net >= 0 ? 'up' : 'down') + '">' + (net >= 0 ? '+' : '-') + money(Math.abs(net)) + '</b></span>' +
+      '<span class="mr-stat">做T <b class="' + (m.tPnl >= 0 ? 'up' : 'down') + '">' + m.tN + ' 笔 ' + (m.tPnl >= 0 ? '+' : '') + money(m.tPnl) + '</b></span>' +
+      '<span class="mr-codes">' + esc([...m.codes].slice(0, 5).join(' · ')) + (m.codes.size > 5 ? ' 等 ' + m.codes.size + ' 个' : '') + '</span></div>';
+  }).join('');
+  /* 对比：本月 vs 上月 */
+  let cmp = '';
+  if (keys.length === 2){
+    const cur = mon.get(keys[1]), prev = mon.get(keys[0]);
+    const dNet = (cur.buy - cur.sell) - (prev.buy - prev.sell);
+    cmp = '<div class="an-note">本月净投入 <b class="' + (dNet >= 0 ? 'up' : 'down') + '">' + (dNet >= 0 ? '+' : '-') + money(Math.abs(dNet)) + '</b>（较上月' + (dNet >= 0 ? '多投' : '回笼') + '）· 做T收益 ' +
+      (cur.tPnl >= 0 ? '+' : '') + money(cur.tPnl) + '</div>';
+  }
+  return '<div class="monthly-review">' + rows + cmp + '</div>';
+}
+
+/* ===== 每日收盘小结面板（1BK_V68.13.1.012 ②）：最近交易日持仓涨跌 + 近3日变动 + 明日关注 ===== */
+function dailyCloseSummaryHTML(){
+  /* 取最近一个有交易/快照的日期 */
+  const dates = new Set();
+  state.holdings.forEach(h => (h.txs || []).forEach(t => { const d = String(t.date||''); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) dates.add(d); }));
+  (state.trades || []).forEach(t => { const d = String(t.date||''); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) dates.add(d); });
+  if (!dates.size) return '<div class="empty">暂无交易记录——录入后这里生成每日收盘小结</div>';
+  const lastDay = [...dates].sort().pop();
+  const d3 = [...dates].sort().slice(-3);
+  /* 近 3 日交易变动 */
+  const moves = [];
+  state.holdings.forEach(h => (h.txs || []).forEach(t => {
+    if (!d3.includes(String(t.date || ''))) return;
+    moves.push({ d: t.date, name: h.name || h.code, side: t.side, shares: t.shares, price: t.price });
+  }));
+  (state.trades || []).forEach(t => {
+    if (!d3.includes(String(t.date || ''))) return;
+    moves.push({ d: t.date, name: t.name || t.code, side: 'T', shares: t.shares, price: (Number(t.sellPrice) + Number(t.buyPrice)) / 2 });
+  });
+  moves.sort((a, b) => a.d < b.d ? -1 : 1);
+  const moveRows = moves.length ? moves.slice(-12).map(m =>
+    '<div class="ds-move"><span class="ds-date">' + m.d.slice(5) + '</span>' +
+    '<span class="ds-name">' + esc(m.name) + '</span>' +
+    '<span class="' + (m.side === 'buy' ? 'up' : (m.side === 'sell' ? 'down' : 'flat')) + '">' +
+    (m.side === 'buy' ? '加仓' : (m.side === 'sell' ? '减仓' : '做T')) + '</span>' +
+    '<span class="mono">' + m.shares + ' 股 @ ' + price4(m.price) + '</span></div>').join('')
+    : '<div class="empty">近 3 日无交易变动</div>';
+  /* 明日关注：今日涨跌异动（跌>3% 可观察 / 涨>5% 可高抛）+ 做T参考 */
+  const watch = [];
+  state.holdings.forEach(h => {
+    if (h.closed) return;
+    const q = state.quotes[qkey(h)];
+    const pct = q && isFinite(q.pct) ? q.pct : NaN;
+    if (isFinite(pct) && pct <= -3) watch.push({ h, why: '今日 ' + pct.toFixed(1) + '% · 跌出价值，可观察低吸', cls: 'down' });
+    else if (isFinite(pct) && pct >= 5) watch.push({ h, why: '今日 ' + pct.toFixed(1) + '% · 涨出价值，可考虑高抛', cls: 'up' });
+  });
+  const watchRows = watch.length ? watch.map(w =>
+    '<div class="ds-watch ' + w.cls + '">' + esc(w.h.name || w.h.code) + ' · ' + w.why + '</div>').join('')
+    : '<div class="empty">今日持仓无 >3% 异动（' + lastDay + '）</div>';
+  return '<div class="daily-summary">' +
+    '<div class="ds-head">最近交易日 <b>' + lastDay + '</b> · 近 3 日变动 ' + moves.length + ' 笔</div>' +
+    '<div class="ds-sub">持仓变动（近 3 日）</div>' + moveRows +
+    '<div class="ds-sub">明日关注（基于今日行情）</div>' + watchRows + '</div>';
+}
+
 /* ---------- 渲染：分析中心 ---------- */
 function renderAnalysis(){
   const box = document.getElementById('analysisBody'); if (!box) return;
@@ -3317,6 +3421,12 @@ function renderAnalysis(){
     '<button class="btn-sm" id="btnRefreshIndCon" title="重新识别全部持仓的申万行业 + 概念标签（行业=东财数据中心申万一级，概念=离线概念表+名称推断）">刷新行业/概念</button>' +
     '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 仅统计当前持仓标的 · 行业取自申万一级行业（东财数据中心，v68.13.8）</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>月度复盘</div>' +
+    '<div class="panel-sub">近 2 个月资金进出 / 做T收益 / 操作标的（1BK_V68.13.1.012）</div></div>' +
+    '<div class="panel-body">' + monthlyReviewHTML() + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>每日收盘小结</div>' +
+    '<div class="panel-sub">最近交易日持仓变动 + 明日关注（跌>3% 可观察 · 涨>5% 可高抛）</div></div>' +
+    '<div class="panel-body">' + dailyCloseSummaryHTML() + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>持仓市值 Top10</div>' +
     '<div class="panel-sub">按当前持仓市值排序（含基金/ETF）</div></div>' +
     '<div class="panel-body">' + top10HTML() + '</div></div>' +
