@@ -833,7 +833,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.016</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.017</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1231,7 +1231,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.016 · 2026-08-11 14:05 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.017 · 2026-08-11 14:23 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1291,8 +1291,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.016';
-const APP_BUILD   = '2026-08-11 14:05';
+const APP_VERSION = '1BK_V68.13.1.017';
+const APP_BUILD   = '2026-08-11 14:23';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4167,8 +4167,9 @@ function fmtVol(v){
 }
 /* 同花顺风格 K 线 SVG：周期切换 + MA5/10/20/60 多均线 + 成交量副图 + 十字光标读数 */
 function klineSVG(rows, name, period){
-  const W = 720, H = 430, padL = 56, padR = 16, padT = 30, padB = 34;
-  const volArea = 66, volGap = 12;
+  /* 1BK_V68.13.1.017：H 430→540，新增 MACD 副图（92px），VOL 加 MA5/10 量均线，悬浮面板加 MACD */
+  const W = 720, H = 540, padL = 56, padR = 16, padT = 30, padB = 34;
+  const volArea = 66, volGap = 12, macdArea = 92, macdGap = 10;
   const n = rows.length;
   if (!n) return '';
   const up = '#e5484d', down = '#15a34a', flat = '#8a93a6';
@@ -4179,8 +4180,10 @@ function klineSVG(rows, name, period){
   const volMax = Math.max.apply(null, rows.map(r => r.vol)) || 1;
   const cw = (W - padL - padR) / n;
   const bw = Math.max(1.5, Math.min(9, cw * 0.7));
-  const plotH = H - padT - padB - volArea - volGap;
+  const plotH = H - padT - padB - volArea - volGap - macdArea - macdGap;
   const plotB = padT + plotH;
+  const volTop = plotB + volGap;                 /* 成交量副图顶部 */
+  const macdTop = volTop + volArea + macdGap;    /* MACD 副图顶部 */
   const yOf = v => padT + (hi - v) / range * plotH;
   const xOf = i => padL + i * cw + cw / 2;
   const col = r => (r.close >= r.open ? (r.close === r.open ? flat : up) : down);
@@ -4194,6 +4197,34 @@ function klineSVG(rows, name, period){
   };
   const maLast = k => { if (n < k) return NaN; let s = 0; for (let j = n - k; j < n; j++) s += rows[j].close; return s / k; };
   const ma5 = maLine(5), ma10 = maLine(10), ma20 = maLine(20), ma60 = maLine(60);
+  /* VOL 量均线（MA5/MA10 成交量，手） */
+  const volMA = (k) => {
+    const pts = [];
+    for (let i = k - 1; i < n; i++){
+      let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].vol;
+      const v = s / k;
+      pts.push([xOf(i), volTop + 4 + (1 - v / volMax) * (volArea - 8)]);
+    }
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const lastV = n >= k ? rows.slice(n - k).reduce((a, r) => a + r.vol, 0) / k : NaN;
+    return { d, lastV };
+  };
+  const vma5 = volMA(5), vma10 = volMA(10);
+  /* MACD（12/26/9，基于 close） */
+  const ema = (arr, k) => {
+    const out = []; let v = arr[0];
+    arr.forEach((x, i) => { v = i ? v + (x - v) * 2 / (k + 1) : x; out.push(v); });
+    return out;
+  };
+  const closes = rows.map(r => r.close);
+  const e12 = ema(closes, 12), e26 = ema(closes, 26);
+  const dif = closes.map((_, i) => e12[i] - e26[i]);
+  const dea = ema(dif, 9);
+  const macd = dif.map((d, i) => (d - dea[i]) * 2);
+  let mHi = -Infinity, mLo = Infinity;
+  dif.forEach((d, i) => { const mx = Math.max(d, dea[i], macd[i]), mn = Math.min(d, dea[i], macd[i]); mHi = Math.max(mHi, mx); mLo = Math.min(mLo, mn); });
+  const mRange = (mHi - mLo) || 1;
+  const mY = v => macdTop + 8 + (mHi - v) / mRange * (macdArea - 16);
   let gridY = '', yLbl = '';
   for (let i = 0; i <= 4; i++){
     const v = hi - range * i / 4;
@@ -4201,9 +4232,16 @@ function klineSVG(rows, name, period){
     gridY += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#eef0f5" stroke-width="1"/>';
     yLbl += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + v.toFixed(2) + '</text>';
   }
-  gridY += '<line x1="' + padL + '" y1="' + (plotB + volGap) + '" x2="' + (W - padR) + '" y2="' + (plotB + volGap) + '" stroke="#eef0f5" stroke-width="1"/>';
-  yLbl += '<text x="' + (padL - 6) + '" y="' + (plotB + volGap + 3.5) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + fmtVol(volMax) + '</text>';
-  let cand = '', vol = '';
+  gridY += '<line x1="' + padL + '" y1="' + (volTop - 2) + '" x2="' + (W - padR) + '" y2="' + (volTop - 2) + '" stroke="#eef0f5" stroke-width="1"/>';
+  gridY += '<line x1="' + padL + '" y1="' + (macdTop - 2) + '" x2="' + (W - padR) + '" y2="' + (macdTop - 2) + '" stroke="#eef0f5" stroke-width="1"/>';
+  yLbl += '<text x="' + (padL - 6) + '" y="' + (volTop + 3.5) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + fmtVol(volMax) + '</text>';
+  yLbl += '<text x="' + (padL - 6) + '" y="' + (macdTop + 3.5) + '" text-anchor="end" font-size="10" fill="#9aa3b5">MACD</text>';
+  /* MACD 副图标签（右） */
+  const macdLbl =
+    '<text x="' + (W - padR) + '" y="' + (macdTop + 10) + '" text-anchor="end" font-size="10" fill="#e5484d">DIF ' + dif[n-1].toFixed(2) + '</text>' +
+    '<text x="' + (W - padR) + '" y="' + (macdTop + 23) + '" text-anchor="end" font-size="10" fill="#f59e0b">DEA ' + dea[n-1].toFixed(2) + '</text>' +
+    '<text x="' + (W - padR) + '" y="' + (macdTop + 36) + '" text-anchor="end" font-size="10" fill="#8b5cf6">MACD ' + macd[n-1].toFixed(2) + '</text>';
+  let cand = '', vol = '', macdBars = '';
   for (let i = 0; i < n; i++){
     const r = rows[i], x = xOf(i);
     const y1 = yOf(r.high), y2 = yOf(r.low), yo = yOf(r.open), yc = yOf(r.close);
@@ -4212,8 +4250,15 @@ function klineSVG(rows, name, period){
     const top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yo - yc));
     cand += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + hgt.toFixed(1) + '" fill="' + c + '" rx="0.6"/>';
     const vh = Math.max(1, r.vol / volMax * (volArea - 8));
-    vol += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + (H - padB - vh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + c + '" opacity="0.6"/>';
+    vol += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + (volTop + 4 + (volArea - 8) - vh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + c + '" opacity="0.6"/>';
+    /* MACD 柱：红正绿负（沿用 A股红涨绿跌） */
+    const mv = macd[i], zeroY = mY(0);
+    const my = mY(mv);
+    const mh = Math.max(0.8, Math.abs(zeroY - my));
+    macdBars += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + Math.min(zeroY, my).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + mh.toFixed(1) + '" fill="' + (mv >= 0 ? up : down) + '" opacity="' + (Math.abs(mv) / mRange > 0.05 ? 0.85 : 0.45) + '"/>';
   }
+  /* MACD 零轴 */
+  macdBars += '<line x1="' + padL + '" y1="' + mY(0).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + mY(0).toFixed(1) + '" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>';
   let xLbl = '';
   [0, Math.floor(n / 4), Math.floor(n / 2), Math.floor(3 * n / 4), n - 1].forEach(i => {
     const anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
@@ -4229,7 +4274,9 @@ function klineSVG(rows, name, period){
     const v = maLast(k);
     return '<text x="' + (W - padR) + '" y="' + (padT + 10 + [0, 13, 26, 39][[5,10,20,60].indexOf(k)]) + '" text-anchor="end" font-size="10" fill="' + maCols[k] + '">MA' + k + (isFinite(v) ? ':' + v.toFixed(2) : '') + '</text>';
   };
-  const legend = leg(5) + leg(10) + leg(20) + leg(60);
+  const legend = leg(5) + leg(10) + leg(20) + leg(60) +
+    '<text x="' + (W - padR) + '" y="' + (volTop + 12) + '" text-anchor="end" font-size="9.5" fill="#607d8b">VOL5 ' + fmtVol(vma5.lastV) + '</text>' +
+    '<text x="' + (W - padR) + '" y="' + (volTop + 24) + '" text-anchor="end" font-size="9.5" fill="#f59e0b">VOL10 ' + fmtVol(vma10.lastV) + '</text>';
   const cross =
     '<g id="klCross" style="display:none">' +
       '<line id="klVL" stroke="rgba(30,41,59,.45)" stroke-width="1" stroke-dasharray="3,3"/>' +
@@ -4238,18 +4285,25 @@ function klineSVG(rows, name, period){
     '</g>' +
     '<rect id="klOverlay" x="' + padL + '" y="' + padT + '" width="' + (W - padL - padR) + '" height="' + (H - padT - padB) + '" fill="transparent" style="cursor:crosshair"/>';
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;display:block">' +
-      title + legend + gridY + yLbl +
+      title + legend + gridY + yLbl + macdLbl +
       (ma5.d ? '<path d="' + ma5.d + '" fill="none" stroke="' + maCols[5] + '" stroke-width="1.3"/>' : '') +
       (ma10.d ? '<path d="' + ma10.d + '" fill="none" stroke="' + maCols[10] + '" stroke-width="1.2"/>' : '') +
       (ma20.d ? '<path d="' + ma20.d + '" fill="none" stroke="' + maCols[20] + '" stroke-width="1.2"/>' : '') +
       (ma60.d ? '<path d="' + ma60.d + '" fill="none" stroke="' + maCols[60] + '" stroke-width="1.2"/>' : '') +
-      cand + vol + xLbl + cross +
+      (vma5.d ? '<path d="' + vma5.d + '" fill="none" stroke="#607d8b" stroke-width="1.1"/>' : '') +
+      (vma10.d ? '<path d="' + vma10.d + '" fill="none" stroke="#f59e0b" stroke-width="1.1"/>' : '') +
+      '<path d="' + dif.map((d, i) => (i ? 'L' : 'M') + xOf(i).toFixed(1) + ',' + mY(d).toFixed(1)).join(' ') + '" fill="none" stroke="#e5484d" stroke-width="1.2"/>' +
+      '<path d="' + dea.map((d, i) => (i ? 'L' : 'M') + xOf(i).toFixed(1) + ',' + mY(d).toFixed(1)).join(' ') + '" fill="none" stroke="#f59e0b" stroke-width="1.1"/>' +
+      cand + vol + macdBars + xLbl + cross +
     '</svg>';
 }
+
 /* 十字光标交互：绑定在 SVG 上（同花顺式读数） */
 function bindKlineCross(svg, rows){
   if (!svg || !rows.length) return;
-  const W = 720, padL = 56, padR = 16, padT = 30, padB = 34;
+  /* 1BK_V68.13.1.017：H 430→540（MACD 副图），竖线贯穿全图，悬浮面板加 MACD */
+  const W = 720, H = 540, padL = 56, padR = 16, padT = 30, padB = 34;
+  const volArea = 66, volGap = 12, macdArea = 92, macdGap = 10;
   const n = rows.length, cw = (W - padL - padR) / n;
   const cross = svg.querySelector('#klCross'), vl = svg.querySelector('#klVL'),
     hl = svg.querySelector('#klHL'), dot = svg.querySelector('#klDot');
@@ -4258,7 +4312,7 @@ function bindKlineCross(svg, rows){
   info.id = 'klInfo';
   info.setAttribute('style', 'display:none');
   const infoRect = document.createElementNS(SVGNS, 'rect');
-  infoRect.setAttribute('width', '210'); infoRect.setAttribute('height', '78');
+  infoRect.setAttribute('width', '210'); infoRect.setAttribute('height', '94');
   infoRect.setAttribute('rx', '6'); infoRect.setAttribute('fill', 'rgba(255,255,255,.96)');
   infoRect.setAttribute('stroke', '#e2e8f0');
   info.appendChild(infoRect);
@@ -4272,18 +4326,18 @@ function bindKlineCross(svg, rows){
     const rect = svg.getBoundingClientRect();
     if (!rect.width) return;
     const x = (e.clientX - rect.left) / rect.width * W;
-    const y = (e.clientY - rect.top) / rect.height * 430;
+    const y = (e.clientY - rect.top) / rect.height * H;
     let i = Math.round((x - padL) / cw - 0.5);
     i = Math.max(0, Math.min(n - 1, i));
     const r = rows[i], cx = padL + i * cw + cw / 2;
     if (cross) cross.style.display = '';
     if (info) info.style.display = '';
-    const plotB = 430 - padB - 66 - 12;
-    if (vl){ vl.setAttribute('x1', cx.toFixed(1)); vl.setAttribute('x2', cx.toFixed(1)); vl.setAttribute('y1', padT); vl.setAttribute('y2', 430 - padB); }
-    if (hl){ hl.setAttribute('x1', padL); hl.setAttribute('x2', 720 - padR); hl.setAttribute('y1', y.toFixed(1)); hl.setAttribute('y2', y.toFixed(1)); }
+    const plotB = padT + (H - padT - padB - volArea - volGap - macdArea - macdGap);
+    if (vl){ vl.setAttribute('x1', cx.toFixed(1)); vl.setAttribute('x2', cx.toFixed(1)); vl.setAttribute('y1', padT); vl.setAttribute('y2', H - padB); }
+    if (hl){ hl.setAttribute('x1', padL); hl.setAttribute('x2', W - padR); hl.setAttribute('y1', y.toFixed(1)); hl.setAttribute('y2', y.toFixed(1)); }
     if (dot){ dot.setAttribute('cx', cx.toFixed(1)); dot.setAttribute('cy', y.toFixed(1)); }
     let ix = cx + 12, iy = Math.max(padT, Math.min(plotB - 66, y - 30));
-    if (ix + 210 > 720 - 4) ix = cx - 222;
+    if (ix + 210 > W - 4) ix = cx - 222;
     if (info) info.setAttribute('transform', 'translate(' + ix + ',' + iy + ')');
     if (infoT){
       while (infoT.firstChild) infoT.removeChild(infoT.firstChild);
@@ -4291,6 +4345,13 @@ function bindKlineCross(svg, rows){
       const d = prev > 0 ? (r.close - prev) / prev * 100 : 0;
       const dC = d > 0 ? 'var(--up)' : (d < 0 ? 'var(--down)' : 'var(--flat)');
       const maV = k => { if (i + 1 < k) return '—'; let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].close; return (s / k).toFixed(2); };
+      /* MACD 计算（与 klineSVG 同口径：12/26/9） */
+      const ema = (arr, k) => { const out = []; let v = arr[0]; arr.forEach((x, j) => { v = j ? v + (x - v) * 2 / (k + 1) : x; out.push(v); }); return out; };
+      const closes = rows.map(r => r.close);
+      const e12 = ema(closes, 12), e26 = ema(closes, 26);
+      const difArr = closes.map((_, j) => e12[j] - e26[j]);
+      const deaArr = ema(difArr, 9);
+      const difV = difArr[i].toFixed(2), deaV = deaArr[i].toFixed(2), macdV = ((difArr[i] - deaArr[i]) * 2).toFixed(2);
       const mk = (txt, x, fill, dy, wt) => {
         const t = document.createElementNS(SVGNS, 'tspan');
         t.setAttribute('x', x); if (dy !== null) t.setAttribute('dy', dy);
@@ -4305,10 +4366,12 @@ function bindKlineCross(svg, rows){
       infoT.appendChild(mk('收 ' + r.close.toFixed(2), null, null, null, 700));
       infoT.appendChild(mk('量 ' + fmtVol(r.vol) + '  MA5 ' + maV(5) + '  MA10 ' + maV(10), 8, null, 14, null));
       infoT.appendChild(mk('MA20 ' + maV(20) + '  MA60 ' + maV(60), 8, null, 14, null));
+      infoT.appendChild(mk('DIF ' + difV + '  DEA ' + deaV + '  MACD ' + macdV, 8, null, 14, null));
     }
   });
   svg.addEventListener('mouseleave', hide);
 }
+
 /* 打开 K 线弹窗（总览实时行情：持仓索引 → 与 renderLive 同口径列表） */
 function openKline(idx){
   const list = liveSortedList();
