@@ -833,7 +833,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.017</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.018</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1231,7 +1231,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.017 · 2026-08-11 14:23 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.018 · 2026-08-12 00:04 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1239,11 +1239,11 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnSettings2">打开设置</button></div></div>
             <div class="setting-row"><div><div class="t">布局</div><div class="d">底部导航常驻（总览/盯盘/做T/统计/清仓/分析/仓位/心法/设置）· 手机端横向滑动</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><span class="dim" style="font-size:12px">方案 B</span></div></div>
-            <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">同步全部数据：持仓(含流水/满仓金额/手动类型)、仓位目标金额、盯盘自选、做T台账、每日操作、设置、清仓结算、资产快照。<b>上传云端仅 2 个入口</b>：每日 15:05 收盘后自动覆盖 + 手动「本机覆盖云端」；其他设备打开/刷新只拉取云端，绝不自动上传（v68.13.1.004）</div></div>
+            <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">同步全部数据：持仓(含流水/满仓金额/手动类型)、仓位目标金额、盯盘自选、做T台账、每日操作、设置、清仓结算、资产快照。<b>全手动同步（v68.14）</b>：上传 = 点「本机覆盖云端」；拉取 = 点「云端覆盖本机」。打开/刷新页面<b>绝不自动上传、也不自动拉取</b>，任何自动云同步均已取消</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
                 <button class="btn-sm" id="btnCloudCfg" title="填写 Supabase 项目的 URL 与 anon key">云同步设置</button>
                 <button class="btn-sm" id="btnDevNames" title="给各设备起名（如我的平板），跨设备共享">设备命名</button>
-                <button class="btn-sm" id="btnCloudSync" title="强制以云端为准覆盖本机（校验云端时间戳有效后执行；每日 15:05 自动同步仍会覆盖云端）">云端覆盖本机</button>
+                <button class="btn-sm" id="btnCloudSync" title="全手动同步：强制以云端为准覆盖本机（校验云端时间戳有效后执行）">云端覆盖本机</button>
                 <button class="btn-primary btn-sm" id="btnCloudForce" title="日常手动同步方式：以本机数据为准，强制覆盖云端">本机覆盖云端</button>
                 <button class="btn-sm" id="btnCloudHist" title="云端保留最近 5 份历史快照，可查看并回滚到任意一份">云端历史</button>
                 <button class="btn-sm" id="btnCloudSql" title="复制建表 SQL，在 Supabase SQL Editor 里执行一次">建表 SQL</button>
@@ -1291,8 +1291,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.017';
-const APP_BUILD   = '2026-08-11 14:23';
+const APP_VERSION = '1BK_V68.13.1.018';
+const APP_BUILD   = '2026-08-12 00:04';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1393,7 +1393,7 @@ function initNav(){
     if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl){ toast('未配置云端——先点「云同步设置」', 'warn'); return; }
     if (!cloud.client){ try { await cloudInit(); } catch(e){} }
     const rows = await fetchCloudHistory();
-    if (!rows.length){ toast('暂无历史快照——每次「本机覆盖云端/自动同步」后会保留一份', 'info'); return; }
+    if (!rows.length){ toast('暂无历史快照——每次「本机覆盖云端」后会保留一份', 'info'); return; }
     const items = rows.map(r => {
       const d = r.data, t = Number(d.savedAt) || 0;
       const hc = (d.holdings || []).length, tt = (d.trades || []).length;
@@ -7567,7 +7567,7 @@ function init(){
     if (state.settings.autoRefresh) refreshQuotes(true);
     tickQuotes();              /* 回到页面立即补一拍行情 */
   });
-  /* 云同步（v53.1）：每日 15:05 自动同步一次；其余时间只手动「本机覆盖云端」 */
+  /* 云同步（1BK_V68.14.0 ⑤ 全手动）：不再安排每日自动同步，函数保留但为 no-op（防历史调用残留） */
   try { setupCloudDailySync(); } catch(e){}
   /* 1BK_V68.14.0 ①：本地存储容量预警（设置页提示条） */
   try { warnStorageCapacity(); } catch(e){}
@@ -7608,7 +7608,7 @@ function init(){
       const meta = YANGEDATA_RAW.meta || {};
       toast('本浏览器暂无数据，已自动载入初始快照（' + r.importedCodes + ' 个标的 · ' +
         (YANGEDATA_RAW.t || []).length + ' 笔交易' + (meta.syncedAt ? ' · ' + meta.syncedAt : '') + '）。' +
-        '若已开启云同步，将自动拉取云端最新数据覆盖本快照', 'info');
+        '云同步为全手动——如需取回云端数据请到「设置」点「云端覆盖本机」', 'info');
     } catch(e){
       setTimeout(() => toast('暂无数据——点「设置」页的「恢复初始数据」载入初始持仓，或直接在本页建仓录入', 'info'), 800);
     }
@@ -8116,7 +8116,7 @@ function knownDevices(){
   return Object.keys(seen).map(id => ({ id, name: seen[id] }));
 }
 /* 设置页「云端同步」里保存的 URL / Key 可覆盖内置默认值（localStorage 优先）
-   详细设置：pushDebounceMs（防抖推送间隔）、realtime（实时订阅开关） */
+   详细设置：realtime（其他设备改动提示开关）；pushDebounceMs 已无用途（自动推送取消，仅兼容旧存储） */
 try {
   const _u = localStorage.getItem(K('cloudUrl'));
   const _k = localStorage.getItem(K('cloudKey'));
@@ -8194,7 +8194,7 @@ function renderCloudStatus(){
     badge = '☁️ 云同步已连接' + (st.lastSyncAt ? ' · ' + fmtHM(st.lastSyncAt) : '') +
             (st.pending ? ' · 待同步 ' + st.pending : '');
     color = st.pending ? 'var(--warn)' : 'var(--accent)';
-    tip = '同步策略：每日 ' + (CONFIG.cloudDailySyncAt || '15:05') + ' 自动同步一次；其余时间手动「本机覆盖云端」。\n' +
+    tip = '同步策略：全手动（v68.14）——上传点「本机覆盖云端」，拉取点「云端覆盖本机」，无任何自动同步。\n' +
       (st.pending ? '本机有 ' + st.pending + ' 项改动待同步。\n' : '') +
       '最近同步：' + (st.lastSyncAt ? fmtDT(st.lastSyncAt) : '—') +
       '\n云端数据：' + (remoteT ? fmtDT(remoteT) : '—') + '（' + deviceLabel(st.lastDevice) + '）' +
@@ -8225,9 +8225,8 @@ function renderCloudStatus(){
         ' ｜ 本机数据：<b>' + (localT ? fmtDT(localT) : '—') + '</b>' +
         (diff ? ' ｜ ' + diff : '') +
         /* v53.1：同步策略说明 + 待同步改动提示 */
-        '<br>🕒 策略：每日 <b>' + (CONFIG.cloudDailySyncAt || '15:05') + '</b> 自动同步一次' +
-        (st.dailyAt ? '（今日已于 ' + fmtHM(st.dailyAt) + ' 完成）' : '') +
-        '，其余时间请手动点「<b>本机覆盖云端</b>」' +
+        '<br>🕒 策略：<b>全手动同步</b>（v68.14 起取消一切自动云同步）' +
+        '，上传点「<b>本机覆盖云端</b>」，拉取点「<b>云端覆盖本机</b>」' +
         (st.pending ? '<br><span style="color:var(--warn)">✎ 本机有 <b>' + st.pending + '</b> 项改动待同步（自 ' + fmtHM(st.pendingSince) + '）</span>' : '') +
         (st.remoteNewer ? '<br><span style="color:var(--warn)">↓ 云端有其他设备的更新，未自动覆盖本机；确认以云端为准时点「云端覆盖本机」拉取</span>' : '');
     }
@@ -8261,11 +8260,11 @@ function loadSupabaseJS(){
   });
 }
 
-/* ===== 本地持久化钩子（v53.1 策略变更）=====
-   旧行为：改动后防抖 600ms 自动推送云端。
-   新行为：**不再自动推送**，只记录保存时间并累计「待同步」计数；真正的上云时机有两个——
-     ① 每日 CONFIG.cloudDailySyncAt（默认 15:05，A股收盘后）自动同步一次；
-     ② 其余任意时间由用户手动点「本机覆盖云端」（本机为准）或「云端覆盖本机」（云端为准）。
+/* ===== 本地持久化钩子（1BK_V68.14.0 ⑤ 全手动云同步）=====
+   旧行为：改动后防抖 600ms 自动推送云端；v53.1 起保留每日 15:05 自动同步一次。
+   现行为（用户明确要求）：**一切自动云同步取消，全手动**——
+     上传 = 手动点「本机覆盖云端」；拉取 = 手动点「云端覆盖本机」。
+     本钩子只记录保存时间并累计「待同步」计数（UI 提醒用），绝不自动推送上云。
    suppressPush=true（应用云端快照 / 载入初始种子期间）→ 不盖章、不计数，
    避免「刚载入的数据」被误判为本机新改动。 */
 /* 1BK_V68.13.6：本浏览器是否处于「种子基线」态（localStorage 持久化标记 + 内存标记）。
@@ -8308,52 +8307,28 @@ function scheduleFastCloudPush(){
 /* 清空「待同步」计数（推送成功 / 应用云端快照后调用） */
 function clearCloudPending(){ cloud.state.pending = 0; cloud.state.pendingSince = 0; cloud.state.remoteNewer = false; }
 
-/* ===== 每日定时云同步（v53.1）=====
-   每日 CONFIG.cloudDailySyncAt（默认 15:05，收盘后）自动同步一次；
-   若该时刻页面没打开而错过，下次打开页面（且已过该时刻）自动补做一次。
-   同步方式 = 智能同步 cloudPull()：本机较新 → 推上云端；云端较新 → 拉下来应用。 */
+/* ===== 每日定时云同步已停用（1BK_V68.14.0 ⑤）=====
+   曾每日 CONFIG.cloudDailySyncAt（默认 15:05）自动上传一次，错过会补做——正是
+   「设备打开页面即自动覆盖云端」的根因。用户明确要求全部手动，定时器已取消
+   （setupCloudDailySync 为 no-op），以下辅助函数仅保留定义兼容引用。 */
 function dailySyncDate(){ try { return localStorage.getItem(K('cloudDailyOn')) || ''; } catch(e){ return ''; } }
 function setDailySyncDate(v){ try { localStorage.setItem(K('cloudDailyOn'), v); } catch(e){} }
 async function cloudDailySync(reason){
-  if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl) return false;
-  const today = ymdOf(new Date());
-  if (dailySyncDate() === today) return false;         /* 今天已同步过 */
-  setDailySyncDate(today);                             /* 先占位，避免并发重复触发 */
-  try {
-    takeDailySnapshot();                            /* 先落当日净值快照（含最新收盘价） */
-    if (!cloud.client) await cloudInit();
-    await cloudPush();                              /* 1BK_V68.13.1.004：收盘后自动覆盖云端（上传唯一自动入口，直接以本机为准覆盖，不再较新者胜） */
-    cloud.state.dailyAt = Date.now();
-    cloud.state.lastSyncAt = Date.now();
-    try { localStorage.setItem(K('cloudLastSyncAt'), String(cloud.state.lastSyncAt)); } catch(e){}   /* 1BK_V68.14.0 ④：持久化上次成功同步时间 */
-    clearCloudPending();
-    renderCloudStatus();
-    toast('每日定时云同步完成（' + (CONFIG.cloudDailySyncAt || '15:05') +
-          (reason === 'catchup' ? ' · 错过后补做' : '') + '）', 'ok');
-    return true;
-  } catch(e){
-    setDailySyncDate('');                              /* 失败释放占位，下一次检查重试 */
-    console.warn('每日定时云同步失败', e);
-    return false;
-  }
+  /* 1BK_V68.14.0 ⑤（全手动云同步）：每日定时自动上传已彻底取消。
+     用户明确要求——云同步全部手动：本机修改后手动「本机覆盖云端」上传，
+     其他设备数据手动「云端覆盖本机」拉取。任何自动 cloudPush 一律禁止。
+     本函数保留占位（isSeedBase / dailySyncDate 等仍被引用），但永不自动执行上传。 */
+  return false;
 }
 function setupCloudDailySync(){
+  /* 1BK_V68.14.0 ⑤（全手动云同步）：不再安排任何定时器/补检。
+     此前逻辑：打开页面 4 秒后补检 + 每 30 秒轮询，已过 15:05 且本机从未成功同步过
+     （cloudLastSyncAt 为空）的设备一打开就会自动 cloudPush 覆盖云端——正是
+     「B 设备打开链接自动上传、覆盖 A 设备刚改的自选」的根因。现已彻底停用：
+     云端上传/拉取只保留两个手动入口（本机覆盖云端 / 云端覆盖本机）。 */
   clearInterval(cloud.dailyTimer); cloud.dailyTimer = null;
-  const at = hm2min(CONFIG.cloudDailySyncAt, 905);
-  /* 1BK_V68.14.0 ④：上次成功同步时间戳（持久化，防跨时区/改系统时间漏跑） */
-  const lastSync = () => { try { return +localStorage.getItem(K('cloudLastSyncAt')) || 0; } catch(e){ return 0; } };
-  const check = () => {
-    if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl) return;
-    const d = new Date();
-    if (d.getHours() * 60 + d.getMinutes() < at) return;
-    if (dailySyncDate() === ymdOf(d)) return;
-    /* 距上次成功同步超过 26h 且已过 15:05 → 强制补偿（跨天/跨时区/改系统时间后仍会补做） */
-    const since = Date.now() - lastSync();
-    if (lastSync() > 0 && since < 26 * 3600 * 1000) return;
-    cloudDailySync((d.getHours() * 60 + d.getMinutes()) > at + 2 ? 'catchup' : 'ontime');
-  };
-  cloud.dailyTimer = setInterval(check, 30000);        /* 30 秒粒度，够准且不耗资源 */
-  setTimeout(check, 4000);                             /* 打开页面时补检（覆盖错过 15:05 的场景） */
+  clearTimeout(cloud.dailyCatchupTimer); cloud.dailyCatchupTimer = null;
+  return;
 }
 
 /* 全量快照推送到云端（单行 id=1，upsert 覆盖）
@@ -8459,15 +8434,16 @@ function applyCloudSnapshot(snap){
   return true;
 }
 
-/* 启动时拉取云端：云端无数据 → 推本地；本地更新 → 覆盖云端；云端更新 → 应用云端（savedAt 新者胜） */
+/* 启动时拉取云端（1BK_V68.14.0 ⑤ 全手动语义）：**只读状态，绝不写云端、也绝不自动覆盖本机**。
+   仅读取云端行的时间戳/来源设备用于状态展示；数据拉取全部交给手动入口「云端覆盖本机」。
+   云端较新 → 置 remoteNewer 提示（不自动应用）；本地较新 → 提示手动「本机覆盖云端」。 */
 async function cloudPull(){
   if (!cloud.client) return;
   try {
     const { data, error } = await cloud.client.from(cloud.cfg.table).select('*').eq('id', 1).maybeSingle();
     if (error) throw error;
     if (!data || !data.data){
-      /* 1BK_V68.13.1.004：云端空**也不自动上传**——上传只有 2 个入口（收盘后自动 / 手动本机覆盖云端）。
-         首次上云请手动点「本机覆盖云端」。种子基线在此清除（本机即真实数据源）。 */
+      /* 云端空 → 不自动上传（上传只有手动入口「本机覆盖云端」）。种子基线在此清除（本机即真实数据源）。 */
       clearSeedBase();
       cloud.state.offline = false;
       cloud.state.errMsg = '';
@@ -8476,13 +8452,14 @@ async function cloudPull(){
       return;
     }
     const remote = data.data;
-    /* 1BK_V68.13.6：种子基线（本浏览器只有内嵌种子，无真实用户数据）→ 云端优先。
-       无论本地时间戳如何（行业识别/快照可能被动写过），一律无条件应用云端，绝不推送；
-       应用成功后才退出基线态（含持久化标记，刷新/再次打开不再误判）。 */
+    /* 1BK_V68.13.6：种子基线（本浏览器只有内嵌种子，无真实用户数据）→ 提示手动拉取云端。
+       全手动策略下不再自动应用云端；用户点「云端覆盖本机」后退出基线态。 */
     if (isSeedBase()){
-      const ok = applyCloudSnapshot(remote);
-      clearSeedBase();
-      if (ok){ toast('已从云端加载最新数据（首次打开 · 云端优先）', 'ok'); renderCloudStatus(); }
+      clearSeedBase();   /* 不再因种子态自动应用云端；数据以用户手动拉取/录入为准 */
+      cloud.state.offline = false;
+      cloud.state.errMsg = '';
+      toast('本机为初始快照基线——如需取回云端最新数据，请手动点「云端覆盖本机」', 'info');
+      renderCloudStatus();
       return;
     }
     /* 记录云端数据时间戳（updated_at 服务器时间 / savedAt 写入方时间 / 来源设备） */
@@ -8490,17 +8467,17 @@ async function cloudPull(){
     cloud.state.remoteSavedAt = remote.savedAt || 0;
     cloud.state.lastDevice = data.device_id || '';
     cloud.state.localAt = lastLocalSaveAt();
-    /* 1BK_V68.13.1.004：**只拉不推**——打开/刷新页面绝不自动上传云端。
-       上传云端仅保留两个入口：① 每日收盘后自动覆盖（cloudDailySync → cloudPush）；
-       ② 手动「本机覆盖云端」（btnCloudForce → cloudPush）。
-       这里若云端较新 → 应用云端；本地较新 → 保留本地（等手动上传），绝不 cloudPush。 */
+    /* 全手动：只提示对比结果，不自动应用云端、不自动上传本地 */
     const localFresh = (cloud.lastSavedAt || lastLocalSaveAt()) > (remote.savedAt || 0);
-    if (!localFresh){
-      applyCloudSnapshot(remote);               // 云端更新 → 应用云端
-      toast('已从云端加载最新数据', 'ok');
+    if (localFresh){
+      cloud.state.remoteNewer = false;
+      toast('本机数据较新——如要同步到云端，请手动点「本机覆盖云端」', 'info');
+    } else {
+      cloud.state.remoteNewer = true;
+      toast('云端有更新（' + deviceLabel(data.device_id || '') + ' ' + fmtAgo(remote.savedAt || 0) + '）——未自动覆盖本机，确认以云端为准时点「云端覆盖本机」', 'warn');
     }
     renderCloudStatus();
-  } catch(e){ console.warn('云端拉取失败', e); setCloudStatus('云同步离线（自动重试）', 'var(--warn)'); }
+  } catch(e){ console.warn('云端状态拉取失败', e); setCloudStatus('云同步离线（自动重试）', 'var(--warn)'); }
 }
 /* 1BK_V68.13.4：手动「云端覆盖本机」= 强制以云端为准覆盖本机（前提云端时间戳无误）。
    与 cloudPull()（纯拉取）不同：不做本地/云端新旧比较，只要云端快照时间戳有效就无条件应用，
@@ -8740,25 +8717,20 @@ async function openCloudConfig(){
     '<div>📅 本机数据：<b>' + (localT ? fmtDT(localT) : '—') + '</b>' + (localT ? '（' + fmtAgo(localT) + '）' : '') + '</div>' +
     '<div>📅 云端数据：<b>' + (remoteT ? fmtDT(remoteT) : '—') + '</b>' +
       (rs ? '（' + fmtAgo(rs) + '，来源 ' + deviceLabel(st.lastDevice) + '）' : (st.everTried ? '' : '（尚未拉取）')) + '</div>' +
-    (localT && rs ? '<div>数据对比：' + (localT > rs ? '<b style="color:var(--accent)">本机较新</b> → 下次同步会覆盖云端' : (rs > localT ? '<b style="color:var(--warn)">云端较新</b> → 打开时会加载云端' : '两边一致')) + '</div>' : '') +
+    (localT && rs ? '<div>数据对比：' + (localT > rs ? '<b style="color:var(--accent)">本机较新</b> → 手动「本机覆盖云端」上传' : (rs > localT ? '<b style="color:var(--warn)">云端较新</b> → 手动「云端覆盖本机」拉取' : '两边一致')) + '</div>' : '') +
     (st.offline && st.errMsg ? '<div style="color:var(--warn)">⚠ ' + esc(st.errMsg) + '</div>' : '') +
     '</div></div>';
-  /* 详细设置：防抖间隔 + 实时订阅 */
-  const dbOpts = [['300', '300ms（最快）'], ['600', '600ms（默认）'], ['1000', '1 秒'], ['2000', '2 秒']];
-  const curDb = cloud.cfg.pushDebounceMs || 600;
-  const dbSel = '<select id="cc_debounce" style="width:100%">' + dbOpts.map(o =>
-    '<option value="' + o[0] + '"' + (String(curDb) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>';
+  /* 详细设置：仅实时订阅（1BK_V68.14.0 ⑤：自动推送已取消，防抖字段移除） */
   const body =
     '<div class="form-grid" style="grid-template-columns:1fr">' +
       statusBlock +
       '<div class="field"><label class="fl">Supabase Project URL</label><input id="cc_url" placeholder="https://xxxx.supabase.co" value="' + esc(cloud.cfg.supabaseUrl || '') + '"></div>' +
       '<div class="field"><label class="fl">anon public key</label><input id="cc_key" placeholder="eyJhbGciOi...或 sb_publishable_..." value="' + esc(cloud.cfg.supabaseKey || '') + '"></div>' +
-      '<div class="field"><label class="fl">自动推送防抖间隔</label>' + dbSel +
-        '<div class="d" style="font-size:11px">本地改动后延迟多久自动推送到云端；间隔越大合并的改动越多（省流量）</div></div>' +
-      '<div class="field"><label class="fl" style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="cc_realtime" style="width:auto"' + (cloud.cfg.realtime !== false ? ' checked' : '') + '> 实时订阅其他设备的改动</label>' +
-        '<div class="d" style="font-size:11px">开启后，其他设备写入云端会即时同步到本机（需要 Supabase Realtime 已启用）</div></div>' +
+      '<div class="field"><label class="fl" style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="cc_realtime" style="width:auto"' + (cloud.cfg.realtime !== false ? ' checked' : '') + '> 提示其他设备的云端改动</label>' +
+        '<div class="d" style="font-size:11px">开启后，其他设备写入云端会在本机弹出提示——<b>仅提示，不自动覆盖本机</b>，是否拉取由你点「云端覆盖本机」决定</div></div>' +
     '</div>' +
     '<div class="hint">URL/key 留空 = 纯本地模式。改动后自动重连云端。<br>' +
+    '<b>同步为全手动</b>：上传点「本机覆盖云端」，拉取点「云端覆盖本机」，无任何自动上传/自动拉取。<br>' +
     '第一次使用请先在 Supabase <b>SQL Editor</b> 执行「建表 SQL」（本弹窗下方按钮可复制），并确认 anon 有读写权限。</div>';
   const ok = await dialog({ title: '云端同步设置（Supabase）', bodyHTML: body, buttons: [
     { label: '取消', value: null },
@@ -8766,9 +8738,8 @@ async function openCloudConfig(){
     { label: '保存并重连', value: true, cls: 'btn-primary', before: m => {
         const url = (m.querySelector('#cc_url') || {}).value || '';
         const key = (m.querySelector('#cc_key') || {}).value || '';
-        const db = parseInt((m.querySelector('#cc_debounce') || {}).value || '600', 10) || 600;
         const rt = (m.querySelector('#cc_realtime') || {}).checked !== false;
-        picked = { url: url.trim(), key: key.trim(), debounce: db, realtime: rt };
+        picked = { url: url.trim(), key: key.trim(), realtime: rt };
       } } ] });
   if (ok === 'sql'){
     try { navigator.clipboard.writeText(CLOUD_SCHEMA_SQL).then(() => toast('建表 SQL 已复制，去 Supabase SQL Editor 粘贴执行', 'ok')).catch(() => {}); } catch(e){}
@@ -8782,13 +8753,11 @@ async function openCloudConfig(){
     else localStorage.removeItem(K('cloudUrl'));
     if (picked.key)  localStorage.setItem(K('cloudKey'), picked.key);
     else localStorage.removeItem(K('cloudKey'));
-    localStorage.setItem(K('cloudDebounce'), String(picked.debounce));
     localStorage.setItem(K('cloudRealtime'), picked.realtime ? '1' : '0');
   } catch(e){}
   cloud.cfg.supabaseUrl = picked.url;
   cloud.cfg.supabaseKey = picked.key;
   cloud.cfg.enabled = !!(picked.url && picked.key);
-  cloud.cfg.pushDebounceMs = picked.debounce;
   cloud.cfg.realtime = picked.realtime;
   cloud.channel = null; cloud.client = null;
   cloud.initRetryN = 0; clearTimeout(cloud.initRetryTimer);
