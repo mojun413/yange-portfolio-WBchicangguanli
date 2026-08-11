@@ -809,7 +809,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.012</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.013</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1203,7 +1203,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.012 · 2026-08-11 12:23 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.013 · 2026-08-11 12:38 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1263,8 +1263,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.012';
-const APP_BUILD   = '2026-08-11 12:23';
+const APP_VERSION = '1BK_V68.13.1.013';
+const APP_BUILD   = '2026-08-11 12:38';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3762,18 +3762,6 @@ let monitorSortDir = 'desc';
 let monitorLoading = false;
 let watchCat = 'all';        // 盯盘分类：'all' | 'stock' | 'etf'
 const persistWatch = () => save('watchlist', watchList);
-/* v53.33：自选并集合并——本地 + 云端去重取并集；云端为空数组时不覆盖本地非空自选。
-   防止「未配自选的设备推送空 watchlist → 拉取时清空本机自选」的丢失问题 */
-function mergeWatchlists(local, remote){
-  const map = new Map();
-  (local || []).forEach(w => { if (w && w.code) map.set(String(w.code).replace(/\D/g, ''), w); });
-  (remote || []).forEach(w => {
-    if (!w || !w.code) return;
-    const c = String(w.code).replace(/\D/g, '');
-    if (!map.has(c)) map.set(c, w);            // 本地没有的云端条目才并入（本地优先）
-  });
-  return Array.from(map.values());
-}
 const watchSym = w => {
   const c = String(w.code || '').replace(/\D/g, '');
   return quoteSymbol({ code: c, type: w.type || 'stock', market: w.market || '' });
@@ -3954,7 +3942,7 @@ async function addWatch(){
   } catch (e) { toast('批量查询失败：' + e.message, 'err'); }
 }
 
-/* 移除自选 */
+/* 移除自选（1BK_V68.13.1.013：删除会同步到云端，其他设备拉取后同样消失） */
 function removeWatch(code){
   watchList = watchList.filter(w => w.code !== code);
   persistWatch();
@@ -8099,7 +8087,7 @@ async function cloudPush(){
       v: 1,
       holdings: state.holdings, dailyOps: state.dailyOps, trades: state.trades,
       settings: state.settings, externalClosed: state.externalClosed || [], snapshots: state.snapshots,
-      watchlist: watchList || [],                    /* 盯盘自选标的（云同步） */
+      watchlist: watchList || [],                    /* 自选同步：本机为准，增删都推云端（1BK_V68.13.1.013 明确） */
       devices: Object.assign({}, deviceNameMap),     /* 设备名映射（跨设备共享友好名） */
       accessPwdHash: (() => { try { return localStorage.getItem(K('accessPwdHash')) || ''; } catch(e){ return ''; } })(),
       savedAt: Date.now()
@@ -8158,8 +8146,8 @@ function applyCloudSnapshot(snap){
       const l = state.snapshots[d]; if (!l || (r.ts || 0) > (l.ts || 0)) state.snapshots[d] = r; }
     saveSnapshots();
   }
-  if (Array.isArray(snap.watchlist)){          /* 盯盘自选标的：与本地并集合并（防空数组清空本机自选） */
-    watchList = mergeWatchlists(watchList, snap.watchlist);
+  if (Array.isArray(snap.watchlist)){          /* 自选同步：云端为准覆盖本机（增删都同步；删除在其他设备同样生效） */
+    watchList = snap.watchlist.slice();        /* 1BK_V68.13.1.013：不再并集合并，删除也能同步 */
     persistWatch();
     if (typeof renderWatch === 'function') renderWatch();
   }
