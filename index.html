@@ -511,7 +511,8 @@ tr.hold-total .tf-note{display:block;font-weight:400;font-size:11px;color:var(--
 .mkt-live-head .bar{width:4px;height:14px;border-radius:3px;background:var(--accent)}
 .mkt-live-sub{font-weight:400;font-size:11.5px;color:var(--muted)}
 .mkt-live-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
-.mkt-chip{flex:0 0 auto;min-width:108px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:1px}
+.mkt-chip{flex:0 0 auto;min-width:108px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:1px;cursor:pointer;transition:border-color .15s,transform .1s}
+.mkt-chip:hover{border-color:var(--accent);transform:translateY(-1px)}
 .mkt-chip .mkt-name{font-size:11.5px;color:var(--muted)}
 .mkt-chip .mkt-val{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
 .mkt-chip .mkt-pct{font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -809,7 +810,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.013</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.014</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1203,7 +1204,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.013 · 2026-08-11 12:38 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.014 · 2026-08-11 13:40 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1263,8 +1264,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.013';
-const APP_BUILD   = '2026-08-11 12:38';
+const APP_VERSION = '1BK_V68.13.1.014';
+const APP_BUILD   = '2026-08-11 13:40';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3807,11 +3808,11 @@ async function renderMarketLive(){
     const q = await fetchQuotes(MARKET_INDICES.map(x => x.code));
     row.innerHTML = MARKET_INDICES.map(m => {
       const d = q && q[m.code];
-      if (!d || !isFinite(d.price)) return '<div class="mkt-chip"><span class="mkt-name">' + esc(m.name) + '</span><span class="dim">—</span></div>';
+      if (!d || !isFinite(d.price)) return '<div class="mkt-chip" data-sym="' + esc(m.code) + '" data-name="' + esc(m.name) + '"><span class="mkt-name">' + esc(m.name) + '</span><span class="dim">—</span></div>';
       const chg = isFinite(d.pct) ? d.pct : 0;
       const cls = chg > 0.005 ? 'up' : (chg < -0.005 ? 'down' : 'flat');
       const sign = chg > 0 ? '+' : '';
-      return '<div class="mkt-chip ' + cls + '"><span class="mkt-name">' + esc(m.name) + '</span>' +
+      return '<div class="mkt-chip ' + cls + '" data-sym="' + esc(m.code) + '" data-name="' + esc(m.name) + '"><span class="mkt-name">' + esc(m.name) + '</span>' +
         '<span class="mkt-val">' + d.price.toFixed(2) + '</span>' +
         '<span class="mkt-pct">' + sign + chg.toFixed(2) + '%</span></div>';
     }).join('');
@@ -3820,6 +3821,18 @@ async function renderMarketLive(){
   } catch(e){}
   mktLiveLoading = false;
 }
+/* 1BK_V68.13.1.014：大盘直播指数点击 → 打开该指数 K 线弹窗（事件委托，每 2 秒重绘也不重绑） */
+(function bindMktLiveKline(){
+  const row = document.getElementById('mktLiveRow');
+  if (!row || row.dataset.klBound) return;
+  row.dataset.klBound = '1';
+  row.addEventListener('click', e => {
+    const chip = e.target.closest('.mkt-chip');
+    if (!chip) return;
+    const sym = chip.getAttribute('data-sym'), name = chip.getAttribute('data-name');
+    if (sym && typeof showKlineDialog === 'function') showKlineDialog(name || sym, sym);
+  });
+})();
 
 /* 渲染自选标的卡片（排序；卡片点击看 K 线，× 移除） */
 function renderWatch(){
