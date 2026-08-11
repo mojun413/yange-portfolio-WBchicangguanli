@@ -499,6 +499,8 @@ tr.hold-total .tf-note{display:block;font-weight:400;font-size:11px;color:var(--
 .mv-total{margin-left:auto;color:var(--muted)}
 .mv-total b{color:var(--text);font-size:14px}
 .mv-fc-val b{color:var(--up);font-size:15px}
+.mv-vs{font-weight:700;font-variant-numeric:tabular-nums;font-size:12.5px}
+.mv-vs.up{color:var(--up)} .mv-vs.down{color:var(--down)}
 .mv-prog{color:var(--muted);font-size:11px}
 @media (max-width:560px){.mv-total{margin-left:0;width:100%}}
 .mkt-chip{flex:0 0 auto;min-width:108px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:1px}
@@ -799,7 +801,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.002</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.004</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1194,7 +1196,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.002 · 2026-08-11 09:40 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.004 · 2026-08-11 10:03 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1202,11 +1204,11 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnSettings2">打开设置</button></div></div>
             <div class="setting-row"><div><div class="t">布局</div><div class="d">底部导航常驻（总览/盯盘/做T/统计/清仓/分析/仓位/心法/设置）· 手机端横向滑动</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><span class="dim" style="font-size:12px">方案 B</span></div></div>
-            <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">同步全部数据：持仓(含流水/满仓金额/手动类型)、仓位目标金额、盯盘自选、做T台账、每日操作、设置、清仓结算、资产快照。每日 15:05 自动一次，其余时间手动「本机覆盖云端」/「云端覆盖本机」；v68.13.1.001 起已关闭即时上云，自选/仓位目标改完需手动同步</div></div>
+            <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">同步全部数据：持仓(含流水/满仓金额/手动类型)、仓位目标金额、盯盘自选、做T台账、每日操作、设置、清仓结算、资产快照。<b>上传云端仅 2 个入口</b>：每日 15:05 收盘后自动覆盖 + 手动「本机覆盖云端」；其他设备打开/刷新只拉取云端，绝不自动上传（v68.13.1.004）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
                 <button class="btn-sm" id="btnCloudCfg" title="填写 Supabase 项目的 URL 与 anon key">云同步设置</button>
                 <button class="btn-sm" id="btnDevNames" title="给各设备起名（如我的平板），跨设备共享">设备命名</button>
-                <button class="btn-sm" id="btnCloudSync" title="强制以云端为准覆盖本机（校验云端时间戳有效后执行；每日 15:05 自动同步仍按较新者胜）">云端覆盖本机</button>
+                <button class="btn-sm" id="btnCloudSync" title="强制以云端为准覆盖本机（校验云端时间戳有效后执行；每日 15:05 自动同步仍会覆盖云端）">云端覆盖本机</button>
                 <button class="btn-primary btn-sm" id="btnCloudForce" title="日常手动同步方式：以本机数据为准，强制覆盖云端">本机覆盖云端</button>
                 <button class="btn-sm" id="btnCloudHist" title="云端保留最近 5 份历史快照，可查看并回滚到任意一份">云端历史</button>
                 <button class="btn-sm" id="btnCloudSql" title="复制建表 SQL，在 Supabase SQL Editor 里执行一次">建表 SQL</button>
@@ -1254,8 +1256,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.002';
-const APP_BUILD   = '2026-08-11 09:40';
+const APP_VERSION = '1BK_V68.13.1.004';
+const APP_BUILD   = '2026-08-11 10:03';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3721,8 +3723,35 @@ async function renderMarketLive(){
   } catch(e){}
   mktLiveLoading = false;
 }
-/* 三市量能：沪/深/北 全市场成交额（万元）→ 合计 + 按当前交易进度线性外推全天预测量能 */
+/* 三市量能：沪/深/北 全市场成交额（万元）→ 合计 + 线性外推今日预测量能 + 对比昨日（参考开盘红）
+   昨日成交额 = 东财日K f57 字段（lmt=2 取上一根），日内缓存 12h 不重复请求 */
 const MARKET_VOL_CODES = ['sh000001', 'sz399106', 'bj899050'];
+const MARKET_VOL_EM = { 'sh000001':'1.000001', 'sz399106':'0.399106', 'bj899050':'0.899050' };
+let mktVolYesterday = null, mktVolYestLoading = false;
+async function fetchYesterdayVolume(){
+  if (mktVolYesterday && (Date.now() - mktVolYesterday.ts) < 12 * 3600 * 1000) return mktVolYesterday;
+  if (mktVolYestLoading) return mktVolYesterday;
+  mktVolYestLoading = true;
+  try {
+    const results = await Promise.all(MARKET_VOL_CODES.map(c =>
+      fetch('https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=' + MARKET_VOL_EM[c] +
+        '&fields1=f1,f2,f3&fields2=f51,f52,f53,f54,f55,f56,f57&klt=101&fqt=1&end=20500101&lmt=2', { mode: 'cors' })
+        .then(r => r.ok ? r.json() : null).catch(() => null)
+    ));
+    let total = 0, date = '';
+    results.forEach(d => {
+      const kl = d && d.data && d.data.klines;
+      if (!kl || !kl.length) return;
+      const prev = kl.length > 1 ? kl[0] : kl[kl.length - 1];   // [0]=昨日 [1]=今日
+      const amt = Number(String(prev || '').split(',')[6]);      // f57 成交额（元）
+      if (isFinite(amt) && amt > 0) total += amt;
+      date = String(prev || '').split(',')[0] || date;
+    });
+    if (total > 0) mktVolYesterday = { total, date, ts: Date.now() };
+  } catch(e){}
+  mktVolYestLoading = false;
+  return mktVolYesterday;
+}
 async function renderMarketVolume(){
   const el = document.getElementById('mktVolume'); if (!el) return;
   try {
@@ -3744,11 +3773,20 @@ async function renderMarketVolume(){
     const totalAmt = total * 1e4;   // 元
     const ratio = Math.max(0.04, Math.min(1, elapsed / 240));   // 已交易进度（开盘初期最小 4%，避免外推爆表）
     const forecast = totalAmt / ratio;
+    /* 对比昨日（异步取昨日三市合计，缓存日内不变） */
+    const yest = await fetchYesterdayVolume();
+    const yestAmt = yest ? yest.total : NaN;
+    const vsYest = (isFinite(yestAmt) && yestAmt > 0) ? (forecast - yestAmt) / yestAmt * 100 : NaN;
+    const vsCls = !isFinite(vsYest) ? '' : (vsYest >= 0 ? 'up' : 'down');
     el.innerHTML =
       '<div class="mv-row"><span class="mv-label">三市量能</span>' + cells.join('') +
       '<span class="mv-total mono">合计 <b>' + fmtAmt(totalAmt) + '</b></span></div>' +
       '<div class="mv-row mv-fc"><span class="mv-label">今日预测</span>' +
       '<span class="mv-fc-val mono"><b>' + fmtAmt(forecast) + '</b></span>' +
+      (isFinite(vsYest)
+        ? '<span class="mv-vs ' + vsCls + '">较昨日 ' + yest.date + '（' + fmtAmt(yestAmt) + '）' +
+          (vsYest >= 0 ? '▲' : '▼') + Math.abs(vsYest).toFixed(0) + '%</span>'
+        : '') +
       '<span class="mv-prog">已交易 ' + Math.round(elapsed / 240 * 100) + '% · 线性外推（非精确预测）</span></div>';
   } catch(e){ el.innerHTML = '<span class="dim">量能获取失败</span>'; }
 }
@@ -7970,7 +8008,7 @@ async function cloudDailySync(reason){
   try {
     takeDailySnapshot();                            /* 先落当日净值快照（含最新收盘价） */
     if (!cloud.client) await cloudInit();
-    else await cloudPull();
+    await cloudPush();                              /* 1BK_V68.13.1.004：收盘后自动覆盖云端（上传唯一自动入口，直接以本机为准覆盖，不再较新者胜） */
     cloud.state.dailyAt = Date.now();
     cloud.state.lastSyncAt = Date.now();
     try { localStorage.setItem(K('cloudLastSyncAt'), String(cloud.state.lastSyncAt)); } catch(e){}   /* 1BK_V68.14.0 ④：持久化上次成功同步时间 */
@@ -8114,9 +8152,13 @@ async function cloudPull(){
     const { data, error } = await cloud.client.from(cloud.cfg.table).select('*').eq('id', 1).maybeSingle();
     if (error) throw error;
     if (!data || !data.data){
-      clearSeedBase();   /* 云端空 → 首次上云推本地（种子），基线结束 */
-      if (hasLocalData()) await cloudPush();   // 云端空 → 把本地推上去（首次上云）
-      else { cloud.state.offline = false; cloud.state.errMsg = ''; renderCloudStatus(); }
+      /* 1BK_V68.13.1.004：云端空**也不自动上传**——上传只有 2 个入口（收盘后自动 / 手动本机覆盖云端）。
+         首次上云请手动点「本机覆盖云端」。种子基线在此清除（本机即真实数据源）。 */
+      clearSeedBase();
+      cloud.state.offline = false;
+      cloud.state.errMsg = '';
+      if (hasLocalData()) toast('云端暂无数据——请手动点「本机覆盖云端」完成首次上云', 'info');
+      renderCloudStatus();
       return;
     }
     const remote = data.data;
@@ -8134,10 +8176,12 @@ async function cloudPull(){
     cloud.state.remoteSavedAt = remote.savedAt || 0;
     cloud.state.lastDevice = data.device_id || '';
     cloud.state.localAt = lastLocalSaveAt();
+    /* 1BK_V68.13.1.004：**只拉不推**——打开/刷新页面绝不自动上传云端。
+       上传云端仅保留两个入口：① 每日收盘后自动覆盖（cloudDailySync → cloudPush）；
+       ② 手动「本机覆盖云端」（btnCloudForce → cloudPush）。
+       这里若云端较新 → 应用云端；本地较新 → 保留本地（等手动上传），绝不 cloudPush。 */
     const localFresh = (cloud.lastSavedAt || lastLocalSaveAt()) > (remote.savedAt || 0);
-    if (localFresh && hasLocalData()){
-      await cloudPush();                        // 本地更新 → 覆盖云端
-    } else if (!localFresh){
+    if (!localFresh){
       applyCloudSnapshot(remote);               // 云端更新 → 应用云端
       toast('已从云端加载最新数据', 'ok');
     }
@@ -8145,7 +8189,7 @@ async function cloudPull(){
   } catch(e){ console.warn('云端拉取失败', e); setCloudStatus('云同步离线（自动重试）', 'var(--warn)'); }
 }
 /* 1BK_V68.13.4：手动「立即同步」= 云端覆盖本机（强制以云端为准，前提云端时间戳无误）。
-   与 cloudPull()（较新者胜）不同：不做本地/云端新旧比较，只要云端快照时间戳有效就无条件应用，
+   与 cloudPull()（纯拉取）不同：不做本地/云端新旧比较，只要云端快照时间戳有效就无条件应用，
    用于「想以云端为准恢复/同步到本机」的场景（如本机误删数据、换新设备要拉云端）。
    时间戳校验：remote.savedAt 必须是合法数字且 > 0，否则中止（防止脏数据/未初始化云端覆盖本机）。 */
 async function cloudPullForce(){
