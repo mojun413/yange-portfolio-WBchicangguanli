@@ -496,6 +496,7 @@ tr.hold-total .tf-note{display:block;font-weight:400;font-size:11px;color:var(--
 .mv-m{display:inline-flex;align-items:baseline;gap:6px}
 .mv-m b{color:var(--text);font-weight:600;font-size:12px}
 .mv-m em{color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums;font-style:normal}
+.mv-m i{color:var(--muted);font-size:11px;font-style:normal}
 .mv-total{margin-left:auto;color:var(--muted)}
 .mv-total b{color:var(--text);font-size:14px}
 .mv-fc-val b{color:var(--up);font-size:15px}
@@ -801,7 +802,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.004</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.005</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1196,7 +1197,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.004 · 2026-08-11 10:03 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.005 · 2026-08-11 10:13 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1256,8 +1257,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.004';
-const APP_BUILD   = '2026-08-11 10:03';
+const APP_VERSION = '1BK_V68.13.1.005';
+const APP_BUILD   = '2026-08-11 10:13';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1862,8 +1863,9 @@ function parseQuote(sym, raw){
     open: Number(p[CONFIG.fieldIndex.open]),
     pct: (isFinite(price) && isFinite(preClose) && preClose > 0) ? (price - preClose) / preClose * 100 : NaN,
     high: hl.high, low: hl.low, time: p[30] || '', ts: Date.now(), err: null,
-    /* 1BK_V68.13.1.002：成交额（万元，腾讯 p[37]；指数=对应市场全市场量能） */
-    amount: Number(p[37]) > 0 ? Number(p[37]) : NaN
+    /* 1BK_V68.13.1.005：成交额（万元，腾讯 p[37]）+ 成交量（手，p[36]；指数=对应市场全市场量能） */
+    amount: Number(p[37]) > 0 ? Number(p[37]) : NaN,
+    volume: Number(p[36]) > 0 ? Number(p[36]) : NaN
   };
 }
 
@@ -3752,17 +3754,28 @@ async function fetchYesterdayVolume(){
   mktVolYestLoading = false;
   return mktVolYesterday;
 }
+/* 1BK_V68.13.1.005：实时量能 60 秒节流（省流量）——renderMarketLive 每 2 秒会调本函数，但只有距上次 >60s 才真正发请求 */
+let mktVolThrottleTs = 0;
 async function renderMarketVolume(){
   const el = document.getElementById('mktVolume'); if (!el) return;
   try {
+    /* 节流：60 秒内不重复拉行情（省流量）；首屏/跨过 60s 才刷新 */
+    const _now = Date.now();
+    if (mktVolThrottleTs && _now - mktVolThrottleTs < 60000) return;
+    mktVolThrottleTs = _now;
     const q = await fetchQuotes(MARKET_VOL_CODES);
     const names = { 'sh000001':'沪市', 'sz399106':'深市', 'bj899050':'北交所' };
-    let total = 0; const cells = [];
+    let totalAmt = 0, totalVol = 0; const cells = [];
     MARKET_VOL_CODES.forEach(c => {
       const d = q && q[c];
-      const amt = d && isFinite(d.amount) ? d.amount : NaN;   // 万元
-      if (isFinite(amt) && amt > 0) total += amt;
-      cells.push('<span class="mv-m"><b>' + names[c] + '</b><em class="mono">' + (isFinite(amt) ? fmtAmt(amt * 1e4) : '—') + '</em></span>');
+      /* 实时量能 = 最新成交量（手，开盘红口径）+ 成交额（元） */
+      const vol = d && isFinite(d.volume) ? d.volume : NaN;      // 手
+      const amt = d && isFinite(d.amount) ? d.amount : NaN;       // 万元
+      if (isFinite(vol) && vol > 0) totalVol += vol;
+      if (isFinite(amt) && amt > 0) totalAmt += amt;
+      cells.push('<span class="mv-m"><b>' + names[c] + '</b>' +
+        '<em class="mono">' + (isFinite(vol) ? fmtVol(vol) : '—') + '</em>' +
+        (isFinite(amt) ? '<i class="mono">' + fmtAmt(amt * 1e4) + '</i>' : '') + '</span>');
     });
     const t = new Date(), now = t.getHours() * 60 + t.getMinutes();
     let elapsed = 0;
@@ -3770,24 +3783,24 @@ async function renderMarketVolume(){
     else if (now > 690 && now < 780) elapsed = 120;             // 午休按上午满
     else if (now >= 780 && now <= 900) elapsed = 120 + (now - 780); // 13:00–15:00
     else if (now > 900) elapsed = 240;
-    const totalAmt = total * 1e4;   // 元
+    const totalAmtYuan = totalAmt * 1e4;   // 元
     const ratio = Math.max(0.04, Math.min(1, elapsed / 240));   // 已交易进度（开盘初期最小 4%，避免外推爆表）
-    const forecast = totalAmt / ratio;
+    const forecast = totalAmtYuan / ratio;                      // 预测全天量能（成交额口径）
     /* 对比昨日（异步取昨日三市合计，缓存日内不变） */
     const yest = await fetchYesterdayVolume();
     const yestAmt = yest ? yest.total : NaN;
     const vsYest = (isFinite(yestAmt) && yestAmt > 0) ? (forecast - yestAmt) / yestAmt * 100 : NaN;
     const vsCls = !isFinite(vsYest) ? '' : (vsYest >= 0 ? 'up' : 'down');
     el.innerHTML =
-      '<div class="mv-row"><span class="mv-label">三市量能</span>' + cells.join('') +
-      '<span class="mv-total mono">合计 <b>' + fmtAmt(totalAmt) + '</b></span></div>' +
+      '<div class="mv-row"><span class="mv-label">实时量能</span>' + cells.join('') +
+      '<span class="mv-total mono">合计 <b>' + fmtVol(totalVol) + '</b></span></div>' +
       '<div class="mv-row mv-fc"><span class="mv-label">今日预测</span>' +
       '<span class="mv-fc-val mono"><b>' + fmtAmt(forecast) + '</b></span>' +
       (isFinite(vsYest)
         ? '<span class="mv-vs ' + vsCls + '">较昨日 ' + yest.date + '（' + fmtAmt(yestAmt) + '）' +
           (vsYest >= 0 ? '▲' : '▼') + Math.abs(vsYest).toFixed(0) + '%</span>'
         : '') +
-      '<span class="mv-prog">已交易 ' + Math.round(elapsed / 240 * 100) + '% · 线性外推（非精确预测）</span></div>';
+      '<span class="mv-prog">已交易 ' + Math.round(elapsed / 240 * 100) + '% · 线性外推（非精确预测）· 实时量能每 60 秒更新</span></div>';
   } catch(e){ el.innerHTML = '<span class="dim">量能获取失败</span>'; }
 }
 function fmtAmt(v){
