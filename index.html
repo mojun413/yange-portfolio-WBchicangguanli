@@ -791,7 +791,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.010</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.011</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1185,9 +1185,9 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.010 · 2026-08-11 11:30 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.011 · 2026-08-11 12:13 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
-            <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
+            <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
             <div class="setting-row"><div><div class="t">账户偏好</div><div class="d">主题色、涨跌色、刷新间隔、自动刷新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnSettings2">打开设置</button></div></div>
@@ -1210,7 +1210,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
                 <p><b>版本：</b><span class="mono" id="aboutVer">1BK_V68.13.1.007</span> · 养鹅持仓管理工具 · 自用记账与组合跟踪 · 2026-08-11</p>
                 <p><b>行情数据来源：</b>腾讯行情公开接口（<span class="mono">qt.gtimg.cn / web.ifzq.gtimg.cn</span>）+ 天天基金公开接口（场外基金估值）；仅用于个人记账参考，<b>不构成任何投资建议</b>。</p>
                 <p><b>数据存储：</b>配置云端数据库（Supabase）后，数据将<b>实时同步到云端</b>，手机 / 电脑打开同一页面即共享一份数据，一处修改处处同步；未配置时自动使用本机 localStorage（键前缀 <span class="mono">pm_</span>）。</p>
-                <p><b>操作联动：</b>建仓 / 加减仓 / 记分红 / 每日操作均在本页录入，自动联动所有汇总（总览 / 持仓明细 / 清仓结算 / 交易统计 / 现金流）。腾讯文档同步已停用，内嵌数据即初始快照；点「恢复初始数据」可重置。</p>
+                <p><b>操作联动：</b>建仓 / 加减仓 / 记分红 / 每日操作均在本页录入，自动联动所有汇总（总览 / 持仓明细 / 清仓结算 / 交易统计 / 现金流）。数据以网页录入为准，内嵌数据仅作初始快照（2026-08-08 腾讯文档最后导出）；点「恢复初始数据」可重置。</p>
                 <p style="color:var(--muted);font-size:11.5px;border-top:1px dashed var(--line);padding-top:8px;margin-top:10px">⚠️ 免责声明：本工具仅用于个人投资记录与组合跟踪，行情数据由第三方公开接口提供（实时不保证准确性）；所有买卖行为、责任均由用户本人承担。</p>
               </div>
             </details>
@@ -1245,8 +1245,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.010';
-const APP_BUILD   = '2026-08-11 11:30';
+const APP_VERSION = '1BK_V68.13.1.011';
+const APP_BUILD   = '2026-08-11 12:13';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -7192,7 +7192,7 @@ function init(){
         if (!(s && s.ts && ymdOf(new Date(s.ts)) === k)) takeDailySnapshot(); } };
     setInterval(tick, 60000); setTimeout(tick, 5000);
   })();
-  /* 顶栏显示内嵌初始数据快照时间（数据已在本机维护；腾讯文档同步已停用） */
+  /* 顶栏显示内嵌初始数据快照时间（数据已在本机维护；2026-08-11 起腾讯文档停用，网页录入为主） */
   try {
     const meta = (typeof YANGEDATA_RAW !== 'undefined' && YANGEDATA_RAW.meta) || {};
     const snap = $('#ydSnap');
@@ -7553,7 +7553,7 @@ async function importYangE2(){
     (meta.syncedAt ? '（生成于 <b>' + esc(meta.syncedAt) + '</b>）' : '') +
     '<br>' +
     '将载入交易明细 <b>' + (d.transactions.length) + '</b> 笔，持仓/成本/盈亏/清仓/统计 <b>全部由网页算法重建</b>' +
-    '<div style="margin-top:8px;color:var(--warn);font-size:12px">💡 此为内嵌初始数据。腾讯文档同步已停用，后续请在页面内录入。' +
+    '<div style="margin-top:8px;color:var(--warn);font-size:12px">💡 此为内嵌初始数据（2026-08-08 腾讯文档最后导出）。腾讯文档已停用，日常数据请在页面内录入。' +
     '点击下方「确认恢复」将<b>清空全部手动录入</b>，恢复到该初始快照。</div>';
   // 确认（已有数据则警告）
   const hasData = state.holdings.length > 0 || state.dailyOps.length > 0;
