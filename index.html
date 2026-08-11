@@ -320,6 +320,25 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .rs-card .tag.buy{background:rgba(239,68,68,.12);color:#dc2626;border:1px solid rgba(239,68,68,.25)}
 .rs-card .tag.hold{background:rgba(245,158,11,.12);color:#d97706;border:1px solid rgba(245,158,11,.25)}
 .rs-card .tag.neutral{background:rgba(100,116,139,.12);color:#64748b;border:1px solid rgba(100,116,139,.25)}
+/* 1BK_V68.14.0 ⑩：持仓市值 Top10 排行条 */
+.top10{display:flex;flex-direction:column;gap:7px}
+.t10-row{display:grid;grid-template-columns:22px minmax(70px,150px) 1fr auto auto;gap:8px;align-items:center;font-size:12.5px}
+.t10-rank{font-size:13px;text-align:center}
+.t10-name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t10-bar-w{position:relative;height:12px;background:var(--panel);border-radius:6px;overflow:hidden}
+.t10-bar{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,rgba(59,130,246,.55),rgba(59,130,246,.9))}
+.t10-val{font-variant-numeric:tabular-nums;color:var(--text);text-align:right}
+.t10-pct{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;width:44px}
+/* 1BK_V68.14.0 ⑩：月度资金流水热力图 */
+.monthly-flow{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.mf-cell{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.mf-m{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.mf-bars{display:flex;flex-direction:column;gap:3px;height:34px;justify-content:flex-end}
+.mf-bar{height:6px;border-radius:3px;min-width:2px}
+.mf-bar.buy{background:var(--up)}
+.mf-bar.sell{background:var(--down)}
+.mf-net{font-size:11.5px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
+.mf-net.up{color:var(--up)} .mf-net.down{color:var(--down)}
 .an-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:1px}
 .an-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .an-metric{background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:8px 10px}
@@ -767,7 +786,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.9</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.14.0</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1158,9 +1177,10 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnFeeSettings2">费率设置</button></div></div>
             <div class="setting-row"><div><div class="t">数据备份</div><div class="d">导出 / 导入 JSON 备份，防数据丢失</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnExport2">导出 JSON</button><button class="btn-sm" id="btnImport2">导入 JSON</button></div></div>
+            <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.9 · 2026-08-11 00:44 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.14.0 · 2026-08-11 09:21 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1174,6 +1194,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
                 <button class="btn-sm" id="btnDevNames" title="给各设备起名（如我的平板），跨设备共享">设备命名</button>
                 <button class="btn-sm" id="btnCloudSync" title="强制以云端为准覆盖本机（校验云端时间戳有效后执行；每日 15:05 自动同步仍按较新者胜）">云端覆盖本机</button>
                 <button class="btn-primary btn-sm" id="btnCloudForce" title="日常手动同步方式：以本机数据为准，强制覆盖云端">本机覆盖云端</button>
+                <button class="btn-sm" id="btnCloudHist" title="云端保留最近 5 份历史快照，可查看并回滚到任意一份">云端历史</button>
                 <button class="btn-sm" id="btnCloudSql" title="复制建表 SQL，在 Supabase SQL Editor 里执行一次">建表 SQL</button>
               </div></div>
             <div class="setting-row"><div><div class="t">访问密码</div><div class="d" id="pwdRowDesc">未设置 — 任何设备打开页面即可访问</div></div>
@@ -1219,8 +1240,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.9';
-const APP_BUILD   = '2026-08-11 00:44';
+const APP_VERSION = '1BK_V68.14.0';
+const APP_BUILD   = '2026-08-11 09:21';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1314,6 +1335,38 @@ function initNav(){
   $('#btnCloudSql') && ($('#btnCloudSql').onclick = () => {
     try { navigator.clipboard.writeText(CLOUD_SCHEMA_SQL).then(() => toast('建表 SQL 已复制——去 Supabase → SQL Editor 粘贴执行一次即可', 'ok')).catch(() => {}); } catch(e){}
     toast('建表 SQL 已复制到剪贴板（Supabase → SQL Editor → New query 粘贴执行）', 'ok');
+  });
+  /* 1BK_V68.14.0 ③：云端历史查看/回滚弹窗 */
+  $('#btnCloudHist') && ($('#btnCloudHist').onclick = async () => {
+    if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl){ toast('未配置云端——先点「云同步设置」', 'warn'); return; }
+    if (!cloud.client){ try { await cloudInit(); } catch(e){} }
+    const rows = await fetchCloudHistory();
+    if (!rows.length){ toast('暂无历史快照——每次「本机覆盖云端/自动同步」后会保留一份', 'info'); return; }
+    const items = rows.map(r => {
+      const d = r.data, t = Number(d.savedAt) || 0;
+      const hc = (d.holdings || []).length, tt = (d.trades || []).length;
+      return '<div style="display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line-2)">' +
+        '<div><b>' + new Date(t).toLocaleString() + '</b>' +
+        '<div class="dim" style="font-size:11.5px">' + deviceLabel(r.device_id || '') + ' · 持仓 ' + hc + ' · 做T台账 ' + tt + ' 笔</div></div>' +
+        '<button class="btn-sm" data-rid="' + r.id + '">回滚到此快照</button></div>';
+    }).join('');
+    const mask = document.createElement('div'); mask.className = 'mask';
+    mask.innerHTML = '<div class="modal" style="max-width:560px">' +
+      '<h3 style="margin:0 0 6px">云端历史快照（最近 5 份）</h3>' +
+      '<div class="dim" style="font-size:12px;margin-bottom:8px">回滚 = 以该历史快照为准覆盖云端与本机。误操作可找回更早的数据。</div>' +
+      '<div id="cloudHistList" style="max-height:60vh;overflow:auto">' + items + '</div>' +
+      '<div class="mf"><button class="btn-primary">关闭</button></div></div>';
+    document.body.appendChild(mask);
+    mask.querySelector('.mf button').onclick = () => mask.remove();
+    mask.addEventListener('mousedown', e => { if (e.target === mask) mask.remove(); });
+    mask.querySelectorAll('[data-rid]').forEach(b => {
+      b.onclick = async () => {
+        const rid = +b.dataset.rid;
+        if (!confirm('确定回滚到该历史快照？将覆盖当前云端与本机数据。')) return;
+        const ok = await restoreCloudHistory(rid);
+        if (ok) mask.remove();
+      };
+    });
   });
   /* cloud 是后置 const（TDZ），等脚本执行完再刷新设置页云端行 */
   setTimeout(() => { try { refreshCloudRowUI(); } catch(e){} }, 0);
@@ -1926,6 +1979,10 @@ async function refreshQuotes(silent){
   $('#btnRefresh').disabled = true;
   setStatus('<span class="spin"></span>正在刷新…', true);
   let failed = 0, unreachable = 0;
+  /* 1BK_V68.14.0 ②：连续失败计数——silent 自动刷新连续失败 ≥3 次也升级提示，不静默 */
+  const streakKey = 'pm_quoteFailStreak';
+  const readStreak = () => { try { return +localStorage.getItem(streakKey) || 0; } catch(e){ return 0; } };
+  const setStreak = n => { try { localStorage.setItem(streakKey, String(n)); } catch(e){} };
   try {
     const symbols = [...new Set(all.map(quoteSymbol))];
     let map = {};
@@ -1969,10 +2026,15 @@ async function refreshQuotes(silent){
     setStatus('最后刷新 <b>' + t + '</b>' +
       (ph !== 'open' ? ' · ' + marketPhaseLabel(ph) + '（已暂停自动刷新）' : '') +
       (failed ? ' · <span style="color:var(--warn)">' + failed + ' 项失败</span>' : ''), true);
-    if (failed && !silent){
+    /* 1BK_V68.14.0 ②：连续失败升级提示（silent 也 toast） */
+    let streak = failed ? readStreak() + 1 : 0;
+    if (!failed) streak = 0;
+    setStreak(streak);
+    if (failed && (!silent || streak >= 3)){
+      if (!silent) streak = 0; setStreak(streak);   /* 手动刷新已提示，重置连续计数 */
       toast(unreachable
-        ? '行情源连不上（' + unreachable + ' 项）。可能是网络/广告拦截插件挡了 qt.gtimg.cn，点「行情自检」查看详情'
-        : failed + ' 个标的行情获取失败，其余数据不受影响', 'warn');
+        ? '行情源连不上（' + unreachable + ' 项）。可能是网络/广告拦截插件挡了 qt.gtimg.cn，点「行情自检」查看详情' + (streak >= 3 ? '（连续 ' + streak + ' 次失败）' : '')
+        : failed + ' 个标的行情获取失败，其余数据不受影响' + (streak >= 3 ? '（连续 ' + streak + ' 次失败）' : ''), 'warn');
     }
     /* 自动刷新（silent）：价格已由秒级 ticker 覆盖，这里只增量更新，避免全量重建打断操作；
        手动刷新：完整渲染（含名称/结构变化） */
@@ -2998,6 +3060,62 @@ function pieSVG(segs){
     '<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" font-size="14" font-weight="700" fill="#111827">' + money(total) + '</text></svg>';
 }
 
+/* 1BK_V68.14.0 ⑩：持仓市值 Top10 排行条（横向条形，红涨绿跌着色渐变按占比） */
+function top10HTML(){
+  const rows = state.holdings
+    .filter(h => { if (h.closed) return false; const c = calcHolding(h); return c.shares > 1e-8 && isFinite(c.mv) && c.mv > 0; })
+    .map(h => { const c = calcHolding(h); return { h, mv: c.mv, pct: 0 }; })
+    .sort((a, b) => b.mv - a.mv).slice(0, 10);
+  if (!rows.length) return '<div class="empty">暂无持仓数据</div>';
+  const total = rows.reduce((a, r) => a + r.mv, 0);
+  rows.forEach(r => r.pct = total > 0 ? r.mv / total * 100 : 0);
+  return '<div class="top10">' + rows.map((r, i) => {
+    const h = r.h;
+    const bar = '<div class="t10-bar" style="width:' + Math.max(1, r.pct).toFixed(1) + '%"></div>';
+    const rank = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : String(i + 1)));
+    return '<div class="t10-row"><span class="t10-rank">' + rank + '</span>' +
+      '<span class="t10-name" title="' + esc(h.name || h.code) + '">' + esc(h.name || h.code) + '</span>' +
+      '<span class="t10-bar-w">' + bar + '</span>' +
+      '<span class="t10-val">' + money(r.mv) + '</span>' +
+      '<span class="t10-pct">' + r.pct.toFixed(1) + '%</span></div>';
+  }).join('') + '</div>';
+}
+/* 1BK_V68.14.0 ⑩：月度资金流水热力图（按交易流水 side 聚合买入/卖出/分红，近 12 个月） */
+function monthlyFlowHTML(){
+  const month = new Map();   // 'YYYY-MM' -> { buy, sell, div }
+  const push = (k, type, v) => {
+    if (!month.has(k)) month.set(k, { buy: 0, sell: 0, div: 0 });
+    const m = month.get(k);
+    if (type === 'buy') m.buy += v; else if (type === 'sell') m.sell += v; else m.div += v;
+  };
+  state.holdings.forEach(h => (h.txs || []).forEach(t => {
+    const d = String(t.date || ''); if (!/^\d{4}-\d{2}/.test(d)) return;
+    const k = d.slice(0, 7);
+    push(k, t.side === 'buy' ? 'buy' : 'sell', Math.abs(Number(t.amount) || 0));
+  }));
+  (state.dailyOps || []).forEach(o => {
+    const d = String(o.date || ''); if (!/^\d{4}-\d{2}/.test(d)) return;
+    if (o.type === 'dividend' || /分红|股息/.test(String(o.desc || o.note || ''))) push(d.slice(0, 7), 'div', Math.abs(Number(o.amount) || 0));
+  });
+  if (!month.size) return '<div class="empty">暂无交易流水——建仓/做T后这里会按月展示资金流入流出</div>';
+  const keys = [...month.keys()].sort().slice(-12);
+  const max = Math.max(1, ...keys.map(k => Math.max(month.get(k).buy, month.get(k).sell)));
+  const cells = keys.map(k => {
+    const m = month.get(k);
+    const buyW = m.buy > 0 ? Math.max(4, m.buy / max * 100) : 0;
+    const sellW = m.sell > 0 ? Math.max(4, m.sell / max * 100) : 0;
+    const net = m.buy - m.sell;
+    return '<div class="mf-cell" title="' + k + '：买入 ' + money(m.buy) + ' · 卖出 ' + money(m.sell) + (m.div ? ' · 分红 ' + money(m.div) : '') + '">' +
+      '<div class="mf-m">' + k.slice(2) + '</div>' +
+      '<div class="mf-bars">' +
+        '<div class="mf-bar buy" style="width:' + buyW.toFixed(1) + '%"></div>' +
+        '<div class="mf-bar sell" style="width:' + sellW.toFixed(1) + '%"></div>' +
+      '</div>' +
+      '<div class="mf-net ' + (net >= 0 ? 'up' : 'down') + '">' + (net >= 0 ? '+' : '-') + money(Math.abs(net)) + '</div></div>';
+  }).join('');
+  return '<div class="monthly-flow">' + cells + '</div>';
+}
+
 /* ---------- 渲染：分析中心 ---------- */
 function renderAnalysis(){
   const box = document.getElementById('analysisBody'); if (!box) return;
@@ -3177,8 +3295,15 @@ function renderAnalysis(){
     '<div class="panel-body">' + attrHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>行业 / 板块分布</div>' +
     '<div class="spacer"></div><button class="btn-sm" id="btnIdentifyAll">批量识别行业</button>' +
+    '<button class="btn-sm" id="btnRefreshIndCon" title="重新识别全部持仓的申万行业 + 概念标签（行业=东财数据中心申万一级，概念=离线概念表+名称推断）">刷新行业/概念</button>' +
     '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 仅统计当前持仓标的 · 行业取自申万一级行业（东财数据中心，v68.13.8）</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>持仓市值 Top10</div>' +
+    '<div class="panel-sub">按当前持仓市值排序（含基金/ETF）</div></div>' +
+    '<div class="panel-body">' + top10HTML() + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>月度资金流水</div>' +
+    '<div class="panel-sub">近 12 个月买入/卖出/分红（红=买入 · 绿=卖出 · 净值=买入−卖出）</div></div>' +
+    '<div class="panel-body">' + monthlyFlowHTML() + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>机构研报覆盖</div>' +
     '<div class="panel-sub">东财研报 · 持仓个股最新机构评级与一致预期 · 数据抓取自 2026-08-10</div></div>' +
     '<div class="panel-body">' + researchHTML + '</div></div>' +
@@ -3190,6 +3315,21 @@ function renderAnalysis(){
   if (nb) nb.onclick = () => { try { if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') Notification.requestPermission().then(p => toast('浏览器通知' + (p === 'granted' ? '已开启' : '保持关闭'), 'info')); else toast('浏览器通知已开启或不支持', 'info'); } catch(e){ toast('通知开启失败：' + e.message, 'err'); } };
   const bia = box.querySelector('#btnIdentifyAll');
   if (bia) bia.onclick = async () => { bia.disabled = true; const t0 = bia.textContent; bia.textContent = '识别中…'; const n = await autoIdentifyIndustries(true); bia.textContent = t0; bia.disabled = false; renderAnalysis(); toast('已按东财申万行业重新识别 ' + n + ' 个标的（基金按名称主题推断）', 'ok'); };
+  /* 1BK_V68.14.0 ⑥：行业+概念一键批量刷新（概念优先离线表 CONCEPT_MAP，缺失名称推断，非破坏性） */
+  const brc = box.querySelector('#btnRefreshIndCon');
+  if (brc) brc.onclick = async () => {
+    brc.disabled = true; const t0 = brc.textContent; brc.textContent = '刷新中…';
+    let indN = 0, conN = 0;
+    try { indN = await autoIdentifyIndustries(true); } catch(e){}
+    state.holdings.forEach(h => {
+      if (h.closed) return;
+      const cs = getConcepts(h);
+      if (cs.length){ h.concepts = cs; conN++; }
+    });
+    try { persist.holdings(); } catch(e){}
+    brc.textContent = t0; brc.disabled = false; renderAnalysis();
+    toast('已刷新 ' + state.holdings.length + ' 个标的：行业 ' + indN + ' 个更新 · 概念 ' + conN + ' 个回填（行业=申万一级，概念=离线表+名称推断）', 'ok');
+  };
 }
 function kpi2(label, val, clsN){ return '<div class="kpi-card"><div class="k">' + label + '</div><div class="v ' + (clsN || '') + '">' + val + '</div></div>'; }
 
@@ -5726,9 +5866,9 @@ function getVar(name){ return getComputedStyle(document.documentElement).getProp
 /* ============================ 导入 / 导出 ============================ */
 function doExport(){
   const payload = {
-    app: 'portfolio-manager', version: 1, exportedAt: new Date().toISOString(),
+    app: 'portfolio-manager', version: 2, exportedAt: new Date().toISOString(),
     data: { holdings: state.holdings, dailyOps: state.dailyOps, trades: state.trades, settings: state.settings,
-            externalClosed: state.externalClosed || [] }
+            externalClosed: state.externalClosed || [], watchlist: watchList || [], snapshots: state.snapshots || {} }
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
   const d = new Date();
@@ -5738,7 +5878,33 @@ function doExport(){
   a.href = URL.createObjectURL(blob); a.download = 'pm-backup-' + stamp + '.json';
   document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
-  toast('已导出备份文件', 'ok');
+  toast('已导出备份文件（含持仓/台账/设置/自选/快照）', 'ok');
+}
+/* 1BK_V68.14.0 ①：localStorage 容量预警——用量超过阈值时在设置页提醒（启动时调用） */
+function warnStorageCapacity(){
+  try {
+    let used = 0;
+    for (let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if (!k) continue;
+      const v = localStorage.getItem(k);
+      used += (k.length + (v ? v.length : 0)) * 2;   // 近似字节（UTF-16）
+    }
+    const limit = 5 * 1024 * 1024;   // localStorage 典型上限 ~5MB
+    const pct = used / limit * 100;
+    const el = document.getElementById('storageWarn');
+    if (!el) return pct;
+    if (pct >= 90){
+      el.style.display = '';
+      el.innerHTML = '⚠️ 本地存储已用 <b>' + (used / 1048576).toFixed(1) + 'MB</b>（约 ' + pct.toFixed(0) + '% 上限）。建议：导出 JSON 备份后清理，或删除不必要的历史数据。';
+    } else if (pct >= 60){
+      el.style.display = '';
+      el.innerHTML = 'ℹ️ 本地存储已用 <b>' + (used / 1048576).toFixed(1) + 'MB</b>（约 ' + pct.toFixed(0) + '% 上限）。建议定期导出 JSON 备份以防清缓存丢失。';
+    } else {
+      el.style.display = 'none';
+    }
+    return pct;
+  } catch(e){ return 0; }
 }
 
 /* 清仓结算单导出（CSV，带 BOM 便于 Excel 打开中文）
@@ -6996,6 +7162,8 @@ function init(){
   });
   /* 云同步（v53.1）：每日 15:05 自动同步一次；其余时间只手动「本机覆盖云端」 */
   try { setupCloudDailySync(); } catch(e){}
+  /* 1BK_V68.14.0 ①：本地存储容量预警（设置页提示条） */
+  try { warnStorageCapacity(); } catch(e){}
   /* 本地每日净值快照（无论是否开云端，都在收盘后 15:05 记一笔，资产曲线靠它跨天累积） */
   (function scheduleLocalSnapshot(){
     const tick = () => { const d = new Date(), at = d.getHours() * 60 + d.getMinutes();
@@ -7256,6 +7424,23 @@ function seedFromYangE(){
   const _prevSuppress = cloud.suppressPush;
   cloud.suppressPush = true;   // 种子/恢复期：不盖章、不推送云端
   try {
+    /* 1BK_V68.14.0 ⑤：优先用缓存（同浏览器二次打开/恢复初始数据，跳过逐笔解析，省时防卡顿） */
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(K('yangeCache')) || 'null'); } catch(e){ cached = null; }
+    if (cached && cached.v === 1 && Array.isArray(cached.holdings) && cached.holdings.length){
+      state.holdings = cached.holdings;
+      state.dailyOps = Array.isArray(cached.dailyOps) ? cached.dailyOps : [];
+      state.trades = Array.isArray(cached.trades) ? cached.trades : [];
+      state.externalClosed = Array.isArray(cached.externalClosed) ? cached.externalClosed : [];
+      state.quotes = {};
+      state.expanded = new Set();
+      getFeeRates();
+      autoRemoveClosed(1);
+      persist.holdings(); persist.trades(); persist.dailyOps(); persist.settings(); saveExtClosed();
+      const codes = state.holdings.length;
+      cloud.suppressPush = _prevSuppress;
+      return { importedCodes: codes, fromCache: true };
+    }
     const d = _parseYangE2();
     // 1. 清空现有数据
     state.holdings = [];
@@ -7318,6 +7503,14 @@ function seedFromYangE(){
     persist.dailyOps();
     persist.settings();
     saveExtClosed();
+    /* 1BK_V68.14.0 ⑤：缓存解析结果——同浏览器二次打开/清空后恢复，跳过逐笔解析（省时+防卡顿） */
+    try {
+      localStorage.setItem(K('yangeCache'), JSON.stringify({
+        v: 1, ts: Date.now(),
+        holdings: state.holdings, dailyOps: state.dailyOps, trades: state.trades,
+        externalClosed: state.externalClosed || []
+      }));
+    } catch(e){}
     return { importedCodes };
   } finally {
     cloud.suppressPush = _prevSuppress;
@@ -7729,6 +7922,7 @@ async function cloudDailySync(reason){
     else await cloudPull();
     cloud.state.dailyAt = Date.now();
     cloud.state.lastSyncAt = Date.now();
+    try { localStorage.setItem(K('cloudLastSyncAt'), String(cloud.state.lastSyncAt)); } catch(e){}   /* 1BK_V68.14.0 ④：持久化上次成功同步时间 */
     clearCloudPending();
     renderCloudStatus();
     toast('每日定时云同步完成（' + (CONFIG.cloudDailySyncAt || '15:05') +
@@ -7743,11 +7937,16 @@ async function cloudDailySync(reason){
 function setupCloudDailySync(){
   clearInterval(cloud.dailyTimer); cloud.dailyTimer = null;
   const at = hm2min(CONFIG.cloudDailySyncAt, 905);
+  /* 1BK_V68.14.0 ④：上次成功同步时间戳（持久化，防跨时区/改系统时间漏跑） */
+  const lastSync = () => { try { return +localStorage.getItem(K('cloudLastSyncAt')) || 0; } catch(e){ return 0; } };
   const check = () => {
     if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl) return;
     const d = new Date();
     if (d.getHours() * 60 + d.getMinutes() < at) return;
     if (dailySyncDate() === ymdOf(d)) return;
+    /* 距上次成功同步超过 26h 且已过 15:05 → 强制补偿（跨天/跨时区/改系统时间后仍会补做） */
+    const since = Date.now() - lastSync();
+    if (lastSync() > 0 && since < 26 * 3600 * 1000) return;
     cloudDailySync((d.getHours() * 60 + d.getMinutes()) > at + 2 ? 'catchup' : 'ontime');
   };
   cloud.dailyTimer = setInterval(check, 30000);        /* 30 秒粒度，够准且不耗资源 */
@@ -7782,6 +7981,8 @@ async function cloudPush(){
       .upsert({ id: 1, data: snap, updated_at: new Date().toISOString(), device_id: cloud.deviceId }, { onConflict: 'id' })
       .select().single();
     if (error) throw error;
+    /* 1BK_V68.14.0 ③：推送成功后把快照存一份到历史槽（id=2..6 轮换，最多 5 份），可回滚 */
+    try { saveCloudHistory(snap); } catch(e){}
     cloud.lastSavedAt = snap.savedAt;
     cloud.state.lastSyncAt = snap.savedAt;
     cloud.state.remoteAt = (ups && ups.updated_at && Date.parse(ups.updated_at)) || snap.savedAt;
@@ -7920,6 +8121,44 @@ async function cloudPullForce(){
     toast('云端快照格式不兼容，未覆盖', 'err');
     return false;
   } catch(e){ console.warn('云端强制拉取失败', e); setCloudStatus('云同步离线（自动重试）', 'var(--warn)'); toast('同步失败：' + e.message, 'err'); return false; }
+}
+/* ===== 云端快照历史（1BK_V68.14.0 ③）：推送时保留最近 5 份（id=2..6 轮换槽），可回滚 ===== */
+const CLOUD_HISTORY_SLOTS = [2, 3, 4, 5, 6];
+async function saveCloudHistory(snap){
+  if (!cloud.client || !snap) return;
+  try {
+    /* 取现有历史，找最旧槽（savedAt 最小）覆盖 */
+    const { data: rows } = await cloud.client.from(cloud.cfg.table).select('id,data').in('id', CLOUD_HISTORY_SLOTS);
+    const hist = (rows || []).map(r => ({ id: r.id, savedAt: Number((r.data || {}).savedAt) || 0 }));
+    let slot = CLOUD_HISTORY_SLOTS[0], oldest = Infinity;
+    CLOUD_HISTORY_SLOTS.forEach(sid => { const h = hist.find(x => x.id === sid); const t = h ? h.savedAt : 0; if (t < oldest){ oldest = t; slot = sid; } });
+    await cloud.client.from(cloud.cfg.table).upsert(
+      { id: slot, data: snap, updated_at: new Date().toISOString(), device_id: cloud.deviceId },
+      { onConflict: 'id' });
+  } catch(e){ console.warn('云端历史快照保存失败', e); }
+}
+async function fetchCloudHistory(){
+  if (!cloud.client) return [];
+  try {
+    const { data } = await cloud.client.from(cloud.cfg.table).select('id,data,updated_at,device_id').in('id', CLOUD_HISTORY_SLOTS);
+    return (data || []).filter(r => r && r.data && Number(r.data.savedAt) > 0)
+      .sort((a, b) => (Number(b.data.savedAt) || 0) - (Number(a.data.savedAt) || 0));
+  } catch(e){ return []; }
+}
+/* 回滚：把指定历史快照写回 id=1（云端）并应用覆盖本机 */
+async function restoreCloudHistory(histId){
+  if (!cloud.client) return false;
+  try {
+    const { data } = await cloud.client.from(cloud.cfg.table).select('data').eq('id', histId).maybeSingle();
+    if (!data || !data.data) return false;
+    clearSeedBase();   /* 回滚 = 明确以该历史为准 */
+    await cloud.client.from(cloud.cfg.table).upsert(
+      { id: 1, data: data.data, updated_at: new Date().toISOString(), device_id: cloud.deviceId },
+      { onConflict: 'id' });
+    const ok = applyCloudSnapshot(data.data);
+    if (ok){ toast('已回滚到历史快照（' + new Date(Number(data.data.savedAt)).toLocaleString() + '）', 'ok'); renderCloudStatus(); }
+    return ok;
+  } catch(e){ console.warn('云端历史回滚失败', e); toast('回滚失败：' + e.message, 'err'); return false; }
 }
 
 /* Realtime 订阅（v53.1 语义变更）：其他设备写入云端 → **只提示不自动覆盖本机**。
