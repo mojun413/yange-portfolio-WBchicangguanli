@@ -833,7 +833,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.015</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.016</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1231,7 +1231,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.015 · 2026-08-11 13:50 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.016 · 2026-08-11 14:05 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1291,8 +1291,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.015';
-const APP_BUILD   = '2026-08-11 13:50';
+const APP_VERSION = '1BK_V68.13.1.016';
+const APP_BUILD   = '2026-08-11 14:05';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3977,26 +3977,31 @@ function bindWatchSuggest(){
   drop.className = 'ws-drop';
   wrap.appendChild(drop);
   const close = () => { drop.style.display = 'none'; drop.innerHTML = ''; };
-  /* smartbox 中文联想：q 支持中文名 / 代码 / 拼音首字母 */
+  /* smartbox 中文联想：返回 `v_hint="sh~601318~中国平安~zgpa~GP-A^..."`（变量赋值，非标准 callback）。
+     加载完成（onload）后读 window.v_hint 解析；支持中文名 / 代码 / 拼音首字母。 */
   const query = q => new Promise(res => {
     if (!q){ res([]); return; }
     const s = document.createElement('script');
     let done = false;
-    const cb = 'v_hint';   /* smartbox 返回 window.v_hint = "sh~512800~名称~py~类型^..." */
-    const fin = () => { if (done) return; done = true; try { delete window[cb]; } catch(e){} try { s.remove(); } catch(e){} res(parseHint()); };
-    window[cb] = () => setTimeout(fin, 0);
-    s.onerror = () => { try { s.remove(); } catch(e){} res([]); };
+    const fin = () => { if (done) return; done = true; try { s.remove(); } catch(e){} res(parseHint()); };
+    s.onload = () => setTimeout(fin, 0);        /* script 执行完 v_hint 已赋值，微任务后解析 */
+    s.onerror = () => { if (done) return; done = true; try { s.remove(); } catch(e){} res([]); };
     s.src = 'https://smartbox.gtimg.cn/s3/?v=2&q=' + encodeURIComponent(q) + '&t=all&_=' + Date.now();
     document.head.appendChild(s);
     setTimeout(fin, 2500);   /* 超时兜底 */
   });
   const parseHint = () => {
-    const raw = window.v_hint || '';
-    if (!raw || typeof raw !== 'string') return [];
+    const raw = (window.v_hint || '').toString();
+    try { delete window.v_hint; } catch(e){ window.v_hint = undefined; }
+    if (!raw || raw === 'undefined') return [];
     return raw.split('^').filter(Boolean).map(seg => {
       const f = seg.split('~');
       if (f.length < 5) return null;
-      return { market: f[0], code: f[1], name: f[2], type: f[4] };
+      const mkt = f[0], code = f[1], name = f[2], type = f[4];
+      if (mkt === 'us') return null;            /* 美股不可交易，过滤 */
+      if (!code || !/^\d{5,6}$/.test(code)) return null;   /* 只要 A股/港股/ETF 6 位（港股 5 位） */
+      const typeMap = { 'GP-A':'stock', 'GP':'stock', 'ETF':'etf', '基金':'fund', '可转债':'bond' };
+      return { market: mkt, code, name, type: typeMap[type] || 'stock' };
     }).filter(Boolean);
   };
   const render = q => {
@@ -4011,7 +4016,7 @@ function bindWatchSuggest(){
       const remote = hits.filter(h => h && h.code && /^\d{5,6}$/.test(h.code)).slice(0, 8);
       const items = [
         ...local.map(w => ({ kind: 'local', name: w.name || w.code, code: w.code, market: w.market || '', type: w.type || 'stock', inWatch: true })),
-        ...remote.map(h => ({ kind: 'remote', name: h.name, code: h.code, market: h.market, type: h.type === 'ETF' ? 'etf' : (h.type === '基金' ? 'fund' : 'stock'), inWatch: watchList.some(w => w.code === h.code) }))
+        ...remote.map(h => ({ kind: 'remote', name: h.name, code: h.code, market: h.market, type: h.type || 'stock', inWatch: watchList.some(w => w.code === h.code) }))
       ];
       if (!items.length){ drop.innerHTML = '<div class="ws-empty">未找到相关标的，可输入 6 位代码直接添加</div>'; drop.style.display = 'block'; return; }
       drop.innerHTML = items.map(it =>
@@ -4043,14 +4048,14 @@ function bindWatchSuggest(){
     if (!item) return;
     const code = item.getAttribute('data-code');
     const name = item.getAttribute('data-name');
-    const mkt = item.getAttribute('data-mkt');
     const type = item.getAttribute('data-type');
     const inWatch = item.querySelector('.ws-tag.in') !== null;
     close();
     if (inWatch){ toast('「' + name + '」已在自选中', 'warn'); return; }
     const digits = code.replace(/\D/g, '');
-    const sym = quoteSymbol({ code: digits, type: type === 'fund' ? 'fund' : 'stock', market: '' });
-    addWatchOne({ digits, sym, name });   /* 直接添加该候选 */
+    const mkt = (item.getAttribute('data-mkt') || '').replace(/[^\w]/g, '');   /* sh | sz | hk */
+    const sym = quoteSymbol({ code: digits, type: type === 'fund' ? 'fund' : 'stock', market: mkt });
+    addWatchOne({ digits, sym, name, type, mkt });   /* 直接添加该候选 */
   });
 }
 /* 添加单个候选（联想点击用）：查行情 → 入自选 */
@@ -4061,7 +4066,7 @@ async function addWatchOne(cand){
     const h = {
       code: cand.digits,
       name: (d && d.name) || cand.name || cand.digits,
-      market: cand.sym.slice(0, 2) === 'jj' ? '' : cand.sym.slice(0, 2),
+      market: cand.mkt || (cand.sym.slice(0, 2) === 'jj' ? '' : cand.sym.slice(0, 2)),
       type: cand.type || 'stock'
     };
     watchList = watchList.filter(w => w.code !== h.code);
