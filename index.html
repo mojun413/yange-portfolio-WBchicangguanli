@@ -439,6 +439,29 @@ tr.div-row .mono.down{color:#c2185b;font-weight:600}
 .trade-badge.tb-flat{background:#eef2f7;color:#64748b;border:1px solid #e2e8f0}
 #holdTable .hold-amt{font-size:15px;line-height:1.25}
 #holdTable .hold-amt .tag{font-size:13.5px;padding:2px 10px}
+/* 1BK_V68.13.1.015：持仓搜索框 + 联想下拉 + 定位闪烁 */
+.hold-search{position:relative}
+.hold-search-input{width:150px;font-size:12.5px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--text);outline:none;transition:border-color .15s}
+.hold-search-input:focus{border-color:var(--accent);width:180px}
+.hold-search-drop{position:absolute;top:calc(100% + 4px);right:0;z-index:60;min-width:220px;max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.16);overflow:hidden}
+.hs-item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:12.5px}
+.hs-item:hover{background:var(--panel-2)}
+.hs-name{font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hs-code{color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px}
+.hs-tag{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 6px;white-space:nowrap}
+.hs-empty{padding:10px 12px;font-size:12px;color:var(--muted);text-align:center}
+@keyframes hsFlash{0%,100%{background:transparent}25%,75%{background:rgba(255,209,102,.32)}50%{background:rgba(255,209,102,.45)}}
+#holdTable tr.hs-flash{animation:hsFlash 2.2s ease}
+/* 1BK_V68.13.1.015：自选中文搜索联想（watchInput 下拉） */
+.ws-wrap{position:relative}
+.ws-drop{position:absolute;top:calc(100% + 4px);left:0;z-index:60;min-width:250px;max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.16);overflow:hidden}
+.ws-item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:12.5px}
+.ws-item:hover{background:var(--panel-2)}
+.ws-name{font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws-code{color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px}
+.ws-tag{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 6px;white-space:nowrap}
+.ws-tag.in{color:var(--up);border-color:rgba(229,72,77,.3)}
+.ws-empty{padding:10px 12px;font-size:12px;color:var(--muted);text-align:center}
 .chip-src{display:inline-block;font-size:10px;color:#b45309;background:#fff7e8;border:1px solid #ffe0b2;border-radius:6px;padding:1px 6px;font-weight:600;margin-right:3px;vertical-align:1px}
 
 /* 表格：可排序 / 负成本 / 导入态 */
@@ -810,7 +833,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.014</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.015</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -848,6 +871,10 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="panel-sub" id="holdSub"></div>
             <div class="spacer"></div>
             <button class="btn-sm" id="btnSortReset" style="display:none" title="恢复为录入顺序">重置排序</button>
+            <div class="hold-search" id="holdSearchWrap">
+              <input id="holdSearch" class="hold-search-input" placeholder="🔍 搜持仓（名称/代码）" autocomplete="off" />
+              <div class="hold-search-drop" id="holdSearchDrop" style="display:none"></div>
+            </div>
             <label class="check" style="font-size:12px;margin:0 2px" id="lblShowClosed"><input type="checkbox" id="chkShowClosed" style="width:auto;margin:0"> 显示已清仓</label>
             <button class="btn-sm" id="btnImportTable" title="从 Excel / 券商导出表格粘贴或选文件批量导入">导入表格</button>
             <button class="btn-sm" id="btnImportShot" title="粘贴或拖入券商 App 持仓截图，自动识别代码、持股数与成本价">导入截图</button>
@@ -1204,7 +1231,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.014 · 2026-08-11 13:40 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.015 · 2026-08-11 13:50 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1264,8 +1291,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.014';
-const APP_BUILD   = '2026-08-11 13:40';
+const APP_VERSION = '1BK_V68.13.1.015';
+const APP_BUILD   = '2026-08-11 13:50';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1462,6 +1489,10 @@ function setVersionUI(){
   };
 }
 setVersionUI();
+/* 1BK_V68.13.1.015：持仓搜索框绑定（联想 + 定位高亮） */
+try { bindHoldSearch(); } catch(e){}
+/* 1BK_V68.13.1.015：自选输入框中文搜索联想（smartbox） */
+try { bindWatchSuggest(); } catch(e){}
 
 /* 通用弹窗：返回 Promise<按钮 value | null> */
 function dialog({ title, bodyHTML, buttons }){
@@ -3932,6 +3963,115 @@ function splitWatchInput(raw){
   });
   return out;
 }
+/* ===== 自选中文搜索联想（1BK_V68.13.1.015）：watchInput 输入中文/代码 → smartbox 关键词联想下拉 ===== */
+let watchSugTimer = null;
+function bindWatchSuggest(){
+  const inp = document.getElementById('watchInput');
+  if (!inp || inp.dataset.sugBound) return;
+  inp.dataset.sugBound = '1';
+  /* 下拉容器（动态建，挂在输入框下方） */
+  const wrap = document.createElement('div');
+  wrap.className = 'ws-wrap';
+  inp.parentNode.insertBefore(wrap, inp.nextSibling);
+  const drop = document.createElement('div');
+  drop.className = 'ws-drop';
+  wrap.appendChild(drop);
+  const close = () => { drop.style.display = 'none'; drop.innerHTML = ''; };
+  /* smartbox 中文联想：q 支持中文名 / 代码 / 拼音首字母 */
+  const query = q => new Promise(res => {
+    if (!q){ res([]); return; }
+    const s = document.createElement('script');
+    let done = false;
+    const cb = 'v_hint';   /* smartbox 返回 window.v_hint = "sh~512800~名称~py~类型^..." */
+    const fin = () => { if (done) return; done = true; try { delete window[cb]; } catch(e){} try { s.remove(); } catch(e){} res(parseHint()); };
+    window[cb] = () => setTimeout(fin, 0);
+    s.onerror = () => { try { s.remove(); } catch(e){} res([]); };
+    s.src = 'https://smartbox.gtimg.cn/s3/?v=2&q=' + encodeURIComponent(q) + '&t=all&_=' + Date.now();
+    document.head.appendChild(s);
+    setTimeout(fin, 2500);   /* 超时兜底 */
+  });
+  const parseHint = () => {
+    const raw = window.v_hint || '';
+    if (!raw || typeof raw !== 'string') return [];
+    return raw.split('^').filter(Boolean).map(seg => {
+      const f = seg.split('~');
+      if (f.length < 5) return null;
+      return { market: f[0], code: f[1], name: f[2], type: f[4] };
+    }).filter(Boolean);
+  };
+  const render = q => {
+    query(q).then(hits => {
+      const qn = String(q).trim().toLowerCase();
+      if (!qn){ close(); return; }
+      /* 本地自选匹配（中文名/代码）放最前，标记「已在自选」 */
+      const local = watchList.filter(w => {
+        const nm = String(w.name || '').toLowerCase(), cd = String(w.code || '').toLowerCase();
+        return nm.indexOf(qn) >= 0 || cd.indexOf(qn) >= 0 || String(w.code || '').replace(/\D/g, '').indexOf(qn.replace(/\D/g, '')) >= 0;
+      }).slice(0, 3);
+      const remote = hits.filter(h => h && h.code && /^\d{5,6}$/.test(h.code)).slice(0, 8);
+      const items = [
+        ...local.map(w => ({ kind: 'local', name: w.name || w.code, code: w.code, market: w.market || '', type: w.type || 'stock', inWatch: true })),
+        ...remote.map(h => ({ kind: 'remote', name: h.name, code: h.code, market: h.market, type: h.type === 'ETF' ? 'etf' : (h.type === '基金' ? 'fund' : 'stock'), inWatch: watchList.some(w => w.code === h.code) }))
+      ];
+      if (!items.length){ drop.innerHTML = '<div class="ws-empty">未找到相关标的，可输入 6 位代码直接添加</div>'; drop.style.display = 'block'; return; }
+      drop.innerHTML = items.map(it =>
+        '<div class="ws-item" data-code="' + esc(it.code) + '" data-name="' + esc(it.name) + '" data-mkt="' + esc(it.market) + '" data-type="' + esc(it.type) + '">' +
+          '<span class="ws-name">' + esc(it.name) + '</span>' +
+          '<span class="ws-code">' + esc(it.code) + '</span>' +
+          (it.inWatch ? '<span class="ws-tag in">已在自选</span>' : '<span class="ws-tag">' + (it.kind === 'local' ? '自选' : '添加') + '</span>') +
+        '</div>').join('');
+      drop.style.display = 'block';
+    });
+  };
+  inp.addEventListener('input', () => {
+    clearTimeout(watchSugTimer);
+    watchSugTimer = setTimeout(() => render(inp.value), 200);
+  });
+  inp.addEventListener('focus', () => { if (inp.value.trim()) render(inp.value); });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){
+      const first = drop.querySelector('.ws-item');
+      if (first && !first.getAttribute('data-inwatch')) first.click();
+      /* 已有 Enter 添加逻辑，仅当有候选未添加时优先联想选中 */
+      e.preventDefault();
+      e.stopPropagation();
+    } else if (e.key === 'Escape'){ close(); inp.blur(); }
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.ws-wrap')) close(); });
+  drop.addEventListener('click', e => {
+    const item = e.target.closest('.ws-item');
+    if (!item) return;
+    const code = item.getAttribute('data-code');
+    const name = item.getAttribute('data-name');
+    const mkt = item.getAttribute('data-mkt');
+    const type = item.getAttribute('data-type');
+    const inWatch = item.querySelector('.ws-tag.in') !== null;
+    close();
+    if (inWatch){ toast('「' + name + '」已在自选中', 'warn'); return; }
+    const digits = code.replace(/\D/g, '');
+    const sym = quoteSymbol({ code: digits, type: type === 'fund' ? 'fund' : 'stock', market: '' });
+    addWatchOne({ digits, sym, name });   /* 直接添加该候选 */
+  });
+}
+/* 添加单个候选（联想点击用）：查行情 → 入自选 */
+async function addWatchOne(cand){
+  try {
+    const q = await fetchQuotes([cand.sym]);
+    const d = q && q[cand.sym];
+    const h = {
+      code: cand.digits,
+      name: (d && d.name) || cand.name || cand.digits,
+      market: cand.sym.slice(0, 2) === 'jj' ? '' : cand.sym.slice(0, 2),
+      type: cand.type || 'stock'
+    };
+    watchList = watchList.filter(w => w.code !== h.code);
+    watchList.push(h);
+    persistWatch();
+    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();
+    refreshMonitor(true);
+    toast('已添加自选 ' + h.name, 'ok');
+  } catch(e){ toast('添加失败：' + e.message, 'err'); }
+}
 async function addWatch(){
   const inp = document.getElementById('watchInput');
   const raw = (inp ? inp.value : '').trim();
@@ -4555,6 +4695,73 @@ function renderHoldings(){
   const sc = HOLD_COLS.find(c => c.key === sortKey);
   $('#holdSub').textContent = visibleHolds.length + ' 个标的' + (closedN ? '（' + closedN + ' 个已清仓' + (showClosed ? '·已显示' : '·已隐藏') + '）' : '') + ' · 点击行展开流水 · ' +
     (sc ? '已按「' + sc.label + '」' + (sortDir === 'asc' ? '升序' : '降序') : '点表头可排序');
+}
+
+/* ===== 持仓搜索（1BK_V68.13.1.015）：名称/代码模糊联想 + 点击定位高亮 ===== */
+let holdSearchTimer = null;
+function bindHoldSearch(){
+  const input = document.getElementById('holdSearch');
+  const drop = document.getElementById('holdSearchDrop');
+  if (!input || !drop || input.dataset.bound) return;
+  input.dataset.bound = '1';
+  const close = () => { drop.style.display = 'none'; drop.innerHTML = ''; };
+  const norm = s => String(s || '').toLowerCase().replace(/[（()）\s]/g, '');
+  const renderDrop = kw => {
+    const q = norm(kw); if (!q){ close(); return; }
+    /* 匹配全部持仓（含已清仓）：名称包含 / 代码包含 / 代码去非数字后包含 */
+    const hits = state.holdings.filter(h => {
+      const nm = norm(h.name || ''), cd = norm(h.code || ''), cdN = String(h.code || '').replace(/\D/g, '');
+      return nm.indexOf(q) >= 0 || cd.indexOf(q) >= 0 || cdN.indexOf(q) >= 0;
+    }).slice(0, 8);
+    if (!hits.length){ drop.innerHTML = '<div class="hs-empty">未找到匹配标的</div>'; drop.style.display = 'block'; return; }
+    drop.innerHTML = hits.map(h =>
+      '<div class="hs-item" data-id="' + h.id + '">' +
+        '<span class="hs-name">' + esc(h.name || h.code) + '</span>' +
+        '<span class="hs-code">' + esc(fullCode(h).toUpperCase()) + '</span>' +
+        '<span class="hs-tag">' + (h.closed ? '已清仓' : (effType(h.code, h.type, h.typeLocked) === 'fund' ? '场外' : (effType(h.code, h.type, h.typeLocked) === 'etf' ? 'ETF' : '股票'))) + '</span>' +
+      '</div>').join('');
+    drop.style.display = 'block';
+  };
+  input.addEventListener('input', () => {
+    clearTimeout(holdSearchTimer);
+    holdSearchTimer = setTimeout(() => renderDrop(input.value), 120);
+  });
+  input.addEventListener('focus', () => { if (input.value) renderDrop(input.value); });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){
+      const first = drop.querySelector('.hs-item');
+      if (first) first.click();
+      e.preventDefault();
+    } else if (e.key === 'Escape'){ close(); input.blur(); }
+  });
+  document.addEventListener('click', e => {
+    if (e.target.closest('#holdSearchWrap')) return;
+    if (e.target.closest('.hs-item')) return;   /* 走 item 自身 handler */
+    close();
+  });
+  drop.addEventListener('click', e => {
+    const item = e.target.closest('.hs-item');
+    if (!item) return;
+    const id = item.getAttribute('data-id');
+    close();
+    const row = document.querySelector('tr[data-row="' + id + '"]');
+    if (!row){ /* 当前未显示（可能被筛选/排序/隐藏清仓）→ 临时显示并定位 */
+      const h = state.holdings.find(x => String(x.id) === id);
+      if (h && h.closed){ const cb = document.getElementById('chkShowClosed'); if (cb && !cb.checked){ cb.checked = true; renderHoldings(); } }
+      const row2 = document.querySelector('tr[data-row="' + id + '"]');
+      if (!row2) { toast('未找到该标的（可能已被清仓且未显示）', 'warn'); return; }
+      flashRow(row2);
+    } else flashRow(row);
+    input.value = ''; input.blur();
+  });
+}
+/* 定位并高亮目标行（闪烁背景 + 滚动到可视区） */
+function flashRow(row){
+  row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  row.classList.remove('hs-flash');
+  void row.offsetWidth;             /* 重触发动画 */
+  row.classList.add('hs-flash');
+  setTimeout(() => row.classList.remove('hs-flash'), 2200);
 }
 
 /* 做T参考排序取值：三角标记后的百分比 = (现价 − 最近一次加/减仓成交价) / 成交价 × 100。无行情或无流水返回 NaN（排序时沉底） */
