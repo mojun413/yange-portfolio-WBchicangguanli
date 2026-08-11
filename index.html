@@ -786,7 +786,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.14.0</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.001</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1180,7 +1180,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.14.0 · 2026-08-11 09:21 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.001 · 2026-08-11 09:33 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（腾讯文档同步已停用）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1188,7 +1188,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnSettings2">打开设置</button></div></div>
             <div class="setting-row"><div><div class="t">布局</div><div class="d">底部导航常驻（总览/盯盘/做T/统计/清仓/分析/仓位/心法/设置）· 手机端横向滑动</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><span class="dim" style="font-size:12px">方案 B</span></div></div>
-            <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">同步全部数据：持仓(含流水/满仓金额/手动类型)、仓位目标金额、盯盘自选、做T台账、每日操作、设置、清仓结算、资产快照。每日 15:05 自动一次，其余时间手动「本机覆盖云端」；自选与仓位目标修改即时上云</div></div>
+            <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">同步全部数据：持仓(含流水/满仓金额/手动类型)、仓位目标金额、盯盘自选、做T台账、每日操作、设置、清仓结算、资产快照。每日 15:05 自动一次，其余时间手动「本机覆盖云端」/「云端覆盖本机」；v68.13.1.001 起已关闭即时上云，自选/仓位目标改完需手动同步</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
                 <button class="btn-sm" id="btnCloudCfg" title="填写 Supabase 项目的 URL 与 anon key">云同步设置</button>
                 <button class="btn-sm" id="btnDevNames" title="给各设备起名（如我的平板），跨设备共享">设备命名</button>
@@ -1240,8 +1240,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.14.0';
-const APP_BUILD   = '2026-08-11 09:21';
+const APP_VERSION = '1BK_V68.13.1.001';
+const APP_BUILD   = '2026-08-11 09:33';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3818,7 +3818,7 @@ async function addWatch(){
       ok.push(q.name || x.digits);
     });
     persistWatch();
-    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* v53.22：自选即时上云，清缓存可恢复 */
+    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* 即时上云已关闭（v68.13.1.001）：改完手动「本机覆盖云端」 */
     if (inp) inp.value = '';
     await refreshMonitor(true);
     toast(ok.length ? '已添加自选 ' + ok.length + ' 个' + (fail.length ? '；未成功 ' + fail.length + '（' + fail.join('、') + '）' : '') : '添加失败：' + fail.join('、'), ok.length ? (fail.length ? 'warn' : 'ok') : 'err');
@@ -3829,7 +3829,7 @@ async function addWatch(){
 function removeWatch(code){
   watchList = watchList.filter(w => w.code !== code);
   persistWatch();
-  if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* v53.22：自选即时上云 */
+  if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* 即时上云已关闭（v68.13.1.001）：改完手动「本机覆盖云端」 */
   refreshMonitor(true);
   toast('已移除自选', 'ok');
 }
@@ -5363,7 +5363,7 @@ function bind(){
   $('#posTotalTarget') && ($('#posTotalTarget').onchange = e => {
     state.settings.totalTarget = Math.max(0, Number(e.target.value) || 0);
     persist.settings(); renderPosition();
-    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* v53.32：总仓位目标即时上云（与自选一致） */
+    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* 即时上云已关闭（v68.13.1.001）：改完手动「本机覆盖云端」 */
   });
   document.addEventListener('change', e => {
     const el = e.target;
@@ -7884,23 +7884,19 @@ function scheduleCloudPush(){
   clearTimeout(cloud.pushTimer); cloud.pushTimer = null;   /* 明确取消旧版自动推送 */
   try { renderCloudStatus(); } catch(e){}
 }
-/* ===== 自选等轻量数据即时上云（v53.22）=====
-   自选增删后 debounce 600ms 单向「本机 → 云端」推送：云端始终保留最新自选，
-   即使清空浏览器缓存 / 换设备，cloudInit → cloudPull → applyCloudSnapshot 也能把自选恢复回来。
-   与 v53.1「核心数据不自动推送」策略不冲突：仅自选这类高频小改动即时上云。 */
+/* ===== 轻量即时上云已关闭（1BK_V68.13.1.001）=====
+   原 v53.22 行为：自选增删 / 改总仓位目标后 debounce 600ms 自动推送云端。
+   用户明确要求关闭：自选/仓位目标改动后**不再自动推上云端**。
+   同步改为全手动：本机改完 → 手动点「本机覆盖云端」；其他设备 → 手动点「云端覆盖本机」拉取。
+   保留函数占位（isSeedBase 等判断仍被调用方引用），但一律不安排自动推送。 */
 let fastPushTimer = null;
 async function pushCloudNow(){
-  try {
-    if (!cloud.client) await cloudInit();
-    if (cloud.client && !isSeedBase()) await cloudPush();   /* 1BK_V68.13.6：种子态禁止即时上云 */
-  } catch(e){ /* 静默 */ }
+  /* 1BK_V68.13.1.001：即时上云已关闭——本函数不再被调度（保留定义兼容引用） */
+  return;
 }
 function scheduleFastCloudPush(){
-  if (cloud.suppressPush) return;
-  if (!cloud.cfg.enabled || !cloud.cfg.supabaseUrl) return;
-  if (isSeedBase()) return;   /* 1BK_V68.13.6：种子态不安排即时推送 */
-  if (fastPushTimer) clearTimeout(fastPushTimer);
-  fastPushTimer = setTimeout(pushCloudNow, cloud.cfg.pushDebounceMs || 600);
+  /* 1BK_V68.13.1.001：即时上云已关闭——自选增删 / 总仓位目标改动不再自动推云端，改为手动「本机覆盖云端」 */
+  return;
 }
 /* 清空「待同步」计数（推送成功 / 应用云端快照后调用） */
 function clearCloudPending(){ cloud.state.pending = 0; cloud.state.pendingSince = 0; cloud.state.remoteNewer = false; }
