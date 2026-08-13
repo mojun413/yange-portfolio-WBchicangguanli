@@ -838,7 +838,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.022</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.023</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1236,7 +1236,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.022 · 2026-08-13 14:19 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.023 · 2026-08-13 14:35 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1296,8 +1296,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.022';
-const APP_BUILD   = '2026-08-13 14:19';
+const APP_VERSION = '1BK_V68.13.1.023';
+const APP_BUILD   = '2026-08-13 14:35';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2186,7 +2186,16 @@ let ticking = false;
 async function tickQuotes(force){
   if (ticking || document.hidden) return;
   /* v53.1：非交易时间完全不刷新（零请求）。force=true 仅供手动刷新/自检穿透 */
-  if (!force && !isTradingTime()){ renderMarketStatus(); return; }
+  if (!force && !isTradingTime()){
+    /* v68.14.3：收盘后自动移出清仓标的（当天清仓当天仍显示，收盘后首个 tick 即移出） */
+    const _closedN = autoCloseAfterMarket();
+    if (_closedN){
+      if (typeof toast === 'function') toast('已收盘 · 自动移出 ' + _closedN + ' 个清仓标的', 'ok');
+      renderAll();
+      return;
+    }
+    renderMarketStatus(); return;
+  }
   renderMarketStatus();          /* 阶段切换（休市→交易中）时同步副标题文案 */
   const syms = new Set();
   state.holdings.forEach(h => syms.add(quoteSymbol(h)));
@@ -5593,6 +5602,8 @@ function syncSettleUI(){
 /* ============================ 渲染入口 ============================ */
 function renderAll(){
   lastRenderAllAt = Date.now();   /* v53.1：记录全量重绘时刻，供 markDataChanged 兜底判重 */
+  /* v68.14.3：收盘后自动移出清仓标的（盘中不动；非交易时段每次重绘前兜底清理） */
+  autoCloseAfterMarket();
   renderOverview(); renderHoldings(); renderSettlement(); renderOps(); renderTrades(); renderStats(); renderPosition(); renderAnalysis(); refreshTargetSelect();
   document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
 }
@@ -8185,6 +8196,14 @@ function autoRemoveClosed(minShares){
   });
   if (removed) persist.holdings();
   return removed;
+}
+/* 收盘后自动把清仓标的移出持仓列表（v68.14.3）
+   判定：非交易时段（已收盘/午休/周末）且「份额归零 + 有卖出流水」→ 标 closed → 列表/行情卡隐藏。
+   盘中不清：当天清仓当天仍显示（可核对当日盈亏），收盘后打开/刷新/轮询时自动移出。
+   返回本次移出数量；0 时无副作用（调用方可据此决定是否重绘）。 */
+function autoCloseAfterMarket(){
+  if (isTradingTime()) return 0;
+  return autoRemoveClosed();
 }
 
 /* ============================ 云端数据库同步（Supabase）============================
