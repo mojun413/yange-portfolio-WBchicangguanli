@@ -693,6 +693,11 @@ th.sorted .si{opacity:1}
 .kl-tabs .kt{padding:4px 14px;font-size:12.5px;font-weight:600;color:var(--muted);border-radius:7px;cursor:pointer;user-select:none;transition:.15s;white-space:nowrap}
 .kl-tabs .kt:hover{color:var(--text);background:rgba(255,255,255,.7)}
 .kl-tabs .kt.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.35)}
+.kl-zoom{display:inline-flex;align-items:center;gap:2px;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:3px;font-size:12px;color:var(--muted);user-select:none}
+.kl-zoom button{border:0;background:transparent;width:28px;height:24px;border-radius:6px;cursor:pointer;font-size:15px;font-weight:700;color:var(--text);line-height:1;padding:0;transition:.15s}
+.kl-zoom button:hover{background:rgba(255,255,255,.7)}
+.kl-zoom button:disabled{opacity:.32;cursor:default;background:transparent}
+.kl-zoom .zl{min-width:132px;text-align:center;font-size:11px;color:var(--muted);white-space:nowrap}
 .setting-row{display:grid;grid-template-columns:1fr 160px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px dashed var(--line-2)}
 .setting-row:last-child{border-bottom:none}
 .setting-row .t{font-size:13.5px;font-weight:600}
@@ -833,7 +838,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.019</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.020</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1231,7 +1236,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.019 · 2026-08-12 12:10 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.020 · 2026-08-13 13:41 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1291,8 +1296,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.019';
-const APP_BUILD   = '2026-08-12 12:10';
+const APP_VERSION = '1BK_V68.13.1.020';
+const APP_BUILD   = '2026-08-13 13:41';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4121,9 +4126,10 @@ function cycleMonitorSort(){
    数据源：https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=<sym>,day,,,<n>,qfq
    返回 data[sym].qfqday = [[date, open, close, high, low, volume], ...]（前复权日K） */
 function klineJsonp(sym, period, count){
-  /* 腾讯前复权K线：period = day | week | month；count 根数（日K 200 够画 MA60） */
+  /* 腾讯前复权K线：period = day | week | month；count 根数
+     日K 500 根 ≈ 2 年（约 488 交易日），够画 MA60 + 两年前景（v68.14 起） */
   const p = period || 'day';
-  const days = count || (p === 'day' ? 200 : (p === 'week' ? 120 : 80));
+  const days = count || (p === 'day' ? 500 : (p === 'week' ? 120 : 80));
   /* 策略：JSONP 为主，3秒超时后自动降级为 fetch（绕过 script 注入问题） */
   return new Promise((resolve, reject) => {
     let done = false;
@@ -4165,11 +4171,13 @@ function fmtVol(v){
   if (v >= 1e4) return (v / 1e4).toFixed(1) + '万';
   return String(Math.round(v));
 }
+/* K线图布局常量（klineSVG / bindKlineCross / 缩放平移共用，改一处全局生效；v68.14 padL 56→64 容纳4位小数Y轴） */
+const KL = { W:720, H:540, padL:64, padR:16, padT:30, padB:34, volArea:66, volGap:12, macdArea:92, macdGap:10 };
 /* 同花顺风格 K 线 SVG：周期切换 + MA5/10/20/60 多均线 + 成交量副图 + 十字光标读数 */
 function klineSVG(rows, name, period){
   /* 1BK_V68.13.1.017：H 430→540，新增 MACD 副图（92px），VOL 加 MA5/10 量均线，悬浮面板加 MACD */
-  const W = 720, H = 540, padL = 56, padR = 16, padT = 30, padB = 34;
-  const volArea = 66, volGap = 12, macdArea = 92, macdGap = 10;
+  const W = KL.W, H = KL.H, padL = KL.padL, padR = KL.padR, padT = KL.padT, padB = KL.padB;
+  const volArea = KL.volArea, volGap = KL.volGap, macdArea = KL.macdArea, macdGap = KL.macdGap;
   const n = rows.length;
   if (!n) return '';
   const up = '#e5484d', down = '#15a34a', flat = '#8a93a6';
@@ -4230,7 +4238,7 @@ function klineSVG(rows, name, period){
     const v = hi - range * i / 4;
     const y = yOf(v);
     gridY += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#eef0f5" stroke-width="1"/>';
-    yLbl += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + v.toFixed(2) + '</text>';
+    yLbl += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + v.toFixed(4) + '</text>';
   }
   gridY += '<line x1="' + padL + '" y1="' + (volTop - 2) + '" x2="' + (W - padR) + '" y2="' + (volTop - 2) + '" stroke="#eef0f5" stroke-width="1"/>';
   gridY += '<line x1="' + padL + '" y1="' + (macdTop - 2) + '" x2="' + (W - padR) + '" y2="' + (macdTop - 2) + '" stroke="#eef0f5" stroke-width="1"/>';
@@ -4269,10 +4277,10 @@ function klineSVG(rows, name, period){
   const chgC = chg > 0 ? up : (chg < 0 ? down : flat);
   const pName = { day:'日K', week:'周K', month:'月K' }[period] || '日K';
   const title = '<text x="' + padL + '" y="' + (padT - 8) + '" font-size="13.5" font-weight="700" fill="#161a22">' + esc(name) + ' · ' + pName + '（前复权）</text>' +
-    '<text x="' + (W - padR) + '" y="' + (padT - 8) + '" text-anchor="end" font-size="12.5" font-weight="700" fill="' + chgC + '">' + last.close.toFixed(2) + '  ' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</text>';
+    '<text x="' + (W - padR) + '" y="' + (padT - 8) + '" text-anchor="end" font-size="12.5" font-weight="700" fill="' + chgC + '">' + last.close.toFixed(4) + '  ' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</text>';
   const leg = k => {
     const v = maLast(k);
-    return '<text x="' + (W - padR) + '" y="' + (padT + 10 + [0, 13, 26, 39][[5,10,20,60].indexOf(k)]) + '" text-anchor="end" font-size="10" fill="' + maCols[k] + '">MA' + k + (isFinite(v) ? ':' + v.toFixed(2) : '') + '</text>';
+    return '<text x="' + (W - padR) + '" y="' + (padT + 10 + [0, 13, 26, 39][[5,10,20,60].indexOf(k)]) + '" text-anchor="end" font-size="10" fill="' + maCols[k] + '">MA' + k + (isFinite(v) ? ':' + v.toFixed(4) : '') + '</text>';
   };
   const legend = leg(5) + leg(10) + leg(20) + leg(60) +
     '<text x="' + (W - padR) + '" y="' + (volTop + 12) + '" text-anchor="end" font-size="9.5" fill="#607d8b">VOL5 ' + fmtVol(vma5.lastV) + '</text>' +
@@ -4302,8 +4310,8 @@ function klineSVG(rows, name, period){
 function bindKlineCross(svg, rows){
   if (!svg || !rows.length) return;
   /* 1BK_V68.13.1.017：H 430→540（MACD 副图），竖线贯穿全图，悬浮面板加 MACD */
-  const W = 720, H = 540, padL = 56, padR = 16, padT = 30, padB = 34;
-  const volArea = 66, volGap = 12, macdArea = 92, macdGap = 10;
+  const W = KL.W, H = KL.H, padL = KL.padL, padR = KL.padR, padT = KL.padT, padB = KL.padB;
+  const volArea = KL.volArea, volGap = KL.volGap, macdArea = KL.macdArea, macdGap = KL.macdGap;
   const n = rows.length, cw = (W - padL - padR) / n;
   const cross = svg.querySelector('#klCross'), vl = svg.querySelector('#klVL'),
     hl = svg.querySelector('#klHL'), dot = svg.querySelector('#klDot');
@@ -4344,7 +4352,7 @@ function bindKlineCross(svg, rows){
       const prev = i > 0 ? rows[i - 1].close : r.open;
       const d = prev > 0 ? (r.close - prev) / prev * 100 : 0;
       const dC = d > 0 ? 'var(--up)' : (d < 0 ? 'var(--down)' : 'var(--flat)');
-      const maV = k => { if (i + 1 < k) return '—'; let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].close; return (s / k).toFixed(2); };
+      const maV = k => { if (i + 1 < k) return '—'; let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].close; return (s / k).toFixed(4); };
       /* MACD 计算（与 klineSVG 同口径：12/26/9） */
       const ema = (arr, k) => { const out = []; let v = arr[0]; arr.forEach((x, j) => { v = j ? v + (x - v) * 2 / (k + 1) : x; out.push(v); }); return out; };
       const closes = rows.map(r => r.close);
@@ -4360,16 +4368,30 @@ function bindKlineCross(svg, rows){
       };
       infoT.appendChild(mk(String(r.date), 8, null, 0, 700));
       infoT.appendChild(mk((d >= 0 ? '+' : '') + d.toFixed(2) + '%', 118, dC, 0, 700));
-      infoT.appendChild(mk('开 ' + r.open.toFixed(2), 8, null, 14, null));
-      infoT.appendChild(mk('高 ' + r.high.toFixed(2), null, 'var(--up)', null, 700));
-      infoT.appendChild(mk('低 ' + r.low.toFixed(2), null, 'var(--down)', null, 700));
-      infoT.appendChild(mk('收 ' + r.close.toFixed(2), null, null, null, 700));
+      infoT.appendChild(mk('开 ' + r.open.toFixed(4), 8, null, 14, null));
+      infoT.appendChild(mk('高 ' + r.high.toFixed(4), null, 'var(--up)', null, 700));
+      infoT.appendChild(mk('低 ' + r.low.toFixed(4), null, 'var(--down)', null, 700));
+      infoT.appendChild(mk('收 ' + r.close.toFixed(4), null, null, null, 700));
       infoT.appendChild(mk('量 ' + fmtVol(r.vol) + '  MA5 ' + maV(5) + '  MA10 ' + maV(10), 8, null, 14, null));
       infoT.appendChild(mk('MA20 ' + maV(20) + '  MA60 ' + maV(60), 8, null, 14, null));
       infoT.appendChild(mk('DIF ' + difV + '  DEA ' + deaV + '  MACD ' + macdV, 8, null, 14, null));
     }
   });
   svg.addEventListener('mouseleave', hide);
+}
+
+/* K线缩放步进（纯函数，v68.14）：view={start,end}（索引），factor<1 放大、>1 缩小，
+   anchor∈[0,1] 缩放锚点（数据区相对位置，0=最左/最早），返回新 view。
+   保证区间 ≥ minView 根、不越界、不缩过全量 */
+function klineZoomView(view, total, factor, anchor, minView){
+  const mv = Math.max(1, Math.min(total, minView || 30));
+  const range = view.end - view.start;
+  let newRange = Math.round(range * factor);
+  newRange = Math.max(mv, Math.min(total, newRange));
+  const a = Math.max(0, Math.min(1, anchor == null ? 0.5 : anchor));
+  let s = Math.round(view.start + range * a - newRange * a);
+  s = Math.max(0, Math.min(total - newRange, s));
+  return { start: s, end: s + newRange };
 }
 
 /* 打开 K 线弹窗（总览实时行情：持仓索引 → 与 renderLive 同口径列表） */
@@ -4387,7 +4409,8 @@ function openKlineByCode(code){
   const c = String(code).replace(/\D/g, '');
   showKlineDialog(w.name || code, watchSym(w));
 }
-/* K 线弹窗：周期切换（日K/周K/月K）+ loading → 同花顺风格 SVG + 十字光标 */
+/* K 线弹窗：周期切换（日K/周K/月K）+ 缩放平移 + loading → 同花顺风格 SVG + 十字光标
+   v68.14：日K 500 根（≈2年）；滚轮锚点缩放 / 拖拽平移 / +−↺ 按钮；开高低收 4 位小数 */
 function showKlineDialog(name, sym){
   const isFund = String(sym).slice(0, 2) === 'jj';
   const mask = document.createElement('div');
@@ -4400,13 +4423,19 @@ function showKlineDialog(name, sym){
         '<span class="kt" data-p="week">周K</span>' +
         '<span class="kt" data-p="month">月K</span>' +
       '</div>' +
+      '<div class="kl-zoom" title="滚轮缩放 · 按住拖拽平移">' +
+        '<button id="klZoomOut" title="缩小">−</button>' +
+        '<span class="zl" id="klZoomLbl">加载中…</span>' +
+        '<button id="klZoomIn" title="放大">＋</button>' +
+        '<button id="klZoomReset" title="复位（显示全部）">↺</button>' +
+      '</div>' +
     '</div>' +
     '<div class="mb" id="klBody" style="text-align:center;padding:22px">' + (isFund ? '<div class="dim" style="padding:20px">场外基金无K线行情</div>' : '<span class="spin"></span> 加载K线数据…') + '</div>' +
     '<div class="mf"><button class="btn-primary">关闭</button></div></div>';
   let refreshTimer = null;                 /* 弹窗内自动刷新定时器（K线 60s），关闭即停 */
   const clearRefresh = () => { clearTimeout(refreshTimer); refreshTimer = null; };
-  const close = () => { clearRefresh(); mask.remove(); document.removeEventListener('keydown', onKey); };
-  mask.querySelector('button').onclick = close;
+  const close = () => { clearRefresh(); mask.remove(); document.removeEventListener('keydown', onKey); document.removeEventListener('mousemove', onDragMove); document.removeEventListener('mouseup', onDragEnd); };
+  mask.querySelector('.mf button').onclick = close;
   mask.addEventListener('mousedown', e => { if (e.target === mask) close(); });
   const onKey = e => { if (e.key === 'Escape') close(); };
   document.addEventListener('keydown', onKey);
@@ -4414,7 +4443,78 @@ function showKlineDialog(name, sym){
   if (isFund) return;
   const body = mask.querySelector('#klBody');
   const tabs = mask.querySelector('#klTabs');
+  const zoomInBtn = mask.querySelector('#klZoomIn'), zoomOutBtn = mask.querySelector('#klZoomOut'),
+    zoomResetBtn = mask.querySelector('#klZoomReset'), zoomLbl = mask.querySelector('#klZoomLbl');
   let loading = false;
+  let periodNow = 'day';
+  let baseRows = [];                 /* 全量K线（当前周期） */
+  let view = { start: 0, end: 0 };   /* 当前可见区间（索引） */
+  let holder = null;                 /* SVG 容器（复用，重渲染不重建） */
+  let drag = null;                   /* 拖拽平移状态 */
+  let rafId = null;
+  const MIN_VIEW = 30;               /* 最小显示根数（保证可读） */
+  const renderSoon = () => { if (rafId) return; rafId = requestAnimationFrame(() => { rafId = null; renderKline(); }); };
+  const zoomBy = (factor, anchor) => { view = klineZoomView(view, baseRows.length, factor, anchor, MIN_VIEW); renderKline(); };
+  const zoomReset = () => { view = { start: 0, end: baseRows.length }; renderKline(); };
+  /* 渲染当前可见区间：切片后重新生成 SVG + 重绑交互 + 更新缩放指示 */
+  function renderKline(){
+    if (!holder || !baseRows.length) return;
+    const vis = baseRows.slice(view.start, view.end);
+    holder.innerHTML = klineSVG(vis, name, periodNow);
+    const svg = holder.firstElementChild;
+    if (!svg) return;
+    bindKlineCross(svg, vis);
+    bindKlineZoom(svg);
+    if (zoomOutBtn) zoomOutBtn.disabled = (view.end - view.start) >= baseRows.length;
+    if (zoomInBtn) zoomInBtn.disabled = (view.end - view.start) <= MIN_VIEW;
+    if (zoomLbl){
+      if (view.start === 0 && view.end === baseRows.length){
+        zoomLbl.textContent = '全量 ' + baseRows.length + ' 根';
+      } else {
+        const d0 = String(baseRows[view.start].date).slice(5), d1 = String(baseRows[view.end - 1].date).slice(5);
+        zoomLbl.textContent = (view.end - view.start) + '/' + baseRows.length + '根 · ' + d0 + '~' + d1;
+      }
+    }
+  }
+  /* 缩放/平移交互：滚轮以鼠标为锚点缩放；按住左键拖拽平移（document 级监听，重渲染不断拖） */
+  function bindKlineZoom(svg){
+    svg.addEventListener('wheel', e => {
+      e.preventDefault();
+      const rect = svg.getBoundingClientRect();
+      if (!rect.width) return;
+      const px = (e.clientX - rect.left) / rect.width * KL.W;
+      const anchor = Math.max(0, Math.min(1, (px - KL.padL) / (KL.W - KL.padL - KL.padR)));
+      zoomBy(e.deltaY < 0 ? 0.72 : 1.39, anchor);
+    }, { passive: false });
+    svg.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      drag = { x: e.clientX, start: view.start, moved: false };
+      e.preventDefault();
+    });
+  }
+  const onDragMove = e => {
+    if (!drag) return;
+    if (!drag.moved && Math.abs(e.clientX - drag.x) > 4) drag.moved = true;
+    if (!drag.moved) return;
+    const svg = holder ? holder.querySelector('svg') : null;
+    if (svg){
+      const cross = svg.querySelector('#klCross'), info = svg.querySelector('#klInfo');
+      if (cross) cross.style.display = 'none'; if (info) info.style.display = 'none';
+    }
+    const rect = holder.getBoundingClientRect();
+    if (!rect.width) return;
+    const range = view.end - view.start;
+    const dxSvg = (e.clientX - drag.x) / rect.width * KL.W;
+    const delta = Math.round(dxSvg * range / (KL.W - KL.padL - KL.padR));
+    let s = drag.start - delta;             /* 向左拖（dxSvg<0）→ 看更晚数据，start 增大 */
+    s = Math.max(0, Math.min(baseRows.length - range, s));
+    view.start = s; view.end = s + range;
+    document.body.style.cursor = 'grabbing';
+    renderSoon();
+  };
+  const onDragEnd = () => { if (drag){ drag = null; document.body.style.cursor = ''; } };
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup', onDragEnd);
   /* 自动刷新调度：日/周/月K 60 秒（v68.13.9 已移除分时图与 2 秒轮询）；弹窗隐藏时暂停；
      1BK_V68.13.1.009：非交易时段冻结不轮询（K线数据休市不变，省请求） */
   const schedule = (period) => {
@@ -4428,6 +4528,7 @@ function showKlineDialog(name, sym){
   const load = (period, silent) => {
     if (loading) return;
     loading = true;
+    periodNow = period;
     if (!silent) body.innerHTML = '<span class="spin"></span> 加载' + ({day:'日K', week:'周K', month:'月K'})[period] + '…';
     klineJsonp(sym, period).then(data => {
       const rows = parseKline(data, sym, period);
@@ -4435,11 +4536,17 @@ function showKlineDialog(name, sym){
         if (!silent) body.innerHTML = '<div class="dim" style="padding:20px">K线数据拉取失败（' + esc(sym) + '）</div>';
         loading = false; schedule(period); return;
       }
-      const holder = document.createElement('div');
-      holder.innerHTML = klineSVG(rows, name, period);
-      if (silent){ const old = body.querySelector('svg'); if (old) old.remove(); } else { body.innerHTML = ''; }
-      body.appendChild(holder.firstElementChild);
-      bindKlineCross(body.firstElementChild, rows);
+      const wasAtEnd = view.end >= baseRows.length;   /* 上次是否已看到最新一根 */
+      baseRows = rows;
+      if (!view.end || wasAtEnd) view.end = rows.length;   /* 首次 / 已看最新 → 全量跟随 */
+      if (view.start >= rows.length) view.start = Math.max(0, rows.length - MIN_VIEW);
+      if (view.end - view.start < MIN_VIEW){ view.start = 0; view.end = rows.length; }
+      if (!holder){
+        holder = document.createElement('div');
+        body.innerHTML = '';
+        body.appendChild(holder);
+      }
+      renderKline();
       loading = false;
       schedule(period);
     }).catch(e => {
@@ -4448,11 +4555,15 @@ function showKlineDialog(name, sym){
       schedule(period);
     });
   };
+  if (zoomInBtn) zoomInBtn.onclick = () => zoomBy(0.72, 0.5);
+  if (zoomOutBtn) zoomOutBtn.onclick = () => zoomBy(1.39, 0.5);
+  if (zoomResetBtn) zoomResetBtn.onclick = zoomReset;
   tabs.querySelectorAll('.kt').forEach(t => {
     t.onclick = () => {
       tabs.querySelectorAll('.kt').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
       clearRefresh();
+      view = { start: 0, end: 0 };   /* 切换周期重置视图 */
       load(t.dataset.p);
     };
   });
