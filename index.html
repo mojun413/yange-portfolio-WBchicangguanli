@@ -284,6 +284,8 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .conc-row .conc-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .conc-bar{height:10px;background:var(--panel-2);border-radius:6px;overflow:hidden}
 .conc-bar span{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:6px;transition:width .2s}
+.conc-bar span.pos{background:linear-gradient(90deg,var(--up),#f87171)}
+.conc-bar span.neg{background:linear-gradient(90deg,var(--down),#34d399)}
 .conc-row.warn .conc-bar span{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
 .conc-row.crit .conc-bar span{background:linear-gradient(90deg,#ef4444,#f87171)}
 .conc-row.warn .conc-pct{color:#d97706;font-weight:700}
@@ -879,7 +881,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.036</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.037</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -935,6 +937,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
               <div class="field"><label class="fl">建仓日期</label><input id="h_date" type="date"></div>
               <div class="field"><label class="fl">买入价</label><input id="h_price" type="number" step="0.0001" min="0" placeholder="自动填现价"></div>
               <div class="field"><label class="fl">股数/份额</label><input id="h_shares" type="number" step="0.01" min="0" placeholder="留空=仅建标的"></div>
+              <div class="field"><label class="fl">成交金额（自动）</label><input id="h_amount" type="number" step="0.01" min="0" readonly placeholder="价×量"></div>
               <div class="field"><label class="fl">手续费</label><input id="h_fee" type="number" step="0.01" min="0" data-auto-fee="1" placeholder="自动计算"></div>
               <div class="form-actions"><button class="btn-primary" id="btnAddHold">添加</button><button id="btnQuery">查询行情</button></div>
             </div>
@@ -1278,7 +1281,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.036 · 2026-08-14 23:13 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.037 · 2026-08-14 23:39 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1338,8 +1341,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.036';
-const APP_BUILD   = '2026-08-14 23:13';
+const APP_VERSION = '1BK_V68.13.1.037';
+const APP_BUILD   = '2026-08-14 23:39';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2838,6 +2841,30 @@ function industryAgg(){
 }
 
 /* ---------- 行业自动识别（A股全栈数据技能：东财申万行业 f127；基金按名称主题词推断）---------- */
+/* 1BK_V68.13.1.037：持仓类型分布面板（股票/ETF/基金/港股 按当前市值占比饼图 + 明细表） */
+function typeDistHTML(){
+  const m = {}; let total = 0;
+  state.holdings.forEach(h => {
+    if (h.closed) return;
+    const c = calcHolding(h);
+    if (c.shares <= 1e-8) return;
+    if (!isFinite(c.mv) || c.mv <= 0) return;
+    const t = effType(h.code, h.type, h.typeLocked);
+    const label = ({ stock:'股票', etf:'场内ETF', fund:'场外基金', hk:'港股' })[t] || '其他';
+    m[label] = (m[label] || 0) + c.mv; total += c.mv;
+  });
+  const segs = Object.keys(m).map(k => ({ label:k, value:m[k], pct: total > 0 ? m[k] / total * 100 : 0 })).sort((a, b) => b.value - a.value);
+  const rows = segs.map((s, i) =>
+    '<tr><td class="l"><span class="dot" style="background:' + POS_PALETTE[i % POS_PALETTE.length] + '"></span>' + esc(s.label) + '</td>' +
+    '<td class="mono">' + money(s.value) + '</td><td class="mono">' + s.pct.toFixed(3) + '%</td>' +
+    '<td class="mono"><div class="bar-in" style="width:' + Math.min(100, s.pct).toFixed(3) + '%"></div></td></tr>').join('');
+  return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>持仓类型分布</div>' +
+    '<div class="panel-sub">按当前持仓市值分类型占比</div></div>' +
+    '<div class="panel-body"><div class="an-cols"><div class="an-pie">' + pieSVG(segs) + '</div>' +
+    '<div class="an-table"><table class="tbl"><thead><tr><th class="l">类型</th><th>市值</th><th>占比</th><th></th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="4" class="dim">—</td></tr>') + '</tbody></table></div></div></div>';
+}
+
 function parseIndustryFromEastmoney(d){
   try { const v = d && d.data && d.data.f127; return (typeof v === 'string' && v.trim()) ? v.trim() : ''; } catch(e){ return ''; }
 }
@@ -3510,7 +3537,9 @@ function renderAnalysis(){
     '<button class="btn-sm" id="btnRefreshIndCon" title="重新识别全部持仓的申万行业 + 概念标签（行业=东财数据中心申万一级，概念=离线概念表+名称推断）">刷新行业/概念</button>' +
     '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 仅统计当前持仓标的 · 行业取自申万一级行业（东财数据中心，v68.13.8）</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
+    typeDistHTML() +
     concPanelHTML() +
+    pnlContribHTML() +
     oneBKReviewHTML() +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>月度复盘</div>' +
     '<div class="panel-sub">近 2 个月资金进出 / 做T收益 / 操作标的（1BK_V68.13.1.012）</div></div>' +
@@ -3612,6 +3641,30 @@ function oneBKReviewHTML(){
     '<div class="panel-body"><div class="bk-list">' + items + '</div>' +
     '<div class="hint" style="margin-top:8px">评分越高 = 当前越符合「四毛买一块」的逆势价值姿态；深度浮亏且分散的标的是典型逆势买点窗口。</div></div></div>';
 }
+/* 1BK_V68.13.1.037：单标的收益贡献面板（按浮动盈亏排序横向条形，红涨绿跌） */
+function pnlContribHTML(){
+  const agg = openAggregate();
+  const total = (isFinite(agg.mv) && agg.mv > 0) ? agg.mv : 0;
+  const rows = state.holdings.filter(h => !h.closed).map(h => ({ h, c: calcHolding(h) }))
+    .filter(x => isFinite(x.c.floatPnl))
+    .sort((a, b) => b.c.floatPnl - a.c.floatPnl);
+  if (!rows.length) return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>单标的收益贡献</div></div><div class="panel-body dim">暂无持仓数据</div></div>';
+  const maxAbs = Math.max.apply(null, rows.map(x => Math.abs(x.c.floatPnl)).concat([1]));
+  const items = rows.map(x => {
+    const v = x.c.floatPnl, w = Math.max(2, Math.abs(v) / maxAbs * 100);
+    const cls = v >= 0 ? 'pos' : 'neg';
+    return '<div class="conc-row">' +
+      '<div class="conc-name" title="' + esc(x.h.name || x.h.code) + '">' + esc(x.h.name || x.h.code) + '</div>' +
+      '<div class="conc-bar"><span class="' + cls + '" style="width:' + w.toFixed(2) + '%"></span></div>' +
+      '<div class="conc-pct mono ' + (v >= 0 ? 'up' : 'down') + '">' + sign2(v) + '</div><div></div>' +
+      '</div>';
+  }).join('');
+  const totalPnl = rows.reduce((s, x) => s + x.c.floatPnl, 0);
+  return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>单标的收益贡献</div>' +
+    '<div class="panel-sub">按浮动盈亏排序 · 红=贡献盈利 / 绿=拖累（合计 ' + sign2(totalPnl) + '）</div></div>' +
+    '<div class="panel-body"><div class="conc-list">' + items + '</div></div></div>';
+}
+
 function kpi2(label, val, clsN){ return '<div class="kpi-card"><div class="k">' + label + '</div><div class="v ' + (clsN || '') + '">' + val + '</div></div>'; }
 
 /* ============================ 祖训纪律引擎（规则引擎） ============================
@@ -6171,9 +6224,10 @@ function bind(){
   /* --- 新增持仓（支持自动费率）--- */
   // 价格/股数变动 → 自动填充手续费
   const autoFeeInputs = () => {
-    const typeEl = $('#h_type'), priceEl = $('#h_price'), sharesEl = $('#h_shares'), feeEl = $('#h_fee'), codeEl = $('#h_code');
+    const typeEl = $('#h_type'), priceEl = $('#h_price'), sharesEl = $('#h_shares'), feeEl = $('#h_fee'), codeEl = $('#h_code'), amtEl = $('#h_amount');
     if (!feeEl || feeEl.dataset.autoFee !== '1') return;
     const price = parseFloat(priceEl.value) || 0, shares = parseFloat(sharesEl.value) || 0;
+    if (amtEl) amtEl.value = (price > 0 && shares > 0) ? (price * shares).toFixed(2) : '';
     const code = codeEl ? codeEl.value.trim() : '';
     const feeType = getFeeType(code, typeEl ? typeEl.value : 'stock');
     if (price > 0 && shares > 0){
