@@ -348,15 +348,8 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .rs-card .tag.buy{background:rgba(239,68,68,.12);color:#dc2626;border:1px solid rgba(239,68,68,.25)}
 .rs-card .tag.hold{background:rgba(245,158,11,.12);color:#d97706;border:1px solid rgba(245,158,11,.25)}
 .rs-card .tag.neutral{background:rgba(100,116,139,.12);color:#64748b;border:1px solid rgba(100,116,139,.25)}
-/* 1BK_V68.14.0 ⑩：持仓市值 Top10 排行条 */
-.top10{display:flex;flex-direction:column;gap:7px}
-.t10-row{display:grid;grid-template-columns:22px minmax(70px,150px) 1fr auto auto;gap:8px;align-items:center;font-size:12.5px}
-.t10-rank{font-size:13px;text-align:center}
-.t10-name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.t10-bar-w{position:relative;height:12px;background:var(--panel);border-radius:6px;overflow:hidden}
-.t10-bar{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,rgba(59,130,246,.55),rgba(59,130,246,.9))}
-.t10-val{font-variant-numeric:tabular-nums;color:var(--text);text-align:right}
-.t10-pct{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;width:44px}
+/* 持仓市值 Top10 样式已随面板移除 */
+
 /* 1BK_V68.14.0 ⑩：月度资金流水热力图 */
 .monthly-flow{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
 .mf-cell{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
@@ -466,6 +459,18 @@ tr.wd-row td{background:#f3f4f6}
 /* 1BK_V68.13.1.010 ②：持仓行做T联动徽章（按标的汇总做T/波段笔数、收益、胜率） */
 .trade-badge{display:inline-block;margin-top:2px;font-size:10px;font-weight:600;line-height:1.5;padding:0 7px;border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums;cursor:help}
 .trade-badge.tb-win{background:rgba(229,72,77,.1);color:var(--up);border:1px solid rgba(229,72,77,.28)}
+/* 总览持仓表 首列(名称)吸左 + 末列(操作)吸右 —— 平板/手机横向滚动时
+   名称常驻左侧、编辑/删除常驻右侧，解决「右边内容显示不全 / 最右操作列被裁」 */
+#holdTable tbody tr.clickable > td:first-child,
+#holdTable tbody tr.clickable > td:last-child{position:sticky;z-index:3;background:var(--panel)}
+#holdTable tbody tr.clickable > td:first-child{left:0}
+#holdTable tbody tr.clickable > td:last-child{right:0;box-shadow:-8px 0 12px -8px rgba(16,24,40,.18)}
+#holdTable thead th:first-child{position:sticky;left:0;z-index:6;background:var(--panel-2)}
+#holdTable thead th:last-child{position:sticky;right:0;z-index:6;background:var(--panel-2);box-shadow:-8px 0 12px -8px rgba(16,24,40,.18)}
+#holdTable tbody tr.clickable:hover > td:first-child,
+#holdTable tbody tr.clickable:hover > td:last-child{background:#f3f7ff}
+#holdTable tbody tr.expanded > td:first-child,
+#holdTable tbody tr.expanded > td:last-child{background:#f3f7ff}
 .trade-badge.tb-lose{background:rgba(21,163,74,.1);color:var(--down);border:1px solid rgba(21,163,74,.28)}
 .trade-badge.tb-flat{background:#eef2f7;color:#64748b;border:1px solid #e2e8f0}
 #holdTable .hold-amt{font-size:15px;line-height:1.25}
@@ -869,7 +874,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.028</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.029</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1268,7 +1273,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.028 · 2026-08-14 20:34 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.029 · 2026-08-14 20:57 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1328,8 +1333,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.028';
-const APP_BUILD   = '2026-08-14 20:34';
+const APP_VERSION = '1BK_V68.13.1.029';
+const APP_BUILD   = '2026-08-14 20:57';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3191,26 +3196,8 @@ function pieSVG(segs){
     '<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" font-size="14" font-weight="700" fill="#111827">' + money(total) + '</text></svg>';
 }
 
-/* 1BK_V68.14.0 ⑩：持仓市值 Top10 排行条（横向条形，红涨绿跌着色渐变按占比） */
-function top10HTML(){
-  const rows = state.holdings
-    .filter(h => { if (h.closed) return false; const c = calcHolding(h); return c.shares > 1e-8 && isFinite(c.mv) && c.mv > 0; })
-    .map(h => { const c = calcHolding(h); return { h, mv: c.mv, pct: 0 }; })
-    .sort((a, b) => b.mv - a.mv).slice(0, 10);
-  if (!rows.length) return '<div class="empty">暂无持仓数据</div>';
-  const total = rows.reduce((a, r) => a + r.mv, 0);
-  rows.forEach(r => r.pct = total > 0 ? r.mv / total * 100 : 0);
-  return '<div class="top10">' + rows.map((r, i) => {
-    const h = r.h;
-    const bar = '<div class="t10-bar" style="width:' + Math.max(1, r.pct).toFixed(3) + '%"></div>';
-    const rank = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : String(i + 1)));
-    return '<div class="t10-row"><span class="t10-rank">' + rank + '</span>' +
-      '<span class="t10-name" title="' + esc(h.name || h.code) + '">' + esc(h.name || h.code) + '</span>' +
-      '<span class="t10-bar-w">' + bar + '</span>' +
-      '<span class="t10-val">' + money(r.mv) + '</span>' +
-      '<span class="t10-pct">' + r.pct.toFixed(3) + '%</span></div>';
-  }).join('') + '</div>';
-}
+/* 持仓市值 Top10 面板已按用户要求移除（分析中心） */
+
 /* 1BK_V68.14.0 ⑩：月度资金流水热力图（按交易流水 side 聚合买入/卖出/分红，近 12 个月） */
 function monthlyFlowHTML(){
   const month = new Map();   // 'YYYY-MM' -> { buy, sell, div }
@@ -3526,9 +3513,6 @@ function renderAnalysis(){
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>每日收盘小结</div>' +
     '<div class="panel-sub">最近交易日持仓变动 + 明日关注（跌>3% 可观察 · 涨>5% 可高抛）</div></div>' +
     '<div class="panel-body">' + dailyCloseSummaryHTML() + '</div></div>' +
-    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>持仓市值 Top10</div>' +
-    '<div class="panel-sub">按当前持仓市值排序（含基金/ETF）</div></div>' +
-    '<div class="panel-body">' + top10HTML() + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>月度资金流水</div>' +
     '<div class="panel-sub">近 12 个月买入/卖出/分红（红=买入 · 绿=卖出 · 净值=买入−卖出）</div></div>' +
     '<div class="panel-body">' + monthlyFlowHTML() + '</div></div>' +
