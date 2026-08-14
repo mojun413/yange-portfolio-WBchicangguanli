@@ -272,6 +272,33 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .pos-badge.tag-full {background:#d1fae5;color:#065f46}
 .pos-badge.tag-over {background:#fee2e2;color:#991b1b;font-weight:700}
 .conc-over{color:#dc2626;font-weight:700}
+/* 持仓集中度面板（v68.16：从持仓表列移入分析中心，作为独立风控模块） */
+.conc-summary{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;font-size:12.5px;color:var(--muted);margin-bottom:10px}
+.conc-summary b{color:var(--text);font-size:13.5px}
+.conc-summary .conc-over-n{color:#dc2626;font-weight:700}
+.conc-summary .ok{color:var(--up)}
+.conc-list{display:flex;flex-direction:column;gap:6px}
+.conc-row{display:grid;grid-template-columns:150px 1fr 72px 64px;align-items:center;gap:8px;font-size:12.5px}
+.conc-row .conc-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conc-bar{height:10px;background:var(--panel-2);border-radius:6px;overflow:hidden}
+.conc-bar span{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:6px;transition:width .2s}
+.conc-row.warn .conc-bar span{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.conc-row.crit .conc-bar span{background:linear-gradient(90deg,#ef4444,#f87171)}
+.conc-row.warn .conc-pct{color:#d97706;font-weight:700}
+.conc-row.crit .conc-pct{color:#dc2626;font-weight:700}
+.conc-pct{text-align:right}
+.conc-flag{font-size:11px;font-weight:700;color:#dc2626;text-align:right}
+/* 1BK 快评面板（v68.16：逆势价值本地快照） */
+.bk-list{display:flex;flex-direction:column;gap:6px}
+.bk-row{display:grid;grid-template-columns:140px 46px 1fr;align-items:center;gap:8px;font-size:12.5px;padding:5px 8px;border-radius:8px;background:var(--panel-2)}
+.bk-row.good{background:#ecfdf5}
+.bk-row.warn{background:#fff7ed}
+.bk-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.bk-score{text-align:center;font-weight:700;font-size:14px;color:var(--accent)}
+.bk-row.good .bk-score{color:#059669}
+.bk-row.warn .bk-score{color:#d97706}
+.bk-verdict{color:var(--text)}
+.bk-metrics{grid-column:1/-1;color:var(--muted);font-size:11px}
 /* 持仓卡：概念标签 chips + 主力资金流行 */
 .tags-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;max-width:240px}
 .chip{display:inline-block;font-size:10.5px;line-height:1.5;padding:1px 7px;border-radius:999px;background:#eef2f7;color:#475569;border:1px solid #e2e8f0;white-space:nowrap}
@@ -839,7 +866,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.026</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.027</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1237,7 +1264,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.026 · 2026-08-14 19:47 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.027 · 2026-08-14 20:23 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1297,8 +1324,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.026';
-const APP_BUILD   = '2026-08-14 19:47';
+const APP_VERSION = '1BK_V68.13.1.027';
+const APP_BUILD   = '2026-08-14 20:23';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2691,6 +2718,7 @@ function cashflowStats(){
 const INDUSTRY_LIST = ['银行','券商','保险','白酒/消费','医药','半导体/芯片','新能源/光伏','汽车','军工','计算机/软件','通信','地产','周期(化工/有色/钢铁)','公用事业','农业','港股/海外','其他','未分类'];
 const SECTOR_WARN_PCT = 35;   // 单一行业占组合市值超过该比例预警
 const SINGLE_WARN_PCT = 15;   // 单一标的占组合市值超过该比例预警（仓位铁律）
+const CONC_WARN_PCT = 10;     // 持仓集中度面板：单标的占组合市值超该比例开始标红（铁律下限）
 const CONCEPT_MOVE_PCT = 5;   // 概念异动：成分股当日涨跌幅绝对值≥此值视为异动
 const FUND_FLOW_WARN_PCT = 2; // 主力净流出：占持仓市值比例≥此值预警（仅股票）
 
@@ -3091,6 +3119,17 @@ function checkAlerts(){
       fired++;
     } else { delete state.conceptAlertState[tag]; }
   });
+  /* 单一标的集中度超上限预警（armed 模式：破线瞬间弹一次，回落自动重新武装） */
+  const _agg = openAggregate();
+  if (isFinite(_agg.mv) && _agg.mv > 0){
+    let top = null, topMv = 0;
+    state.holdings.forEach(h => { if (h.closed) return; const c = calcHolding(h); if (isFinite(c.mv) && c.mv > topMv){ topMv = c.mv; top = h; } });
+    if (top){
+      top.alertState = top.alertState || {};
+      if (topMv / _agg.mv * 100 > SINGLE_WARN_PCT){ if (!top.alertState.conc){ top.alertState.conc = Date.now(); fireAlertInfo(top, '集中度超上限', '占组合市值 ' + (topMv / _agg.mv * 100).toFixed(3) + '%（> ' + SINGLE_WARN_PCT + '%），波动高度依赖单票'); fired++; } }
+      else if (top.alertState.conc) delete top.alertState.conc;
+    }
+  }
   if (fired) persist.holdings();
 }
 
@@ -3461,6 +3500,7 @@ function renderAnalysis(){
     '<div class="spacer"></div>' +
     '<div class="seg">' + ['30:近30天', '90:近90天', 'all:全部'].map(r => { const [v, t] = r.split(':'); return '<button data-an-range="' + v + '" class="' + (range === v ? 'on' : '') + '">' + t + '</button>'; }).join('') + '</div></div>' +
     '<div class="panel-body">' + curveHTML + '</div></div>' +
+    riskStatsPanelHTML() +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>收益归因（IRR vs 成本收益率）</div></div>' +
     '<div class="panel-body">' + attrHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>行业 / 板块分布</div>' +
@@ -3468,6 +3508,8 @@ function renderAnalysis(){
     '<button class="btn-sm" id="btnRefreshIndCon" title="重新识别全部持仓的申万行业 + 概念标签（行业=东财数据中心申万一级，概念=离线概念表+名称推断）">刷新行业/概念</button>' +
     '<div class="panel-sub">单一行业 > ' + SECTOR_WARN_PCT + '% 预警 · 仅统计当前持仓标的 · 行业取自申万一级行业（东财数据中心，v68.13.8）</div></div>' +
     '<div class="panel-body">' + industryHTML + '</div></div>' +
+    concPanelHTML() +
+    oneBKReviewHTML() +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>月度复盘</div>' +
     '<div class="panel-sub">近 2 个月资金进出 / 做T收益 / 操作标的（1BK_V68.13.1.012）</div></div>' +
     '<div class="panel-body">' + monthlyReviewHTML() + '</div></div>' +
@@ -3506,6 +3548,99 @@ function renderAnalysis(){
     brc.textContent = t0; brc.disabled = false; renderAnalysis();
     toast('已刷新 ' + state.holdings.length + ' 个标的：行业 ' + indN + ' 个更新 · 概念 ' + conN + ' 个回填（行业=申万一级，概念=离线表+名称推断）', 'ok');
   };
+}
+function concPanelHTML(){
+  const agg = openAggregate();
+  const total = (isFinite(agg.mv) && agg.mv > 0) ? agg.mv : 0;
+  const rows = state.holdings.filter(h => !h.closed).map(h => ({ h, c: calcHolding(h) }))
+    .filter(x => isFinite(x.c.mv) && x.c.mv > 0)
+    .sort((a, b) => b.c.mv - a.c.mv);
+  if (!total || !rows.length) return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>持仓集中度</div></div><div class="panel-body dim">暂无持仓数据</div></div>';
+  let hhi = 0, overN = 0;
+  const items = rows.map((x, i) => {
+    const pct = x.c.mv / total * 100;
+    hhi += (pct / 100) * (pct / 100);
+    const over = pct > CONC_WARN_PCT;
+    if (over) overN++;
+    const lvl = pct > SINGLE_WARN_PCT ? 'crit' : (over ? 'warn' : '');
+    return '<div class="conc-row ' + lvl + '">' +
+      '<div class="conc-name" title="' + esc(x.h.name || x.h.code) + '">' + (i + 1) + '. ' + esc(x.h.name || x.h.code) + '</div>' +
+      '<div class="conc-bar"><span style="width:' + Math.min(100, pct).toFixed(2) + '%"></span></div>' +
+      '<div class="conc-pct mono">' + pct.toFixed(3) + '%</div>' +
+      (lvl ? '<div class="conc-flag">' + (lvl === 'crit' ? '⚠超' + SINGLE_WARN_PCT + '%' : '⚠超' + CONC_WARN_PCT + '%') + '</div>' : '<div></div>') +
+      '</div>';
+  }).join('');
+  const top1 = rows.length ? rows[0].c.mv / total * 100 : 0;
+  const top3 = rows.slice(0, 3).reduce((s, x) => s + x.c.mv, 0) / total * 100;
+  const hhiPct = hhi * 10000;   // 0~10000（越高越集中）
+  const divers = hhiPct > 1800 ? '高度集中' : (hhiPct > 1000 ? '较集中' : (hhiPct > 500 ? '适中' : '分散'));
+  return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>持仓集中度</div>' +
+    '<div class="panel-sub">单标的占组合市值 ＞ ' + CONC_WARN_PCT + '% 标黄 · ＞ ' + SINGLE_WARN_PCT + '% 标红（仓位铁律：单一标的 ≤ 组合 10-15%）</div></div>' +
+    '<div class="panel-body">' +
+      '<div class="conc-summary">' +
+        '<span>前1大 <b>' + top1.toFixed(3) + '%</b></span>' +
+        '<span>前3大 <b>' + top3.toFixed(3) + '%</b></span>' +
+        '<span>HHI <b>' + hhiPct.toFixed(0) + '</b>（' + divers + '）</span>' +
+        (overN ? '<span class="conc-over-n">⚠ ' + overN + ' 个超 ' + CONC_WARN_PCT + '%</span>' : '<span class="ok">✓ 无超限</span>') +
+      '</div>' +
+      '<div class="conc-list">' + items + '</div>' +
+    '</div></div>';
+}
+function portfolioRiskStats(){
+  const rows = snapshotRows().filter(r => isFinite(r.mv) && r.mv > 0);
+  if (rows.length < 2) return null;
+  let peak = rows[0].mv, maxDD = 0;
+  rows.forEach(r => {
+    if (r.mv > peak) peak = r.mv;
+    const dd = peak > 0 ? (r.mv - peak) / peak : 0;
+    if (dd < maxDD) maxDD = dd;
+  });
+  const first = rows[0], last = rows[rows.length - 1];
+  const net0 = (isFinite(first.net) && first.net > 0) ? first.net : first.cost;
+  const years = Math.max(1 / 365, (Date.parse(last.d) - Date.parse(first.d)) / 31536000000);
+  const totalR = (net0 > 0) ? (last.mv / net0 - 1) : NaN;
+  const ann = isFinite(totalR) ? (Math.pow(1 + totalR, 1 / years) - 1) : NaN;
+  return { maxDD: maxDD * 100, ann: ann * 100, totalR: totalR * 100, days: rows.length, first: first.d, last: last.d };
+}
+function riskStatsPanelHTML(){
+  const s = portfolioRiskStats();
+  if (!s) return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>组合收益与回撤</div></div>' +
+    '<div class="panel-body dim">快照不足（需 ≥ 2 个交易日市值记录）——每日 15:05 自动存档后，这里会显示年化收益与最大回撤</div></div>';
+  return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>组合收益与回撤</div>' +
+    '<div class="panel-sub">基于每日市值快照（' + s.first + ' ~ ' + s.last + '，共 ' + s.days + ' 个交易日）· 年化按投入本金口径</div></div>' +
+    '<div class="panel-body">' +
+      kpi2('年化收益率', isFinite(s.ann) ? pct2(s.ann) : '—', isFinite(s.ann) ? cls(s.ann) : '') +
+      kpi2('区间总收益', isFinite(s.totalR) ? pct2(s.totalR) : '—', isFinite(s.totalR) ? cls(s.totalR) : '') +
+      kpi2('最大回撤', isFinite(s.maxDD) ? pct2(s.maxDD) : '—', 'down') +
+      kpi2('区间交易日', s.days, '') +
+    '</div></div>';
+}
+function oneBKReviewHTML(){
+  const agg = openAggregate();
+  const total = (isFinite(agg.mv) && agg.mv > 0) ? agg.mv : 0;
+  const rows = state.holdings.filter(h => !h.closed).map(h => ({ h, c: calcHolding(h) }))
+    .filter(x => isFinite(x.c.mv) && x.c.mv > 0);
+  if (!total || !rows.length) return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>1BK 快评</div></div><div class="panel-body dim">暂无持仓数据</div></div>';
+  const items = rows.map(x => {
+    const roi = x.c.roi, conc = x.c.mv / total * 100, pct = x.c.pct;
+    let score = 60, verdict = '持有观察', vcls = '';
+    if (roi >= 50){ score = 80; verdict = '盈利丰厚·可锁利'; vcls = 'good'; }
+    else if (roi <= -10){ score = Math.min(82, 56 + (-roi) / 2); verdict = '深度浮亏·逆势窗口'; vcls = 'warn'; }
+    if (conc > SINGLE_WARN_PCT){ score -= 12; verdict += '·集中'; vcls = 'warn'; }
+    if (pct <= -3) score -= 4;
+    if (pct >= 5) score += 3;
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    return '<div class="bk-row ' + vcls + '">' +
+      '<div class="bk-name" title="' + esc(x.h.name || x.h.code) + '">' + esc(x.h.name || x.h.code) + '</div>' +
+      '<div class="bk-score mono">' + score + '</div>' +
+      '<div class="bk-verdict">' + verdict + '</div>' +
+      '<div class="bk-metrics mono">收益 ' + pct2(roi) + ' · 集中度 ' + conc.toFixed(3) + '% · 今 ' + pct2(pct) + '</div>' +
+      '</div>';
+  }).sort((a, b) => b.score - a.score).join('');
+  return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>1BK 快评（逆势价值 · 本地快照）</div>' +
+    '<div class="panel-sub">基于持仓本地数据（收益 / 集中度 / 当日涨跌）的轻量快评，非实时研报；完整覆盖请用 1BK 选股方法论</div></div>' +
+    '<div class="panel-body"><div class="bk-list">' + items + '</div>' +
+    '<div class="hint" style="margin-top:8px">评分越高 = 当前越符合「四毛买一块」的逆势价值姿态；深度浮亏且分散的标的是典型逆势买点窗口。</div></div></div>';
 }
 function kpi2(label, val, clsN){ return '<div class="kpi-card"><div class="k">' + label + '</div><div class="v ' + (clsN || '') + '">' + val + '</div></div>'; }
 
@@ -4668,7 +4803,6 @@ const HOLD_COLS = [
   { key:'floatPnl', label:'浮动盈亏',   cls:'',  type:'num',  get:(h,c) => c.floatPnl },
   { key:'roi',      label:'收益率',      cls:'',  type:'num',  get:(h,c) => c.roi },
   { key:'pct',      label:'当日涨跌',    cls:'',  type:'num',  get:(h,c) => c.pct },
-  { key:'conc',     label:'集中度',      cls:'',  type:'num',  get:(h,c) => (isFinite(c.conc) ? c.conc : NaN) },  // v68.15：标的市值 ÷ 组合总市值，超 CONC_WARN 标红
   { key:'tRef',     label:'做T参考',     cls:'l', type:'num',  get:(h,c) => tRefPct(h,c) }   // 按三角标记后的做T参考比例（现价 vs 最近一次加/减仓价）排序
 ];
 /* 按当前排序设置对 [{h,c}] 排序；缺值（NaN/空）永远排在最后，与升降序无关 */
@@ -4850,10 +4984,6 @@ function renderHoldings(){
     return;
   }
   const closedN = state.holdings.length - visibleHolds.length;
-  /* v68.15：集中度 = 标的市值 ÷ 组合总市值；阈值默认 10%（单一标的 ≤ 组合 10-15% 铁律），后续可在设置里配 */
-  const CONC_WARN = (state.settings && state.settings.concWarnPct) || 10;
-  const aggAll = openAggregate();
-  const totalMv = aggAll.mv;
   const ths = HOLD_COLS.map(col => {
     const on = col.key === sortKey;
     const ind = on ? (sortDir === 'asc' ? '▲' : '▼') : '⇅';
@@ -4861,7 +4991,7 @@ function renderHoldings(){
       ' data-sort="' + col.key + '" title="点击按「' + col.label + '」排序">' + col.label + '<span class="si">' + ind + '</span></th>';
   }).join('');
   let html = '<table><thead><tr>' + ths + '<th class="l"></th></tr></thead><tbody>';
-  const rows = sortHoldRows(visibleHolds.map(h => { const c = calcHolding(h); c.conc = (totalMv > 0 && isFinite(c.mv)) ? c.mv / totalMv * 100 : NaN; return { h, c }; }));
+  const rows = sortHoldRows(visibleHolds.map(h => { const c = calcHolding(h); return { h, c }; }));
   rows.forEach(({ h, c }) => {
     const open = state.expanded.has(h.id);
     html += '<tr class="clickable ' + (open ? 'expanded' : '') + '" data-row="' + h.id + '">' +
@@ -4880,11 +5010,10 @@ function renderHoldings(){
       '<td class="mono q-fpnl hold-amt ' + cls(c.floatPnl) + '" data-q="' + qkey(h) + '">' + (isFinite(c.floatPnl) ? sign2(c.floatPnl) : '—') + '</td>' +
       '<td class="mono q-roi hold-amt ' + cls(c.roi) + '" data-q="' + qkey(h) + '">' + pct2(c.roi) + '</td>' +
       '<td class="mono q-pct hold-amt ' + cls(c.pct) + '" data-q="' + qkey(h) + '">' + pct2(c.pct) + '</td>' +
-      '<td class="mono hold-amt' + (isFinite(c.conc) && c.conc > CONC_WARN ? ' conc-over' : '') + '">' + (isFinite(c.conc) ? pct2(c.conc) + (c.conc > CONC_WARN ? ' ⚠' : '') : '—') + '</td>' +
       '<td class="l tref-td hold-amt">' + tRefCell(h, c) + '</td>' +
       '<td class="l"><button class="btn-ghost btn-sm" data-act="editHold" data-id="' + h.id + '">编辑</button>' +
         '<button class="btn-ghost btn-sm" data-act="delHold" data-id="' + h.id + '">删除</button></td></tr>';
-    if (open) html += '<tr class="sub-row"><td colspan="13">' + subPanel(h, c) + '</td></tr>';
+    if (open) html += '<tr class="sub-row"><td colspan="12">' + subPanel(h, c) + '</td></tr>';
   });
   html += '</tbody>';
 
@@ -4905,7 +5034,7 @@ function renderHoldings(){
     '<td class="mono' + (agg.cost < 0 ? ' neg-cost' : '') + '" data-agg="cost"><b>' + money(agg.cost) + '</b></td>' +
     '<td class="mono ' + cls(agg.floatPnl) + '" data-agg="fpnl"><b>' + (isFinite(agg.floatPnl) ? sign2(agg.floatPnl) : '—') + '</b></td>' +
     '<td class="mono ' + cls(aggRoi) + '" data-agg="roi">' + pct2(aggRoi) + '</td>' +
-    '<td class="mono dim">—</td><td class="mono dim">—</td><td class="mono dim">—</td><td class="l"></td></tr></tfoot>';
+    '<td class="mono dim">—</td><td class="mono dim">—</td><td class="l"></td></tr></tfoot>';
 
   html += '</table>';
   box.innerHTML = html;
