@@ -877,7 +877,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.039</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.040</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1277,7 +1277,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.039 · 2026-08-15 00:40 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.040 · 2026-08-15 00:58 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1337,8 +1337,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.039';
-const APP_BUILD   = '2026-08-15 00:40';
+const APP_VERSION = '1BK_V68.13.1.040';
+const APP_BUILD   = '2026-08-15 00:58';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3199,7 +3199,7 @@ document.addEventListener('click', e => { const b = e.target.closest('.ab-close'
 
 /* ---------- SVG：资产净值曲线 ---------- */
 function equityCurveSVG(rows, bench){
-  const W = 720, H = 240, pl = 52, pr = 14, pt = 46, pb = 30;
+  const W = 720, H = 240, pl = 52, pr = 14, pt = 58, pb = 30;
   if (!rows || !rows.length) return '';
   const withBench = !!(bench && bench.length);
   let series;
@@ -3242,7 +3242,7 @@ function equityCurveSVG(rows, bench){
   const xt = [0, Math.floor((n - 1) / 2), n - 1].filter(i => rows[i]).map(i =>
     '<text x="' + X(i).toFixed(3) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10" fill="#9ca3af">' + rows[i].d.slice(5) + '</text>');
   const lx = Math.max(8, W - series.length * 132 - 8);
-  const legend = series.map((s, i) => '<g transform="translate(' + (lx + i * 132) + ',8)"><rect width="10" height="10" fill="' + s.color + '"' +
+  const legend = series.map((s, i) => '<g transform="translate(' + (lx + i * 132) + ',34)"><rect width="10" height="10" fill="' + s.color + '"' +
     (s.dash ? ' style="fill:none;stroke:' + s.color + ';stroke-width:2;stroke-dasharray:3 2"' : '') + '></rect><text x="14" y="9" font-size="11" fill="#374151">' + s.label + '</text></g>').join('');
   let paths = '';
   series.forEach(s => { paths += '<path d="' + pathOf(s.vals) + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.dash ? 1.5 : 2.5) + '"' + (s.dash ? ' stroke-dasharray="5 4"' : '') + '/>'; });
