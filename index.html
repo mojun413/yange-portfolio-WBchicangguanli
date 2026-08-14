@@ -447,8 +447,11 @@ tr.expanded{background:#f3f7ff}
 .tag.t{color:#b45309;border-color:#ffe0b2;background:#fff7e8}
 .tag.swing{color:#0e7490;border-color:#bfe6ef;background:#ecfaff}
 .tag.div{color:#9a3ecf;border-color:#e5ccf5;background:#f9f0fd}
+.tag.rights{color:#0284c7;border-color:#bae6fd;background:#eff9ff}
+.tag.wdraw{color:#64748b;border-color:#cbd5e1;background:#f1f5f9}
 tr.div-row td{background:#f4eaf9}
 tr.div-row .mono.down{color:#c2185b;font-weight:600}
+tr.wd-row td{background:#f3f4f6}
 .caret{display:inline-block;width:14px;color:var(--muted);transition:.15s;font-size:11px}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
@@ -866,7 +869,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.027</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.028</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1043,6 +1046,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="panel-sub" id="statsSub">按标的汇总 · 由交易流水实时计算</div>
             <span style="flex:1"></span>
             <button class="btn-sm" id="btnExportStats" title="导出交易统计 CSV">导出 CSV</button>
+            <button class="btn-sm" id="btnExportMonthly" title="按月汇总买入/卖出/分红/配股/手续费/已实现盈亏/净现金流，导出 CSV（报税·对账）">月度账单</button>
           </div>
           <div class="panel-body tight"><div class="table-wrap" id="statsTable"></div></div>
         </div>
@@ -1264,7 +1268,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.027 · 2026-08-14 20:23 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.028 · 2026-08-14 20:34 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1324,8 +1328,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.027';
-const APP_BUILD   = '2026-08-14 20:23';
+const APP_VERSION = '1BK_V68.13.1.028';
+const APP_BUILD   = '2026-08-14 20:34';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2354,6 +2358,10 @@ function calcHolding(h){
         spreadCost += divAmt;                    // 负金额 → 成本减少
         rows.push(Object.assign({}, t, { pnl: null, avgAfter: shares > 0 ? cost / shares : 0,
           spreadAfter: shares > 0 ? spreadCost / shares : 0, dividend: true }));
+      } else if (t.kind === 'withdraw'){
+        /* 撤单行：仅日志记录，零股数 / 零资金 / 零成本影响，但保留在交易流水里可追溯 */
+        rows.push(Object.assign({}, t, { pnl: null, avgAfter: shares > 0 ? cost / shares : 0,
+          spreadAfter: shares > 0 ? spreadCost / shares : 0, withdraw: true }));
       }
       continue;
     }
@@ -3212,9 +3220,12 @@ function monthlyFlowHTML(){
     if (type === 'buy') m.buy += v; else if (type === 'sell') m.sell += v; else m.div += v;
   };
   state.holdings.forEach(h => (h.txs || []).forEach(t => {
+    if (t.kind === 'withdraw') return;                  // 撤单不计入资金流
     const d = String(t.date || ''); if (!/^\d{4}-\d{2}/.test(d)) return;
     const k = d.slice(0, 7);
-    push(k, t.side === 'buy' ? 'buy' : 'sell', Math.abs(Number(t.amount) || 0));
+    /* 分红用 amount；其余（含配股/买卖）用 price×shares 口径 */
+    const v = t.dividend ? Math.abs(Number(t.amount) || 0) : Math.abs((Number(t.price) || 0) * (Number(t.shares) || 0));
+    push(k, (t.side === 'buy' || t.kind === 'rights') ? 'buy' : 'sell', v);
   }));
   (state.dailyOps || []).forEach(o => {
     const d = String(o.date || ''); if (!/^\d{4}-\d{2}/.test(d)) return;
@@ -3500,7 +3511,6 @@ function renderAnalysis(){
     '<div class="spacer"></div>' +
     '<div class="seg">' + ['30:近30天', '90:近90天', 'all:全部'].map(r => { const [v, t] = r.split(':'); return '<button data-an-range="' + v + '" class="' + (range === v ? 'on' : '') + '">' + t + '</button>'; }).join('') + '</div></div>' +
     '<div class="panel-body">' + curveHTML + '</div></div>' +
-    riskStatsPanelHTML() +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>收益归因（IRR vs 成本收益率）</div></div>' +
     '<div class="panel-body">' + attrHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>行业 / 板块分布</div>' +
@@ -3584,35 +3594,6 @@ function concPanelHTML(){
         (overN ? '<span class="conc-over-n">⚠ ' + overN + ' 个超 ' + CONC_WARN_PCT + '%</span>' : '<span class="ok">✓ 无超限</span>') +
       '</div>' +
       '<div class="conc-list">' + items + '</div>' +
-    '</div></div>';
-}
-function portfolioRiskStats(){
-  const rows = snapshotRows().filter(r => isFinite(r.mv) && r.mv > 0);
-  if (rows.length < 2) return null;
-  let peak = rows[0].mv, maxDD = 0;
-  rows.forEach(r => {
-    if (r.mv > peak) peak = r.mv;
-    const dd = peak > 0 ? (r.mv - peak) / peak : 0;
-    if (dd < maxDD) maxDD = dd;
-  });
-  const first = rows[0], last = rows[rows.length - 1];
-  const net0 = (isFinite(first.net) && first.net > 0) ? first.net : first.cost;
-  const years = Math.max(1 / 365, (Date.parse(last.d) - Date.parse(first.d)) / 31536000000);
-  const totalR = (net0 > 0) ? (last.mv / net0 - 1) : NaN;
-  const ann = isFinite(totalR) ? (Math.pow(1 + totalR, 1 / years) - 1) : NaN;
-  return { maxDD: maxDD * 100, ann: ann * 100, totalR: totalR * 100, days: rows.length, first: first.d, last: last.d };
-}
-function riskStatsPanelHTML(){
-  const s = portfolioRiskStats();
-  if (!s) return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>组合收益与回撤</div></div>' +
-    '<div class="panel-body dim">快照不足（需 ≥ 2 个交易日市值记录）——每日 15:05 自动存档后，这里会显示年化收益与最大回撤</div></div>';
-  return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>组合收益与回撤</div>' +
-    '<div class="panel-sub">基于每日市值快照（' + s.first + ' ~ ' + s.last + '，共 ' + s.days + ' 个交易日）· 年化按投入本金口径</div></div>' +
-    '<div class="panel-body">' +
-      kpi2('年化收益率', isFinite(s.ann) ? pct2(s.ann) : '—', isFinite(s.ann) ? cls(s.ann) : '') +
-      kpi2('区间总收益', isFinite(s.totalR) ? pct2(s.totalR) : '—', isFinite(s.totalR) ? cls(s.totalR) : '') +
-      kpi2('最大回撤', isFinite(s.maxDD) ? pct2(s.maxDD) : '—', 'down') +
-      kpi2('区间交易日', s.days, '') +
     '</div></div>';
 }
 function oneBKReviewHTML(){
@@ -5115,7 +5096,7 @@ function tRefPct(h, c){
   const q = state.quotes[qkey(h)] || {};
   const price = Number(q.price);
   if (!isFinite(price)) return NaN;
-  const rows = (c.rows || []).filter(t => !t.dividend);
+  const rows = (c.rows || []).filter(t => !t.dividend && !t.withdraw);
   if (!rows.length) return NaN;
   const last = rows[rows.length - 1];
   const tp = Number(last.price);
@@ -5128,7 +5109,7 @@ function tRefCell(h, c){
   const q = state.quotes[qkey(h)] || {};
   const price = Number(q.price);
   if (!isFinite(price)) return '<span class="dim">—</span>';
-  const rows = (c.rows || []).filter(t => !t.dividend);
+  const rows = (c.rows || []).filter(t => !t.dividend && !t.withdraw);
   if (!rows.length) return '<span class="dim">—</span>';
   const last = rows[rows.length - 1];          // 时间正序最后一条 = 最近一次加仓/减仓
   const tp = Number(last.price);
@@ -5155,7 +5136,7 @@ function tRefCell(h, c){
    做T/波段的核心判断就是「我最近那笔买/卖与现在的差距」——差得越多，T 的空间越大。
    涨红跌绿：现价高于成交价 = 红（▲），低于 = 绿（▼）。 */
 function tRefBlock(h, c, q){
-  const rows = (c.rows || []).filter(t => !t.dividend);
+  const rows = (c.rows || []).filter(t => !t.dividend && !t.withdraw);
   const lastBuy  = rows.filter(t => t.side === 'buy').slice(-1)[0];   // 最近一次加仓
   const lastSell = rows.filter(t => t.side === 'sell').slice(-1)[0];  // 最近一次减仓
   const price = Number(q && q.price);
@@ -5208,16 +5189,19 @@ function subPanel(h, c){
     flow = '<div class="table-wrap"><table><thead><tr><th class="l">日期</th><th class="l">方向</th><th>价格</th><th>股数</th>' +
       '<th title="点击数值可直接改手续费">手续费 ✎</th><th>成交额</th><th>含费净额</th><th>成交后持股</th><th>本次实现盈亏</th><th>成交后均价</th><th class="l">备注</th><th class="l"></th></tr></thead><tbody>' +
       c.rows.slice().reverse().map(t => {
-        /* 分红行：份额=0、金额为负，特殊展示（资金流入抵减成本） */
-        if (t.dividend){
-          return '<tr class="div-row"><td class="l mono">' + esc(t.date) + '</td>' +
-            '<td class="l"><span class="tag div">分红</span>' +
+        /* 分红 / 撤单 行：份额=0，特殊展示（分红金额抵减成本；撤单仅日志） */
+        if (t.dividend || t.withdraw){
+          const isW = !!t.withdraw;
+          const evCls = isW ? 'tag wdraw' : 'tag div';
+          const evTxt = isW ? '撤单' : '分红';
+          return '<tr class="' + (isW ? 'wd-row' : 'div-row') + '"><td class="l mono">' + esc(t.date) + '</td>' +
+            '<td class="l"><span class="' + evCls + '">' + evTxt + '</span>' +
             (t.clipped ? '<span class="err-dot"></span>' : '') + '</td>' +
             '<td class="mono dim">—</td>' +
             '<td class="mono dim">—</td>' +
             '<td class="mono dim">—</td>' +
             '<td class="mono dim">—</td>' +
-            '<td class="mono down">' + sign2(Number(t.amount) || 0) + '</td>' +
+            '<td class="mono ' + (isW ? 'dim' : 'down') + '">' + (isW ? '—' : sign2(Number(t.amount) || 0)) + '</td>' +
             '<td class="mono">' + cumShr(t) + '</td>' +
             '<td class="mono dim">—</td>' +
             '<td class="mono' + ((t.spreadAfter != null && t.spreadAfter < 0) ? ' neg-cost' : ' dim') + '">' + (t.spreadAfter != null ? price4(t.spreadAfter) : '—') + '</td>' +
@@ -5229,7 +5213,7 @@ function subPanel(h, c){
         const fee = Number(t.fee) || 0;
         const netAmt = t.side === 'buy' ? amt + fee : amt - fee;   // 买入=含费投入；卖出=净回收
         return '<tr><td class="l mono">' + esc(t.date) + '</td>' +
-          '<td class="l"><span class="' + (t.side === 'buy' ? 'up' : 'down') + '">' + (t.side === 'buy' ? '买入' : '卖出') + '</span>' +
+          '<td class="l"><span class="' + (t.kind === 'rights' ? 'tag rights' : (t.side === 'buy' ? 'up' : 'down')) + '">' + (t.kind === 'rights' ? '配股' : (t.side === 'buy' ? '买入' : '卖出')) + '</span>' +
             (t.clipped ? '<span class="err-dot" title="卖出股数超过当时持仓，已按可卖数量计算"></span>' : '') + '</td>' +
           '<td class="mono">' + price4(Number(t.price)) + '</td>' +
           '<td class="mono">' + shr(Number(t.shares)) + '</td>' +
@@ -5264,6 +5248,8 @@ function subPanel(h, c){
         '<button class="btn-sm" style="color:var(--up);border-color:#f3c9c9" data-act="quickBuy" data-id="' + h.id + '">加仓（买入）</button>' +
         '<button class="btn-sm" style="color:var(--down);border-color:#c6e8d3" data-act="quickSell" data-id="' + h.id + '">减仓（卖出）</button>' +
         '<button class="btn-sm" style="color:#9a3ecf;border-color:#e5ccf5" data-act="quickDiv" data-id="' + h.id + '" title="录入分红/股息：金额抵减持仓成本（摊薄口径）">记分红</button>' +
+        '<button class="btn-sm" style="color:#0284c7;border-color:#bae6fd" data-act="quickRights" data-id="' + h.id + '" title="配股：按配股价缴款获配新股，计入持仓成本（摊薄口径）">记配股</button>' +
+        '<button class="btn-sm" style="color:#64748b;border-color:#cbd5e1" data-act="quickWithdraw" data-id="' + h.id + '" title="撤单：仅记录已撤委托，不影响股数与资金">记撤单</button>' +
       '</div>' +
     '</div>' + flow + '</div>';
 }
@@ -5805,9 +5791,10 @@ function refreshTargetSelect(){
 }
 
 /* ============================ 交易写入 ============================ */
-function addTx(h, { date, side, price, shares, fee, note }){
+function addTx(h, { date, side, price, shares, fee, note, kind }){
   h.txs = h.txs || [];
   const tx = { id: uid(), date, side, price, shares, fee, seq: Date.now() };
+  if (kind) tx.kind = kind;                 // 事件类型：rights=配股 / withdraw=撤单（分红走 dividend 标记）
   if (note != null && String(note).trim()) tx.note = String(note).trim();
   h.txs.push(tx);
   /* 已标记清仓的标的重新买入后恢复显示（持仓 > 0 解除 closed） */
@@ -6140,6 +6127,50 @@ function bind(){
     URL.revokeObjectURL(a.href);
     toast('已导出 ' + st.length + ' 个标的的交易统计', 'ok');
   };
+  $('#btnExportMonthly').onclick = () => exportMonthlyBill();
+
+  /* 月度账单：按月聚合买入含费 / 卖出净回收 / 分红收入 / 配股缴款 / 手续费 / 已实现盈亏 / 净现金流，导出 CSV（报税·对账） */
+  function exportMonthlyBill(){
+    const months = {};   // key=YYYY-MM
+    (state.holdings || []).forEach(h => {
+      const c = calcHolding(h);
+      (c.rows || []).forEach(t => {
+        const m = String(t.date || '').slice(0, 7);
+        if (!/^\d{4}-\d{2}$/.test(m)) return;
+        const b = months[m] || (months[m] = { buy: 0, sell: 0, div: 0, rights: 0, fee: 0, realized: 0 });
+        const fee = Number(t.fee) || 0;
+        b.fee += fee;
+        if (t.dividend){
+          b.div += Math.abs(Number(t.amount) || 0);                 // 分红为资金流入
+        } else if (t.withdraw){
+          /* 撤单：无资金影响 */
+        } else if (t.kind === 'rights'){
+          b.rights += Number(t.price) * Number(t.shares) + fee;      // 配股缴款支出
+        } else if (t.side === 'buy'){
+          b.buy += Number(t.price) * Number(t.shares) + fee;
+        } else if (t.side === 'sell'){
+          b.sell += Number(t.price) * Number(t.shares) - fee;
+          if (t.pnl != null) b.realized += t.pnl;
+        }
+      });
+    });
+    const keys = Object.keys(months).sort();
+    if (!keys.length){ toast('没有交易流水可汇总', 'warn'); return; }
+    const header = ['月份', '买入含费', '卖出净回收', '分红收入', '配股缴款', '手续费', '已实现盈亏', '净现金流(流入+)'];
+    const lines = ['\ufeff' + header.join(',')];
+    keys.forEach(m => {
+      const b = months[m];
+      const net = b.sell + b.div - b.buy - b.rights;                 // 净流入为正
+      lines.push([m, b.buy.toFixed(3), b.sell.toFixed(3), b.div.toFixed(3), b.rights.toFixed(3), b.fee.toFixed(3), b.realized.toFixed(3), net.toFixed(3)].join(','));
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '月度账单_' + nowStr().replace(/[^\d]/g, '').slice(0, 8) + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('已导出 ' + keys.length + ' 个月的月度账单', 'ok');
+  }
 
   /* 「恢复初始数据」已移至设置页（btnImportYangE2），顶栏不再放置，避免误触。 */
 
@@ -6284,6 +6315,8 @@ function bind(){
       const act = btn.dataset.act, id = btn.dataset.id;
       if (act === 'quickBuy' || act === 'quickSell') return quickTx(btn, id, act === 'quickBuy' ? 'buy' : 'sell');
       if (act === 'quickDiv') return quickDiv(btn, id);
+      if (act === 'quickRights') return quickRights(btn, id);
+      if (act === 'quickWithdraw') return quickWithdraw(btn, id);
       if (act === 'delHold'){
         const h = state.holdings.find(x => x.id === id); if (!h) return;
         const ok = await confirmBox('删除标的', '将删除 <b>' + esc(h.name || h.code) + '</b> 及其 ' + ((h.txs || []).length) + ' 条交易流水，且不可恢复。<br><br>确定继续？');
@@ -6499,6 +6532,55 @@ async function quickDiv(btn, id){
   h.txs.push(tx);
   persist.holdings();
   toast('已记分红 ' + money(amt) + '（抵减持仓成本）', 'ok');
+  renderAll();
+}
+/* 记配股：按配股价缴款获配新股，计入持仓成本（摊薄口径，与买入一致）；kind='rights' 仅用于交易流水标签 */
+async function quickRights(btn, id){
+  const h = state.holdings.find(x => x.id === id); if (!h) return;
+  const c = calcHolding(h);
+  const body = '<div class="form-grid" style="grid-template-columns:1fr 1fr">' +
+    '<div class="field"><label class="fl">配股日期</label><input type="date" id="rg_date" value="' + todayStr() + '"></div>' +
+    '<div class="field"><label class="fl">配股价（元）</label><input type="number" step="0.0001" min="0.0001" id="rg_price" placeholder="如 12.50"></div>' +
+    '<div class="field"><label class="fl">获配股数</label><input type="number" step="1" min="1" id="rg_shares" placeholder="如 500"></div>' +
+    '<div class="field"><label class="fl">手续费（元）</label><input type="number" step="0.01" min="0" id="rg_fee" value="0"></div></div>' +
+    '<div class="hint" style="margin-top:8px">配股需缴款，按配股价计入持仓成本（与买入同口径），不影响已持股数之外的成本结构。<br>当前标的：' + esc(h.name || h.code) + ' · 现持仓 ' + shr(c.shares) + '</div>';
+  let picked = null;
+  const ok = await dialog({ title: '记配股', bodyHTML: body, buttons: [
+    { label: '取消', value: null },
+    { label: '保存', value: true, cls: 'btn-primary', before: m => {
+        try {
+          const date = (m.querySelector('#rg_date').value) || todayStr();
+          const price = num(m.querySelector('#rg_price').value, '配股价', { min: 1e-6 });
+          const shares = num(m.querySelector('#rg_shares').value, '获配股数', { min: 1e-8 });
+          const fee = num(m.querySelector('#rg_fee').value || '0', '手续费', { min: 0, allowEmpty: true, def: 0 });
+          picked = { date, price, shares, fee };
+          return true;
+        } catch (e) { toast(e.message, 'err'); return false; }
+      } } ] });
+  if (!ok || !picked) return;
+  const { date, price, shares, fee } = picked;
+  addTx(h, { date, side: 'buy', price, shares, fee, kind: 'rights' });
+  toast('已记配股 ' + shr(shares) + ' @' + price4(price) + '（缴款 ' + money(price * shares + fee) + '）', 'ok');
+  renderAll();
+}
+/* 记撤单：仅记录已撤委托，零股数 / 零资金 / 零成本影响，保留在交易流水可追溯 */
+async function quickWithdraw(btn, id){
+  const h = state.holdings.find(x => x.id === id); if (!h) return;
+  const body = '<div class="form-grid" style="grid-template-columns:1fr 1fr">' +
+    '<div class="field"><label class="fl">撤单日期</label><input type="date" id="wd_date" value="' + todayStr() + '"></div>' +
+    '<div class="field"><label class="fl">委托说明（可选）</label><input id="wd_note" placeholder="如：限价12.50买入1000股 已撤" value=""></div></div>' +
+    '<div class="hint" style="margin-top:8px">撤单不改持仓、不改成本、不计资金流，仅留存委托记录。<br>当前标的：' + esc(h.name || h.code) + '</div>';
+  let picked = null;
+  const ok = await dialog({ title: '记撤单', bodyHTML: body, buttons: [
+    { label: '取消', value: null },
+    { label: '保存', value: true, cls: 'btn-primary', before: m => {
+        picked = { date: (m.querySelector('#wd_date').value) || todayStr(), note: (m.querySelector('#wd_note').value || '').trim() || undefined };
+        return true;
+      } } ] });
+  if (!ok || !picked) return;
+  const { date, note } = picked;
+  addTx(h, { date, side: 'buy', price: 0, shares: 0, fee: 0, kind: 'withdraw', note });
+  toast('已记撤单（仅记录，不影响持仓与资金）', 'ok');
   renderAll();
 }
 
@@ -6949,7 +7031,8 @@ const IMP_FIELDS = [
   { key:'price',  label:'价格',      alias:['成交均价','成交价格','确认净值','成交价','买入价','单价','均价','价格','净值','price'] },
   { key:'shares', label:'股数/份额', alias:['成交数量','成交股数','确认份额','持仓数量','持仓股数','持股数','份额','股数','数量','quantity','shares','volume'] },
   { key:'cost',   label:'成本价',    alias:['参考成本价','摊薄成本','持仓成本','平均成本','成本价','成本','cost'] },
-  { key:'fee',    label:'手续费',    alias:['交易费用','手续费','印花税','过户费','经手费','证管费','结算费','申购费','赎回费','佣金','服务费','规费','费用','fee','commission'] }
+  { key:'fee',    label:'手续费',    alias:['交易费用','手续费','印花税','过户费','经手费','证管费','结算费','申购费','赎回费','佣金','服务费','规费','费用','fee','commission'] },
+  { key:'event',  label:'事件类型',  alias:['事件','事件类型','类别'] }
 ];
 const IMP_TPL = {
   flow: '代码,名称,日期,方向,价格,数量,手续费\n600519,贵州茅台,2026-03-05,买入,1500.00,100,5\n600519,贵州茅台,2026-06-18,卖出,1560.00,50,6.5\n159915,创业板ETF,2026-05-11,买入,2.180,10000,5\n',
@@ -7028,6 +7111,14 @@ function normSide(raw){
   if (s === 'b' || s === '1')  return 'buy';
   return null;
 }
+/* 事件类型列：配股 / 撤单（分红导入暂不支持，需金额列，留待后续）；其余返回 null 走普通买卖 */
+function normEvent(raw){
+  const s = String(raw == null ? '' : raw).trim().toLowerCase();
+  if (!s) return null;
+  if (/配股|供股|rights|rationing/.test(s)) return 'rights';
+  if (/撤单|撤买|撤卖|withdraw|cancel/.test(s)) return 'withdraw';
+  return null;
+}
 /* 代码单元格：兼容 600519 / SH600519 / 600519.SH / 00700.HK，并修复 Excel 吃掉的前导 0 */
 function normCodeCell(raw){
   const s = String(raw == null ? '' : raw).trim().toUpperCase();
@@ -7061,7 +7152,7 @@ function parseImportTable(mode, mapping, dataRows){
   const idx = k => mapping.reduce((acc, m, i) => (m === k ? acc.concat(i) : acc), []);
   const iCode = idx('code')[0], iName = idx('name')[0], iType = idx('type')[0], iDate = idx('date')[0];
   const iSide = idx('side')[0], iPrice = idx('price')[0], iShares = idx('shares')[0], iCost = idx('cost')[0];
-  const iFees = idx('fee');
+  const iFees = idx('fee'), iEvent = idx('event')[0];
   const batch = [];
   const out = dataRows.map((cells, n) => {
     const g = i => (i === undefined ? '' : (cells[i] == null ? '' : cells[i]));
@@ -7073,6 +7164,7 @@ function parseImportTable(mode, mapping, dataRows){
     const fee = iFees.reduce((s, i) => { const v = normNum(cells[i]); return s + (isFinite(v) ? Math.abs(v) : 0); }, 0);
     const date = normDate(g(iDate)) || todayStr();
     let price, shares, side;
+    const ev = normEvent(g(iEvent));
     if (mode === 'snap'){
       price  = normNum(g(iCost)); if (!isFinite(price)) price = normNum(g(iPrice));
       shares = Math.abs(normNum(g(iShares)));
@@ -7085,10 +7177,16 @@ function parseImportTable(mode, mapping, dataRows){
       side = normSide(g(iSide));
       if (!side) side = (isFinite(sv) && sv < 0) ? 'sell' : 'buy';   // 无方向列：负数量视为卖出，否则按买入
       shares = Math.abs(sv);
-      if (!isFinite(price)){ r.msg = '缺少成交价格'; return r; }
-      if (!isFinite(shares) || shares <= 0){ r.msg = '成交数量无效'; return r; }
+      if (ev === 'withdraw'){
+        /* 撤单：零股数 / 零资金，仅记录，跳过数量校验 */
+        side = 'buy'; price = 0; shares = 0;
+      } else {
+        if (!isFinite(price)){ r.msg = '缺少成交价格'; return r; }
+        if (!isFinite(shares) || shares <= 0){ r.msg = '成交数量无效'; return r; }
+      }
+      if (ev === 'rights') side = 'buy';   // 配股按买入口径计入成本
     }
-    const data = { code: cc.code, market: cc.market, type, name, date, side, price, shares, fee };
+    const data = { code: cc.code, market: cc.market, type, name, date, side, price, shares, fee, kind: ev || undefined };
     /* 重复判定：与已有流水或本批次前面的行完全一致 */
     const exist = state.holdings.find(h => h.code === data.code && h.type === data.type);
     if (exist && (exist.txs || []).some(t => txSame(t, data))) { r.dup = true; r.msg = '与已有流水重复'; }
@@ -7178,7 +7276,7 @@ function openImportTable(){
         '<td class="l">' + esc(d.name || '') + '</td>' +
         '<td class="l">' + (d.type ? typeLabel(d.code || '', d.type) : '') + '</td>' +
         '<td class="l mono">' + esc(d.date || '') + '</td>' +
-        '<td class="l">' + (d.side ? '<span class="' + (d.side === 'buy' ? 'up' : 'down') + '">' + (d.side === 'buy' ? '买入' : '卖出') + '</span>' : '') + '</td>' +
+        '<td class="l">' + (d.kind === 'rights' ? '<span class="rights">配股</span>' : d.kind === 'withdraw' ? '<span class="wdraw">撤单</span>' : (d.side ? '<span class="' + (d.side === 'buy' ? 'up' : 'down') + '">' + (d.side === 'buy' ? '买入' : '卖出') + '</span>' : '')) + '</td>' +
         '<td class="mono">' + (isFinite(d.price) ? price4(d.price) : '') + '</td>' +
         '<td class="mono">' + (isFinite(d.shares) ? shr(d.shares) : '') + '</td>' +
         '<td class="mono">' + (isFinite(d.fee) ? n2(d.fee) : '') + '</td>' +
@@ -7242,7 +7340,7 @@ function openImportTable(){
         if (!overwrite){ skippedSnap++; return; }
         h.txs = []; replaced++;
       }
-      addTx(h, { date: d.date, side: d.side, price: d.price, shares: d.shares, fee: d.fee });
+      addTx(h, { date: d.date, side: d.side, price: d.price, shares: d.shares, fee: d.fee, kind: d.kind });
       added++;
     });
     created = state.holdings.length - before;
