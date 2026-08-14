@@ -187,6 +187,13 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .filterbar.on .fb-label{color:var(--accent);font-weight:600}
 .filterbar.on select.mini{border-color:var(--accent);background:var(--accent-soft)}
 
+#alertBanner{position:fixed;top:0;left:0;right:0;z-index:9999;display:none;background:linear-gradient(90deg,#dc2626,#ea580c);box-shadow:0 2px 12px rgba(0,0,0,.28)}
+#alertBanner .ab-in{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px 14px;color:#fff;font-size:13px;font-weight:500}
+#alertBanner .ab-item{padding:3px 11px;border-radius:999px;background:rgba(255,255,255,.20);white-space:nowrap}
+#alertBanner .ab-item.ab-profit{background:rgba(255,255,255,.32)}
+#alertBanner .ab-item.ab-target{background:rgba(255,255,255,.24)}
+#alertBanner .ab-close{margin-left:auto;background:transparent;border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer;padding:0 4px}
+
 /* ===================== 总览 KPI 卡片 ===================== */
 .cards{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:9px}
 .card{
@@ -292,17 +299,6 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .conc-row.crit .conc-pct{color:#dc2626;font-weight:700}
 .conc-pct{text-align:right}
 .conc-flag{font-size:11px;font-weight:700;color:#dc2626;text-align:right}
-/* 1BK 快评面板（v68.16：逆势价值本地快照） */
-.bk-list{display:flex;flex-direction:column;gap:6px}
-.bk-row{display:grid;grid-template-columns:140px 46px 1fr;align-items:center;gap:8px;font-size:12.5px;padding:5px 8px;border-radius:8px;background:var(--panel-2)}
-.bk-row.good{background:#ecfdf5}
-.bk-row.warn{background:#fff7ed}
-.bk-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-.bk-score{text-align:center;font-weight:700;font-size:14px;color:var(--accent)}
-.bk-row.good .bk-score{color:#059669}
-.bk-row.warn .bk-score{color:#d97706}
-.bk-verdict{color:var(--text)}
-.bk-metrics{grid-column:1/-1;color:var(--muted);font-size:11px}
 /* 持仓卡：概念标签 chips + 主力资金流行 */
 .tags-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;max-width:240px}
 .chip{display:inline-block;font-size:10.5px;line-height:1.5;padding:1px 7px;border-radius:999px;background:#eef2f7;color:#475569;border:1px solid #e2e8f0;white-space:nowrap}
@@ -881,7 +877,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.038</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.039</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1281,7 +1277,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.038 · 2026-08-14 23:48 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.039 · 2026-08-15 00:40 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1341,8 +1337,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.038';
-const APP_BUILD   = '2026-08-14 23:48';
+const APP_VERSION = '1BK_V68.13.1.039';
+const APP_BUILD   = '2026-08-15 00:40';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2351,6 +2347,7 @@ function updateLivePrices(){
     else if (typeof renderOverview === 'function' && document.getElementById('page-overview')) renderOverview();
   } catch(e){ console.error('[tick render]', e); }
   checkAlerts();        /* 交易时段每拍检测止损/止盈破线（休市自动跳过） */
+  renderAlertBanner();   /* 常驻醒目横幅：破线即显示，不自动消失（v68.13.1.039） */
 }
 
 /* ============================ 成本核算（移动加权平均 + 摊薄成本） ============================ */
@@ -3178,12 +3175,53 @@ function checkAlerts(){
   if (fired) persist.holdings();
 }
 
+/* 常驻醒目预警横幅（v68.13.1.039）：破止损/止盈/目标价线即钉页面顶部，不自动消失，可手动关闭 */
+function renderAlertBanner(){
+  const hits = [];
+  state.holdings.forEach(h => {
+    if (h.closed) return;
+    const c = calcHolding(h); if (!isFinite(c.price)) return;
+    const low = Number(h.alertLow) || 0, high = Number(h.alertHigh) || 0, tgt = Number(h.alertTarget) || 0;
+    if (low > 0 && c.price <= low) hits.push({ nm: h.name || h.code, type: '止损', price: c.price, line: low, cls: 'ab-loss' });
+    if (high > 0 && c.price >= high) hits.push({ nm: h.name || h.code, type: '止盈', price: c.price, line: high, cls: 'ab-profit' });
+    if (tgt > 0 && c.price >= tgt) hits.push({ nm: h.name || h.code, type: '目标价', price: c.price, line: tgt, cls: 'ab-target' });
+  });
+  let el = document.getElementById('alertBanner');
+  if (!hits.length){ if (el) el.style.display = 'none'; return; }
+  if (!el){ el = document.createElement('div'); el.id = 'alertBanner'; document.body.appendChild(el); }
+  el.innerHTML = '<div class="ab-in">' + hits.map(x =>
+    '<span class="ab-item ' + x.cls + '">' + esc(x.nm) + ' ' + x.type + ' ¥' + x.price.toFixed(3) + '（线 ¥' + x.line.toFixed(3) + '）</span>').join('') +
+    '<button class="ab-close" aria-label="关闭">×</button></div>';
+  el.style.display = 'block';
+}
+/* 价格预警常驻横幅：点击 × 隐藏本次会话 */
+document.addEventListener('click', e => { const b = e.target.closest('.ab-close'); if (b){ const el = document.getElementById('alertBanner'); if (el) el.style.display = 'none'; } });
+
 /* ---------- SVG：资产净值曲线 ---------- */
-function equityCurveSVG(rows){
+function equityCurveSVG(rows, bench){
   const W = 720, H = 240, pl = 52, pr = 14, pt = 46, pb = 30;
   if (!rows || !rows.length) return '';
-  const mv = rows.map(r => r.mv), net = rows.map(r => r.net);
-  const all = mv.concat(net).filter(v => isFinite(v));
+  const withBench = !!(bench && bench.length);
+  let series;
+  if (withBench){
+    const m0 = rows[0].mv || 1, n0 = (isFinite(rows[0].net) && rows[0].net) ? rows[0].net : 1;
+    series = [
+      { vals: rows.map(r => r.mv / m0 * 100), color: '#2563eb', label: '持仓净值(归一)', dash: false },
+      { vals: rows.map(r => (isFinite(r.net) ? r.net : 0) / n0 * 100), color: '#9ca3af', label: '净投入(归一)', dash: true }
+    ];
+    bench.forEach(b => {
+      const first = b.pts.find(v => isFinite(v) && v > 0);
+      const base = first || 1;
+      series.push({ vals: b.pts.map(v => (isFinite(v) && v > 0) ? v / base * 100 : null), color: b.color, label: b.label, dash: false });
+    });
+  } else {
+    series = [
+      { vals: rows.map(r => r.mv), color: '#2563eb', label: '持仓市值', dash: false },
+      { vals: rows.map(r => r.net), color: '#9ca3af', label: '累计净投入', dash: true }
+    ];
+  }
+  const all = [];
+  series.forEach(s => s.vals.forEach(v => { if (isFinite(v)) all.push(v); }));
   if (!all.length) return '';
   let lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
   if (lo === hi){ lo -= 1; hi += 1; }
@@ -3191,25 +3229,56 @@ function equityCurveSVG(rows){
   const n = rows.length;
   const X = i => pl + (n === 1 ? 0 : (i / (n - 1)) * (W - pl - pr));
   const Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
+  const fmtV = withBench ? (v => v.toFixed(0) + '%') : money;
   const pathOf = arr => arr.map((v, i) => (isFinite(v) ? (i ? 'L' : 'M') + X(i).toFixed(3) + ' ' + Y(v).toFixed(3) : '')).join(' ');
   let area = '';
-  if (n > 1){ area = 'M' + X(0).toFixed(3) + ' ' + Y(mv[0]).toFixed(3) + ' ' +
-    mv.map((v, i) => isFinite(v) ? 'L' + X(i).toFixed(3) + ' ' + Y(v).toFixed(3) : '').join(' ') +
+  if (n > 1 && !withBench){ area = 'M' + X(0).toFixed(3) + ' ' + Y(rows[0].mv).toFixed(3) + ' ' +
+    rows.map((r, i) => isFinite(r.mv) ? 'L' + X(i).toFixed(3) + ' ' + Y(r.mv).toFixed(3) : '').join(' ') +
     ' L' + X(n - 1).toFixed(3) + ' ' + (H - pb) + ' L' + X(0).toFixed(3) + ' ' + (H - pb) + ' Z'; }
   const grid = [];
   for (let k = 0; k <= 4; k++){ const v = lo + (hi - lo) * k / 4, y = Y(v);
     grid.push('<line x1="' + pl + '" y1="' + y.toFixed(3) + '" x2="' + (W - pr) + '" y2="' + y.toFixed(3) + '" stroke="#eef0f3" stroke-width="1"/>' +
-      '<text x="' + (pl - 6) + '" y="' + (y + 3).toFixed(3) + '" text-anchor="end" font-size="10" fill="#9ca3af">' + money(v) + '</text>'); }
+      '<text x="' + (pl - 6) + '" y="' + (y + 3).toFixed(3) + '" text-anchor="end" font-size="10" fill="#9ca3af">' + fmtV(v) + '</text>'); }
   const xt = [0, Math.floor((n - 1) / 2), n - 1].filter(i => rows[i]).map(i =>
     '<text x="' + X(i).toFixed(3) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10" fill="#9ca3af">' + rows[i].d.slice(5) + '</text>');
+  const lx = Math.max(8, W - series.length * 132 - 8);
+  const legend = series.map((s, i) => '<g transform="translate(' + (lx + i * 132) + ',8)"><rect width="10" height="10" fill="' + s.color + '"' +
+    (s.dash ? ' style="fill:none;stroke:' + s.color + ';stroke-width:2;stroke-dasharray:3 2"' : '') + '></rect><text x="14" y="9" font-size="11" fill="#374151">' + s.label + '</text></g>').join('');
+  let paths = '';
+  series.forEach(s => { paths += '<path d="' + pathOf(s.vals) + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.dash ? 1.5 : 2.5) + '"' + (s.dash ? ' stroke-dasharray="5 4"' : '') + '/>'; });
+  const title = withBench ? '资产净值曲线（归一化对比 · 起点=100）' : '资产净值曲线';
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block">' +
-    '<text x="' + pl + '" y="18" font-size="12" fill="#111827" font-weight="600">资产净值曲线</text>' +
-    '<g transform="translate(' + (W - 224) + ',8)"><rect width="10" height="10" fill="#2563eb"/><text x="14" y="9" font-size="11" fill="#374151">持仓市值</text>' +
-    '<rect y="15" width="10" height="10" fill="#9ca3af"/><text x="14" y="24" font-size="11" fill="#374151">累计净投入</text></g>' +
-    grid.join('') + (area ? '<path d="' + area + '" fill="rgba(37,99,235,0.10)"/>' : '') +
-    '<path d="' + pathOf(net) + '" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5 4"/>' +
-    '<path d="' + pathOf(mv) + '" fill="none" stroke="#2563eb" stroke-width="2.5"/>' + xt.join('') + '</svg>';
+    '<text x="' + pl + '" y="18" font-size="12" fill="#111827" font-weight="600">' + title + '</text>' +
+    legend + grid.join('') + (area ? '<path d="' + area + '" fill="rgba(37,99,235,0.10)"/>' : '') +
+    paths + xt.join('') + '</svg>';
 }
+/* 资产曲线叠加基准指数（v68.13.1.039）：手动开启才联网，复用 klineJsonp 抓日K，localStorage 缓存1天 */
+async function loadBenchmarks(rows){
+  const mode = state.settings.benchmark || '';
+  if (!mode || !rows.length) return;
+  const kinds = [];
+  if (mode === 'hs300' || mode === 'both') kinds.push({ sym: 'sh000300', label: '沪深300', color: '#f59e0b' });
+  if (mode === 'zzqx' || mode === 'both') kinds.push({ sym: 'sh000985', label: '中证全指', color: '#10b981' });
+  const d0 = Date.parse(String(rows[0].d).replace(/-/g, '/'));
+  const d1 = Date.parse(String(rows[rows.length - 1].d).replace(/-/g, '/'));
+  const days = Math.max(60, Math.round((d1 - d0) / 86400000) + 5);
+  const bench = [];
+  for (const k of kinds){
+    let closes;
+    const cached = benchCacheGet(k.sym);
+    if (cached && cached.sym === k.sym && (Date.now() - cached.at < 86400000)) closes = cached.closes;
+    else { try { const data = await klineJsonp(k.sym, 'day', days); const kl = parseKline(data, k.sym, 'day'); closes = kl.map(r => ({ d: r.date, c: r.close })); benchCacheSet(k.sym, closes); } catch (e) { toast('基准『' + k.label + '』加载失败：' + e.message, 'err'); continue; } }
+    if (!closes || !closes.length) continue;
+    const map = {}; closes.forEach(o => map[o.d] = o.c);
+    const ds = closes.map(o => o.d).sort();
+    const pts = rows.map(r => { let v = null; for (const d of ds){ if (d <= r.d) v = map[d]; else break; } return v; });
+    bench.push({ label: k.label, color: k.color, pts });
+  }
+  const chartEl = document.querySelector('#analysisBody .an-chart');
+  if (chartEl && bench.length) chartEl.innerHTML = equityCurveSVG(rows, bench);
+}
+function benchCacheGet(sym){ try { return JSON.parse(localStorage.getItem('pm_bench_' + sym)); } catch (e) { return null; } }
+function benchCacheSet(sym, closes){ try { localStorage.setItem('pm_bench_' + sym, JSON.stringify({ sym, at: Date.now(), closes })); } catch (e) {} }
 
 /* ---------- SVG：行业饼图 ---------- */
 function pieSVG(segs){
@@ -3360,6 +3429,7 @@ function renderAnalysis(){
   const box = document.getElementById('analysisBody'); if (!box) return;
   const att = returnAttribution(), ind = industryAgg(), rows = snapshotRows();
   const range = state.settings.analysisRange || 'all';
+  const bench = state.settings.benchmark || '';
   let view = rows; if (range === '30') view = rows.slice(-30); else if (range === '90') view = rows.slice(-90);
   const curve = equityCurveSVG(view);
 
@@ -3453,10 +3523,13 @@ function renderAnalysis(){
     const price = isFinite(c.price) ? c.price : NaN;
     const stLow = low > 0 ? (isFinite(price) ? (price <= low ? '已破' : '监控中') : '—') : '—';
     const stHigh = high > 0 ? (isFinite(price) ? (price >= high ? '已破' : '监控中') : '—') : '—';
+    const tgt = Number(h.alertTarget) || 0;
+    const stTgt = tgt > 0 ? (isFinite(price) ? (price >= tgt ? '已到达' : '监控中') : '—') : '—';
     alertCardsHTML += '<div class="alert-card">' +
       '<span class="ac-name">' + esc(h.name || h.code) + '</span>' +
       '<span class="ac-badge ' + (stLow === '已破' ? 'hit' : 'watch') + '">止损 ¥' + (low || '—') + ' · ' + stLow + '</span>' +
       '<span class="ac-badge ' + (stHigh === '已破' ? 'hit' : 'watch') + '">止盈 ¥' + (high || '—') + ' · ' + stHigh + '</span>' +
+      (tgt > 0 ? '<span class="ac-badge ' + (stTgt === '已到达' ? 'hit' : 'watch') + '">目标价 ¥' + tgt + ' · ' + stTgt + '</span>' : '') +
       '</div>';
   });
   let disc = '';
@@ -3528,7 +3601,8 @@ function renderAnalysis(){
   box.innerHTML =
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>资产曲线</div>' +
     '<div class="spacer"></div>' +
-    '<div class="seg">' + ['30:近30天', '90:近90天', 'all:全部'].map(r => { const [v, t] = r.split(':'); return '<button data-an-range="' + v + '" class="' + (range === v ? 'on' : '') + '">' + t + '</button>'; }).join('') + '</div></div>' +
+    '<div class="seg">' + ['30:近30天', '90:近90天', 'all:全部'].map(r => { const [v, t] = r.split(':'); return '<button data-an-range="' + v + '" class="' + (range === v ? 'on' : '') + '">' + t + '</button>'; }).join('') + '</div>' +
+    '<div class="seg bench-seg" title="叠加基准指数（手动开启才会联网拉取日K，缓存1天）">' + [['','关'],['hs300','沪深300'],['zzqx','中证全指'],['both','都']].map(r => { const v = r[0], t = r[1]; return '<button data-bench="' + v + '" class="' + (bench === v ? 'on' : '') + '">' + t + '</button>'; }).join('') + '</div></div>' +
     '<div class="panel-body">' + curveHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>收益归因（IRR vs 成本收益率）</div></div>' +
     '<div class="panel-body">' + attrHTML + '</div></div>' +
@@ -3540,7 +3614,6 @@ function renderAnalysis(){
     typeDistHTML() +
     concPanelHTML() +
     pnlContribHTML() +
-    oneBKReviewHTML() +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>月度复盘</div>' +
     '<div class="panel-sub">近 2 个月资金进出 / 做T收益 / 操作标的（1BK_V68.13.1.012）</div></div>' +
     '<div class="panel-body">' + monthlyReviewHTML() + '</div></div>' +
@@ -3557,6 +3630,8 @@ function renderAnalysis(){
     '<div class="panel-sub">祖训规则引擎自动盯盘 · 交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警 · 主力净流出/概念异动实时监测</div></div>' +
     '<div class="panel-body">' + alertHTML + '</div></div>';
   box.querySelectorAll('[data-an-range]').forEach(b => b.onclick = () => { state.settings.analysisRange = b.dataset.anRange; persist.settings(); renderAnalysis(); });
+  box.querySelectorAll('[data-bench]').forEach(b => b.onclick = () => { state.settings.benchmark = b.dataset.bench; persist.settings(); renderAnalysis(); });
+  loadBenchmarks(view);   /* 手动叠加基准：联网拉指数日K并归一化叠加（缓存1天） */
   const nb = box.querySelector('#btnEnableNotify');
   if (nb) nb.onclick = () => { try { if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') Notification.requestPermission().then(p => toast('浏览器通知' + (p === 'granted' ? '已开启' : '保持关闭'), 'info')); else toast('浏览器通知已开启或不支持', 'info'); } catch(e){ toast('通知开启失败：' + e.message, 'err'); } };
   const bia = box.querySelector('#btnIdentifyAll');
@@ -3613,33 +3688,6 @@ function concPanelHTML(){
       '</div>' +
       '<div class="conc-list">' + items + '</div>' +
     '</div></div>';
-}
-function oneBKReviewHTML(){
-  const agg = openAggregate();
-  const total = (isFinite(agg.mv) && agg.mv > 0) ? agg.mv : 0;
-  const rows = state.holdings.filter(h => !h.closed).map(h => ({ h, c: calcHolding(h) }))
-    .filter(x => isFinite(x.c.mv) && x.c.mv > 0);
-  if (!total || !rows.length) return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>1BK 快评</div></div><div class="panel-body dim">暂无持仓数据</div></div>';
-  const items = rows.map(x => {
-    const roi = x.c.roi, conc = x.c.mv / total * 100, pct = x.c.pct;
-    let score = 60, verdict = '持有观察', vcls = '';
-    if (roi >= 50){ score = 80; verdict = '盈利丰厚·可锁利'; vcls = 'good'; }
-    else if (roi <= -10){ score = Math.min(82, 56 + (-roi) / 2); verdict = '深度浮亏·逆势窗口'; vcls = 'warn'; }
-    if (conc > SINGLE_WARN_PCT){ score -= 12; verdict += '·集中'; vcls = 'warn'; }
-    if (pct <= -3) score -= 4;
-    if (pct >= 5) score += 3;
-    score = Math.max(0, Math.min(100, Math.round(score)));
-    return '<div class="bk-row ' + vcls + '">' +
-      '<div class="bk-name" title="' + esc(x.h.name || x.h.code) + '">' + esc(x.h.name || x.h.code) + '</div>' +
-      '<div class="bk-score mono">' + score + '</div>' +
-      '<div class="bk-verdict">' + verdict + '</div>' +
-      '<div class="bk-metrics mono">收益 ' + pct2(roi) + ' · 集中度 ' + conc.toFixed(3) + '% · 今 ' + pct2(pct) + '</div>' +
-      '</div>';
-  }).sort((a, b) => b.score - a.score).join('');
-  return '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>1BK 快评（逆势价值 · 本地快照）</div>' +
-    '<div class="panel-sub">基于持仓本地数据（收益 / 集中度 / 当日涨跌）的轻量快评，非实时研报；完整覆盖请用 1BK 选股方法论</div></div>' +
-    '<div class="panel-body"><div class="bk-list">' + items + '</div>' +
-    '<div class="hint" style="margin-top:8px">评分越高 = 当前越符合「四毛买一块」的逆势价值姿态；深度浮亏且分散的标的是典型逆势买点窗口。</div></div></div>';
 }
 /* 1BK_V68.13.1.037：单标的收益贡献面板（按浮动盈亏排序横向条形，红涨绿跌） */
 function pnlContribHTML(){
@@ -6390,6 +6438,7 @@ function bind(){
             '<datalist id="ind_list">' + INDUSTRY_LIST.map(k => '<option value="' + k + '">').join('') + '</datalist></div>' +
           '<div class="field"><label class="fl">止损价（破线预警）</label><input id="e_alertLow" type="number" step="0.001" min="0" placeholder="留空=不预警" value="' + (Number(h.alertLow) || '') + '"></div>' +
           '<div class="field"><label class="fl">止盈价（破线预警）</label><input id="e_alertHigh" type="number" step="0.001" min="0" placeholder="留空=不预警" value="' + (Number(h.alertHigh) || '') + '"></div>' +
+          '<div class="field"><label class="fl">目标价（到达提示）</label><input id="e_alertTarget" type="number" step="0.001" min="0" placeholder="留空=不提示" value="' + (Number(h.alertTarget) || '') + '"></div>' +
           '<div class="field" style="grid-column:1 / -1"><label class="fl">概念标签（逗号/顿号分隔·可留空按名称自动推断）</label>' +
             '<div style="display:flex;gap:6px;align-items:center">' +
             '<input id="e_concepts" placeholder="点右侧「识别概念」按名称推断" value="' + esc((Array.isArray(h.concepts) ? h.concepts.join('、') : '') || '') + '" style="flex:1;min-width:0">' +
@@ -6404,7 +6453,7 @@ function bind(){
               const rawC = v('e_concepts');
               const concepts = rawC ? rawC.split(/[，,、\s]+/).map(s => s.trim()).filter(Boolean) : [];
               picked = { name: v('e_name'), code, type: v('e_type'), market: v('e_mkt'),
-                         industry: v('e_industry'), alertLow: parseFloat(v('e_alertLow')) || 0, alertHigh: parseFloat(v('e_alertHigh')) || 0,
+                         industry: v('e_industry'), alertLow: parseFloat(v('e_alertLow')) || 0, alertHigh: parseFloat(v('e_alertHigh')) || 0, alertTarget: parseFloat(v('e_alertTarget')) || 0,
                          concepts };
             } } ] });
         if (!ok || !picked) return;
@@ -6419,6 +6468,7 @@ function bind(){
         h.concepts = Array.isArray(picked.concepts) ? picked.concepts : [];
         h.alertLow = picked.alertLow || 0;
         h.alertHigh = picked.alertHigh || 0;
+        h.alertTarget = picked.alertTarget || 0;
         h.alertState = {};   /* 改了阈值 → 重置触发状态，重新武装 */
         const sp = splitCode(picked.code);
         h.code = sp ? sp.code : picked.code.replace(/\D/g, '') || picked.code;
