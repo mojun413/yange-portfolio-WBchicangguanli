@@ -271,6 +271,7 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .pos-badge.tag-heavy{background:#fef3c7;color:#92400e}
 .pos-badge.tag-full {background:#d1fae5;color:#065f46}
 .pos-badge.tag-over {background:#fee2e2;color:#991b1b;font-weight:700}
+.conc-over{color:#dc2626;font-weight:700}
 /* 持仓卡：概念标签 chips + 主力资金流行 */
 .tags-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;max-width:240px}
 .chip{display:inline-block;font-size:10.5px;line-height:1.5;padding:1px 7px;border-radius:999px;background:#eef2f7;color:#475569;border:1px solid #e2e8f0;white-space:nowrap}
@@ -838,7 +839,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.025</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.026</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1236,7 +1237,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.025 · 2026-08-14 19:14 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.026 · 2026-08-14 19:47 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1296,8 +1297,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.025';
-const APP_BUILD   = '2026-08-14 19:14';
+const APP_VERSION = '1BK_V68.13.1.026';
+const APP_BUILD   = '2026-08-14 19:47';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3667,6 +3668,24 @@ function refreshExtraLine(){
   if (!_extraLineRaw) return;
   $('#extraLine').innerHTML = loadHidden().indexOf('持仓市值') >= 0 ? maskExtraDigits(_extraLineRaw) : _extraLineRaw;
 }
+let BENCH = null;   /* 沪深300 基准对照：{ pct, since }，首屏异步加载 */
+/* v68.15：沪深300 自组合首笔建仓日 → 今的区间涨幅，作组合收益对照基准（近似） */
+function loadBenchmark(){
+  let firstDate = '';
+  state.trades.forEach(t => { if (t.date && (!firstDate || t.date < firstDate)) firstDate = t.date; });
+  if (!firstDate){ BENCH = null; return; }
+  klineJsonp('sh000300', 'day', 600).then(data => {
+    const rows = parseKline(data, 'sh000300', 'day');
+    if (!rows.length){ BENCH = null; return; }
+    const last = rows[rows.length - 1];
+    let start = rows[0];
+    for (let i = 0; i < rows.length; i++){ if (rows[i].date >= firstDate){ start = rows[i]; break; } }
+    if (!(start.close > 0)){ BENCH = null; return; }
+    BENCH = { pct: (last.close - start.close) / start.close * 100, since: start.date };
+    if (typeof renderOverview === 'function') renderOverview();   /* 拉到后刷新总览 extraLine */
+  }).catch(() => { BENCH = null; });
+}
+
 function renderOverview(){
   /* ---------- 1. 持仓类四卡：全部取自 openAggregate()，与持仓明细表「合计」行同源 ---------- */
   const agg = openAggregate();
@@ -3737,7 +3756,9 @@ function renderOverview(){
     '<span>累计赎回金额：' + money(sellTotal) + '（净额 · ' + cf.sellN + ' 笔）</span>' +
     '<span>累计分红：<b class="up">' + money(cf.divTotal) + '</b>（' + cf.divN + ' 笔）</span>' +
     '<span>资金回笼率：<b class="' + cls((recycleRate - 1) * 100) + '">' + pct2(recycleRate * 100) + '</b></span>' +
-    '<span>做T/波段台账：<b class="' + cls(tPnl) + '">' + sign2(tPnl) + '</b>（' + state.trades.length + ' 笔，不计入金蛋）</span>';
+    '<span>做T/波段台账：<b class="' + cls(tPnl) + '">' + sign2(tPnl) + '</b>（' + state.trades.length + ' 笔，不计入金蛋）</span>' +
+    '<span title="沪深300 自你首笔建仓日(' + (BENCH ? BENCH.since : '—') + ')以来的区间涨幅，作组合收益对照基准（近似）">沪深300同期：<b class="' + (BENCH ? cls(BENCH.pct) : '') + '">' + (BENCH ? pct2(BENCH.pct) : '—') + '</b></span>' +
+    (BENCH && isFinite(roi) ? '<span title="组合金蛋收益率 − 沪深300同期 = 超额收益（近似）">超额：<b class="' + cls(roi - BENCH.pct) + '">' + sign2(roi - BENCH.pct) + '%</b></span>' : '');
   $('#extraLine').innerHTML = loadHidden().indexOf('持仓市值') >= 0 ? maskExtraDigits(_extraLineRaw) : _extraLineRaw;
 
   /* 实时行情面板：展示所有当前持仓的最新价 + 涨跌幅（红涨绿跌） */
@@ -4647,6 +4668,7 @@ const HOLD_COLS = [
   { key:'floatPnl', label:'浮动盈亏',   cls:'',  type:'num',  get:(h,c) => c.floatPnl },
   { key:'roi',      label:'收益率',      cls:'',  type:'num',  get:(h,c) => c.roi },
   { key:'pct',      label:'当日涨跌',    cls:'',  type:'num',  get:(h,c) => c.pct },
+  { key:'conc',     label:'集中度',      cls:'',  type:'num',  get:(h,c) => (isFinite(c.conc) ? c.conc : NaN) },  // v68.15：标的市值 ÷ 组合总市值，超 CONC_WARN 标红
   { key:'tRef',     label:'做T参考',     cls:'l', type:'num',  get:(h,c) => tRefPct(h,c) }   // 按三角标记后的做T参考比例（现价 vs 最近一次加/减仓价）排序
 ];
 /* 按当前排序设置对 [{h,c}] 排序；缺值（NaN/空）永远排在最后，与升降序无关 */
@@ -4828,6 +4850,10 @@ function renderHoldings(){
     return;
   }
   const closedN = state.holdings.length - visibleHolds.length;
+  /* v68.15：集中度 = 标的市值 ÷ 组合总市值；阈值默认 10%（单一标的 ≤ 组合 10-15% 铁律），后续可在设置里配 */
+  const CONC_WARN = (state.settings && state.settings.concWarnPct) || 10;
+  const aggAll = openAggregate();
+  const totalMv = aggAll.mv;
   const ths = HOLD_COLS.map(col => {
     const on = col.key === sortKey;
     const ind = on ? (sortDir === 'asc' ? '▲' : '▼') : '⇅';
@@ -4835,7 +4861,7 @@ function renderHoldings(){
       ' data-sort="' + col.key + '" title="点击按「' + col.label + '」排序">' + col.label + '<span class="si">' + ind + '</span></th>';
   }).join('');
   let html = '<table><thead><tr>' + ths + '<th class="l"></th></tr></thead><tbody>';
-  const rows = sortHoldRows(visibleHolds.map(h => ({ h, c: calcHolding(h) })));
+  const rows = sortHoldRows(visibleHolds.map(h => { const c = calcHolding(h); c.conc = (totalMv > 0 && isFinite(c.mv)) ? c.mv / totalMv * 100 : NaN; return { h, c }; }));
   rows.forEach(({ h, c }) => {
     const open = state.expanded.has(h.id);
     html += '<tr class="clickable ' + (open ? 'expanded' : '') + '" data-row="' + h.id + '">' +
@@ -4854,10 +4880,11 @@ function renderHoldings(){
       '<td class="mono q-fpnl hold-amt ' + cls(c.floatPnl) + '" data-q="' + qkey(h) + '">' + (isFinite(c.floatPnl) ? sign2(c.floatPnl) : '—') + '</td>' +
       '<td class="mono q-roi hold-amt ' + cls(c.roi) + '" data-q="' + qkey(h) + '">' + pct2(c.roi) + '</td>' +
       '<td class="mono q-pct hold-amt ' + cls(c.pct) + '" data-q="' + qkey(h) + '">' + pct2(c.pct) + '</td>' +
+      '<td class="mono hold-amt' + (isFinite(c.conc) && c.conc > CONC_WARN ? ' conc-over' : '') + '">' + (isFinite(c.conc) ? pct2(c.conc) + (c.conc > CONC_WARN ? ' ⚠' : '') : '—') + '</td>' +
       '<td class="l tref-td hold-amt">' + tRefCell(h, c) + '</td>' +
       '<td class="l"><button class="btn-ghost btn-sm" data-act="editHold" data-id="' + h.id + '">编辑</button>' +
         '<button class="btn-ghost btn-sm" data-act="delHold" data-id="' + h.id + '">删除</button></td></tr>';
-    if (open) html += '<tr class="sub-row"><td colspan="12">' + subPanel(h, c) + '</td></tr>';
+    if (open) html += '<tr class="sub-row"><td colspan="13">' + subPanel(h, c) + '</td></tr>';
   });
   html += '</tbody>';
 
@@ -4878,7 +4905,7 @@ function renderHoldings(){
     '<td class="mono' + (agg.cost < 0 ? ' neg-cost' : '') + '" data-agg="cost"><b>' + money(agg.cost) + '</b></td>' +
     '<td class="mono ' + cls(agg.floatPnl) + '" data-agg="fpnl"><b>' + (isFinite(agg.floatPnl) ? sign2(agg.floatPnl) : '—') + '</b></td>' +
     '<td class="mono ' + cls(aggRoi) + '" data-agg="roi">' + pct2(aggRoi) + '</td>' +
-    '<td class="mono dim">—</td><td class="mono dim">—</td><td class="l"></td></tr></tfoot>';
+    '<td class="mono dim">—</td><td class="mono dim">—</td><td class="mono dim">—</td><td class="l"></td></tr></tfoot>';
 
   html += '</table>';
   box.innerHTML = html;
@@ -7695,6 +7722,8 @@ function init(){
   try { setupCloudDailySync(); } catch(e){}
   /* 1BK_V68.14.0 ①：本地存储容量预警（设置页提示条） */
   try { warnStorageCapacity(); } catch(e){}
+  /* v68.15：沪深300 基准对照（异步拉取，失败静默，不影响其他渲染） */
+  try { loadBenchmark(); } catch(e){}
   /* 本地每日净值快照（无论是否开云端，都在收盘后 15:05 记一笔，资产曲线靠它跨天累积） */
   (function scheduleLocalSnapshot(){
     const tick = () => { const d = new Date(), at = d.getHours() * 60 + d.getMinutes();
