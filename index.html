@@ -166,7 +166,7 @@ label.fl{display:block;font-size:12px;color:var(--muted);margin:0 0 4px 2px}
 /* ===================== 面板 / 区块 ===================== */
 .wrap{padding:0 var(--page-pad) 96px;margin:0 auto;max-width:var(--page-maxw)}
 /* 总览页左右留白再收一点，给 13 寸平板/手机横屏下的持仓表腾宽度 */
-#page-overview .wrap{padding-left:6px;padding-right:6px}
+#page-overview .wrap{padding-left:4px;padding-right:4px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:0 0 18px;overflow:hidden}
 .panel:first-child{margin-top:0}
 .panel:last-child{margin-bottom:18px}
@@ -188,10 +188,10 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .filterbar.on select.mini{border-color:var(--accent);background:var(--accent-soft)}
 
 /* ===================== 总览 KPI 卡片 ===================== */
-.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px}
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:9px}
 .card{
   position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:8px 10px 7px;box-shadow:var(--shadow);min-width:0;overflow:hidden;
+  padding:6px 8px 5px;box-shadow:var(--shadow);min-width:0;overflow:hidden;
   transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:#d7dcec}
@@ -452,7 +452,7 @@ tr.wd-row td{background:#f3f4f6}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .dim{color:var(--muted)}
 /* 总览持仓表：列高紧凑化（一屏显示更多标的）+ 金额数字放大（类型/持股数/成本价/现价） */
-#holdTable th, #holdTable td{padding:6px 10px;line-height:1.3}
+#holdTable th, #holdTable td{padding:5px 7px;line-height:1.28}
 #holdTable .name-cell{gap:0;line-height:1.2}
 #holdTable .name-cell .n{font-size:13px}
 #holdTable .name-cell .c{font-size:10.5px}
@@ -790,9 +790,9 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
   .topbar-in{padding:12px 16px}
 }
 @media (min-width:1101px) and (max-width:1366px){
-  /* 13 寸横屏：卡片 6 列，gap 保持 8px，卡片 padding 收紧，给下方表格腾宽度 */
+  /* 13 寸横屏：卡片 6 列，gap 保持 8px，卡片 padding 进一步收紧，给下方表格腾宽度 */
   .cards{grid-template-columns:repeat(6,1fr);gap:8px}
-  .card{padding:7px 8px 6px}
+  .card{padding:6px 6px 5px}
 }
 /* ---- 竖屏平板 641-900px：主区 2 列，底部导航自动横向滚动 ---- */
 @media (min-width:641px) and (max-width:900px){
@@ -885,7 +885,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.034</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.035</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1284,7 +1284,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.034 · 2026-08-14 22:46 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.035 · 2026-08-14 22:57 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1344,8 +1344,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.034';
-const APP_BUILD   = '2026-08-14 22:46';
+const APP_VERSION = '1BK_V68.13.1.035';
+const APP_BUILD   = '2026-08-14 22:57';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
