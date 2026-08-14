@@ -838,7 +838,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.024</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.025</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1236,7 +1236,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.024 · 2026-08-14 19:01 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.025 · 2026-08-14 19:14 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1296,8 +1296,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.024';
-const APP_BUILD   = '2026-08-14 19:01';
+const APP_VERSION = '1BK_V68.13.1.025';
+const APP_BUILD   = '2026-08-14 19:14';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -7757,7 +7757,7 @@ window.YANGEDATA_RAW = YANGEDATA_RAW;
 /* ============================ 费率引擎 ============================ */
 const DEFAULT_FEE_RATES = {
   stock: { commissionRate: 0.0000854, minCommission: 1,   stampTaxRate: 0.0005, transferFeeRate: 0.00001, label: '股票' },
-  etf:   { commissionRate: 0.0001,    minCommission: 1,   stampTaxRate: 0,       transferFeeRate: 0,       label: '场内ETF' },
+  etf:   { commissionRate: 0.0001,    minCommission: 0.2, stampTaxRate: 0,       transferFeeRate: 0,       label: '场内ETF' },
   fund:  { commissionRate: 0.0001,    minCommission: 0.2, stampTaxRate: 0,       transferFeeRate: 0,       label: '场外基金（手动）' }
 };
 /* 判断费率类型：股票 / 场内ETF / 场外基金（场外基金不自动计算，手动录入） */
@@ -7808,6 +7808,11 @@ function getFeeRates(){
       s.etf.commissionRate = DEFAULT_FEE_RATES.etf.commissionRate;
       persist.settings();
     }
+    /* 迁移：场内ETF 最低佣金曾误沿用股票最低佣金，统一修正为 0.2 元（v68.14.4） */
+    if (s.etf.minCommission !== DEFAULT_FEE_RATES.etf.minCommission){
+      s.etf.minCommission = DEFAULT_FEE_RATES.etf.minCommission;
+      persist.settings();
+    }
     return s;
   }
   // 首次自动从腾讯文档同步的费率初始化
@@ -7822,7 +7827,8 @@ function getFeeRates(){
       /* 场内ETF：佣金固定万1（不再沿用股票费率），免印花税免过户费 */
       etf: Object.assign({}, DEFAULT_FEE_RATES.etf, {
         commissionRate: DEFAULT_FEE_RATES.etf.commissionRate,
-        minCommission: YANGEDATA_RAW.sf.min_commission
+        /* v68.14.4：场内ETF 最低佣金独立为 0.2 元，不再误沿用股票最低佣金 */
+        minCommission: DEFAULT_FEE_RATES.etf.minCommission
       }),
       fund: Object.assign({}, DEFAULT_FEE_RATES.fund, {
         commissionRate: YANGEDATA_RAW.ff.commission_rate,
