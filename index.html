@@ -838,7 +838,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.023</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.024</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1236,7 +1236,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.023 · 2026-08-13 14:35 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.024 · 2026-08-14 19:01 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1296,8 +1296,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.023';
-const APP_BUILD   = '2026-08-13 14:35';
+const APP_VERSION = '1BK_V68.13.1.024';
+const APP_BUILD   = '2026-08-14 19:01';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1447,13 +1447,13 @@ function parseDate(d){ const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})
 /* CSV 单元格转义（含逗号/引号/换行的文本加双引号包裹） */
 function csvCell(v){ const s = String(v == null ? '' : v); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; }
 
-function n2(v){ return (!isFinite(v) || v === null) ? '—' : (v<0?'-':'') + Math.abs(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function n2(v){ return (!isFinite(v) || v === null) ? '—' : (v<0?'-':'') + Math.abs(v).toFixed(3).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 function money(v){ return (!isFinite(v) || v === null) ? '—' : CONFIG.currency + n2(v); }
 function sign2(v){ if(!isFinite(v)) return '—'; return (v>0?'+':'') + n2(v); }
-function pct2(v){ if(!isFinite(v)) return '—'; return (v>0?'+':'') + v.toFixed(2) + '%'; }
+function pct2(v){ if(!isFinite(v)) return '—'; return (v>0?'+':'') + v.toFixed(3) + '%'; }
 function shr(v){ if(!isFinite(v)) return '—'; return Number.isInteger(v) ? v.toLocaleString('en-US') : v.toFixed(2); }
 function cls(v){ return !isFinite(v) || Math.abs(v) < 1e-9 ? 'flat' : (v > 0 ? 'up' : 'down'); }
-function price4(v){ if(!isFinite(v)) return '—'; return v.toFixed(v < 10 ? 4 : 2); }
+function price4(v){ if(!isFinite(v)) return '—'; return v.toFixed(3); }
 
 /* 弹窗停留时长（毫秒，可微调）：普通提示 5s、错误/警告 6.5s —— 保证看得清再消失 */
 const TOAST_MS = 5000, TOAST_ERR_MS = 6500;
@@ -2245,7 +2245,7 @@ function updateLivePrices(){
       const arrow = q.pct > 0 ? '▲' : (q.pct < 0 ? '▼' : '·');
       const cName = q.pct > 0 ? 'up' : (q.pct < 0 ? 'down' : 'flat');
       el.className = 'lc-pct ' + cName;
-      el.innerHTML = '<span class="arrow">' + arrow + '</span>' + (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%';
+      el.innerHTML = '<span class="arrow">' + arrow + '</span>' + (q.pct > 0 ? '+' : '') + q.pct.toFixed(3) + '%';
     }
   });
   /* 2) 盯盘自选卡（watch-card 已有 data-code） */
@@ -2262,7 +2262,7 @@ function updateLivePrices(){
     if (pctEl){
       pctEl.className = 'mc-pct ' + clsN;
       pctEl.innerHTML = isFinite(q.pct)
-        ? (upN ? '▲' : (downN ? '▼' : '·')) + (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%'
+        ? (upN ? '▲' : (downN ? '▼' : '·')) + (q.pct > 0 ? '+' : '') + q.pct.toFixed(3) + '%'
         : '<span class="dim">—</span>';
     }
     card.className = 'watch-card ' + clsN;
@@ -2394,8 +2394,8 @@ function tradeBadgeHTML(code){
     const winRate = s.n ? Math.round(s.win / s.n * 100) : 0;
     const cls = s.pnl > 0 ? 'tb-win' : (s.pnl < 0 ? 'tb-lose' : 'tb-flat');
     return '<span class="trade-badge ' + cls + '" title="做T ' + s.T + ' 笔 / 波段 ' + s.swingN + ' 笔 · 胜率 ' + winRate + '% · 累计收益 ' +
-      (s.pnl >= 0 ? '+' : '') + s.pnl.toFixed(0) + ' 元">做T ' + s.n + ' 笔' +
-      (s.pnl !== 0 ? ' ' + (s.pnl > 0 ? '+' : '') + s.pnl.toFixed(0) + '元' : '') +
+      (s.pnl >= 0 ? '+' : '') + s.pnl.toFixed(3) + ' 元">做T ' + s.n + ' 笔' +
+      (s.pnl !== 0 ? ' ' + (s.pnl > 0 ? '+' : '') + s.pnl.toFixed(3) + '元' : '') +
       ' · 胜率 ' + winRate + '%</span>';
   } catch(e){ return ''; }
 }
@@ -2996,7 +2996,7 @@ function refreshFundFlowUI(){
     const v = (h.fundFlow != null) ? h.fundFlow : NaN;
     if (!isFinite(v)){ el.textContent = '—'; el.className = 'ff-inline q-ff dim'; return; }
     const wan = v / 1e4, up = v >= 0;
-    el.textContent = '主力' + (up ? '净流入 ' : '净流出 ') + (Math.abs(wan) >= 1e4 ? (wan / 1e4).toFixed(2) + '亿' : wan.toFixed(0) + '万');
+    el.textContent = '主力' + (up ? '净流入 ' : '净流出 ') + (Math.abs(wan) >= 1e4 ? (wan / 1e4).toFixed(3) + '亿' : wan.toFixed(3) + '万');
     el.className = 'ff-inline q-ff ' + (up ? 'up' : 'down');
   });
 }
@@ -3010,7 +3010,7 @@ function fundFlowText(h){
   const v = (h.fundFlow != null) ? h.fundFlow : NaN;
   if (!isFinite(v)) return '—';
   const wan = v / 1e4, up = v >= 0;
-  return '主力' + (up ? '净流入 ' : '净流出 ') + (Math.abs(wan) >= 1e4 ? (wan / 1e4).toFixed(2) + '亿' : wan.toFixed(0) + '万');
+  return '主力' + (up ? '净流入 ' : '净流出 ') + (Math.abs(wan) >= 1e4 ? (wan / 1e4).toFixed(3) + '亿' : wan.toFixed(3) + '万');
 }
 function fundFlowPanelHTML(){
   const rows = state.holdings.filter(h => isFinite(h.fundFlow)).map(h => ({ h, ff: h.fundFlow, ff5: h.fundFlow5 || 0 }));
@@ -3019,11 +3019,11 @@ function fundFlowPanelHTML(){
   const maxAbs = Math.max(1, ...rows.map(r => Math.abs(r.ff)));
   const outflow = rows.filter(r => r.ff < 0).slice(0, 8);
   const inflow  = rows.filter(r => r.ff > 0).slice(-8).reverse();
-  const fmt = w => (Math.abs(w) >= 1e4 ? (w / 1e4).toFixed(2) + '亿' : w.toFixed(0) + '万');
+  const fmt = w => (Math.abs(w) >= 1e4 ? (w / 1e4).toFixed(3) + '亿' : w.toFixed(3) + '万');
   const bar = r => {
     const up = r.ff >= 0, w = Math.min(100, Math.abs(r.ff) / maxAbs * 100);
     return '<div class="ff-row"><div class="ff-name">' + esc(r.h.name || r.h.code) + '</div>' +
-      '<div class="ff-track"><div class="ff-bar ' + (up ? 'up' : 'down') + '" style="width:' + w.toFixed(1) + '%"></div></div>' +
+      '<div class="ff-track"><div class="ff-bar ' + (up ? 'up' : 'down') + '" style="width:' + w.toFixed(3) + '%"></div></div>' +
       '<div class="ff-val ' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + fmt(r.ff / 1e4) + '</div></div>';
   };
   return '<div class="ff-sum">主力净流出 <b class="down">' + outflow.length + ' 只</b> · 净流入 <b class="up">' + inflow.length + ' 只</b> · 仅股票 · 每 90 秒刷新</div>' +
@@ -3036,7 +3036,7 @@ function fundFlowPanelHTML(){
 /* ---------- 预警与纪律 ---------- */
 function fireAlert(h, type, target, price){
   const nm = h.name || h.code, verb = type === '止损' ? '跌破' : '突破';
-  const body = nm + ' 现价 ¥' + price.toFixed(2) + ' 已' + verb + type + '线 ¥' + target.toFixed(2);
+  const body = nm + ' 现价 ¥' + price.toFixed(3) + ' 已' + verb + type + '线 ¥' + target.toFixed(3);
   try { if (typeof Notification !== 'undefined' && Notification.permission === 'granted'){ new Notification('【' + type + '预警】' + nm, { body }); } } catch(e){}
   toast(body + (type === '止损' ? ' · 注意A股T+1（今日买入次日方可卖），涨跌停±10%/±20%可能无成交' : ''), 'warn', 6000);
 }
@@ -3066,7 +3066,7 @@ function checkAlerts(){
     if (mv <= 0) return;
     const ratio = Math.abs(h.fundFlow) / mv * 100;
     h.alertState = h.alertState || {};
-    if (ratio >= FUND_FLOW_WARN_PCT && !h.alertState.fflow){ h.alertState.fflow = Date.now(); fireAlertInfo(h, '主力净流出', fundFlowText(h) + '（占持仓市值 ' + ratio.toFixed(1) + '%）'); fired++; }
+    if (ratio >= FUND_FLOW_WARN_PCT && !h.alertState.fflow){ h.alertState.fflow = Date.now(); fireAlertInfo(h, '主力净流出', fundFlowText(h) + '（占持仓市值 ' + ratio.toFixed(3) + '%）'); fired++; }
     else if (ratio < FUND_FLOW_WARN_PCT && h.alertState.fflow) delete h.alertState.fflow;   /* 回流后重新武装 */
   });
   /* 概念异动预警（按东财题材标签聚合；成分股单日大幅波动即视为该概念异动） */
@@ -3084,7 +3084,7 @@ function checkAlerts(){
     if (movers.length){
       if (state.conceptAlertState[tag]) return;            /* 已触发则不再重复弹（回落到阈值下自动重新武装） */
       state.conceptAlertState[tag] = Date.now();
-      const names = movers.map(x => (x.h.name || x.h.code) + (x.pct >= 0 ? '+' : '') + x.pct.toFixed(1) + '%').join('、');
+      const names = movers.map(x => (x.h.name || x.h.code) + (x.pct >= 0 ? '+' : '') + x.pct.toFixed(3) + '%').join('、');
       const kind = movers.length >= 2 ? '概念联动异动' : '概念异动';
       fireAlertInfo({ name: tag, code: tag }, kind, names);
       fired++;
@@ -3106,17 +3106,17 @@ function equityCurveSVG(rows){
   const n = rows.length;
   const X = i => pl + (n === 1 ? 0 : (i / (n - 1)) * (W - pl - pr));
   const Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
-  const pathOf = arr => arr.map((v, i) => (isFinite(v) ? (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) : '')).join(' ');
+  const pathOf = arr => arr.map((v, i) => (isFinite(v) ? (i ? 'L' : 'M') + X(i).toFixed(3) + ' ' + Y(v).toFixed(3) : '')).join(' ');
   let area = '';
-  if (n > 1){ area = 'M' + X(0).toFixed(1) + ' ' + Y(mv[0]).toFixed(1) + ' ' +
-    mv.map((v, i) => isFinite(v) ? 'L' + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) : '').join(' ') +
-    ' L' + X(n - 1).toFixed(1) + ' ' + (H - pb) + ' L' + X(0).toFixed(1) + ' ' + (H - pb) + ' Z'; }
+  if (n > 1){ area = 'M' + X(0).toFixed(3) + ' ' + Y(mv[0]).toFixed(3) + ' ' +
+    mv.map((v, i) => isFinite(v) ? 'L' + X(i).toFixed(3) + ' ' + Y(v).toFixed(3) : '').join(' ') +
+    ' L' + X(n - 1).toFixed(3) + ' ' + (H - pb) + ' L' + X(0).toFixed(3) + ' ' + (H - pb) + ' Z'; }
   const grid = [];
   for (let k = 0; k <= 4; k++){ const v = lo + (hi - lo) * k / 4, y = Y(v);
-    grid.push('<line x1="' + pl + '" y1="' + y.toFixed(1) + '" x2="' + (W - pr) + '" y2="' + y.toFixed(1) + '" stroke="#eef0f3" stroke-width="1"/>' +
-      '<text x="' + (pl - 6) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="end" font-size="10" fill="#9ca3af">' + money(v) + '</text>'); }
+    grid.push('<line x1="' + pl + '" y1="' + y.toFixed(3) + '" x2="' + (W - pr) + '" y2="' + y.toFixed(3) + '" stroke="#eef0f3" stroke-width="1"/>' +
+      '<text x="' + (pl - 6) + '" y="' + (y + 3).toFixed(3) + '" text-anchor="end" font-size="10" fill="#9ca3af">' + money(v) + '</text>'); }
   const xt = [0, Math.floor((n - 1) / 2), n - 1].filter(i => rows[i]).map(i =>
-    '<text x="' + X(i).toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10" fill="#9ca3af">' + rows[i].d.slice(5) + '</text>');
+    '<text x="' + X(i).toFixed(3) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10" fill="#9ca3af">' + rows[i].d.slice(5) + '</text>');
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block">' +
     '<text x="' + pl + '" y="18" font-size="12" fill="#111827" font-weight="600">资产净值曲线</text>' +
     '<g transform="translate(' + (W - 224) + ',8)"><rect width="10" height="10" fill="#2563eb"/><text x="14" y="9" font-size="11" fill="#374151">持仓市值</text>' +
@@ -3135,7 +3135,7 @@ function pieSVG(segs){
   segs.forEach((s, i) => {
     const frac = s.value / total, a2 = ang + frac * Math.PI * 2, large = frac > 0.5 ? 1 : 0;
     const x1 = cx + r * Math.cos(ang), y1 = cy + r * Math.sin(ang), x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
-    paths += '<path d="M' + cx + ' ' + cy + ' L' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + large + ' 1 ' + x2.toFixed(1) + ' ' + y2.toFixed(1) + ' Z" fill="' + POS_PALETTE[i % POS_PALETTE.length] + '" stroke="#fff" stroke-width="1"><title>' + esc(s.label) + ' ' + s.pct.toFixed(1) + '%</title></path>';
+    paths += '<path d="M' + cx + ' ' + cy + ' L' + x1.toFixed(3) + ' ' + y1.toFixed(3) + ' A' + r + ' ' + r + ' 0 ' + large + ' 1 ' + x2.toFixed(3) + ' ' + y2.toFixed(3) + ' Z" fill="' + POS_PALETTE[i % POS_PALETTE.length] + '" stroke="#fff" stroke-width="1"><title>' + esc(s.label) + ' ' + s.pct.toFixed(3) + '%</title></path>';
     ang = a2;
   });
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="200" height="200" style="display:block;margin:0 auto">' + paths +
@@ -3154,13 +3154,13 @@ function top10HTML(){
   rows.forEach(r => r.pct = total > 0 ? r.mv / total * 100 : 0);
   return '<div class="top10">' + rows.map((r, i) => {
     const h = r.h;
-    const bar = '<div class="t10-bar" style="width:' + Math.max(1, r.pct).toFixed(1) + '%"></div>';
+    const bar = '<div class="t10-bar" style="width:' + Math.max(1, r.pct).toFixed(3) + '%"></div>';
     const rank = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : String(i + 1)));
     return '<div class="t10-row"><span class="t10-rank">' + rank + '</span>' +
       '<span class="t10-name" title="' + esc(h.name || h.code) + '">' + esc(h.name || h.code) + '</span>' +
       '<span class="t10-bar-w">' + bar + '</span>' +
       '<span class="t10-val">' + money(r.mv) + '</span>' +
-      '<span class="t10-pct">' + r.pct.toFixed(1) + '%</span></div>';
+      '<span class="t10-pct">' + r.pct.toFixed(3) + '%</span></div>';
   }).join('') + '</div>';
 }
 /* 1BK_V68.14.0 ⑩：月度资金流水热力图（按交易流水 side 聚合买入/卖出/分红，近 12 个月） */
@@ -3191,8 +3191,8 @@ function monthlyFlowHTML(){
     return '<div class="mf-cell" title="' + k + '：买入 ' + money(m.buy) + ' · 卖出 ' + money(m.sell) + (m.div ? ' · 分红 ' + money(m.div) : '') + '">' +
       '<div class="mf-m">' + k.slice(2) + '</div>' +
       '<div class="mf-bars">' +
-        '<div class="mf-bar buy" style="width:' + buyW.toFixed(1) + '%"></div>' +
-        '<div class="mf-bar sell" style="width:' + sellW.toFixed(1) + '%"></div>' +
+        '<div class="mf-bar buy" style="width:' + buyW.toFixed(3) + '%"></div>' +
+        '<div class="mf-bar sell" style="width:' + sellW.toFixed(3) + '%"></div>' +
       '</div>' +
       '<div class="mf-net ' + (net >= 0 ? 'up' : 'down') + '">' + (net >= 0 ? '+' : '-') + money(Math.abs(net)) + '</div></div>';
   }).join('');
@@ -3273,8 +3273,8 @@ function dailyCloseSummaryHTML(){
     if (h.closed) return;
     const q = state.quotes[qkey(h)];
     const pct = q && isFinite(q.pct) ? q.pct : NaN;
-    if (isFinite(pct) && pct <= -3) watch.push({ h, why: '今日 ' + pct.toFixed(1) + '% · 跌出价值，可观察低吸', cls: 'down' });
-    else if (isFinite(pct) && pct >= 5) watch.push({ h, why: '今日 ' + pct.toFixed(1) + '% · 涨出价值，可考虑高抛', cls: 'up' });
+    if (isFinite(pct) && pct <= -3) watch.push({ h, why: '今日 ' + pct.toFixed(3) + '% · 跌出价值，可观察低吸', cls: 'down' });
+    else if (isFinite(pct) && pct >= 5) watch.push({ h, why: '今日 ' + pct.toFixed(3) + '% · 涨出价值，可考虑高抛', cls: 'up' });
   });
   const watchRows = watch.length ? watch.map(w =>
     '<div class="ds-watch ' + w.cls + '">' + esc(w.h.name || w.h.code) + ' · ' + w.why + '</div>').join('')
@@ -3305,7 +3305,7 @@ function renderAnalysis(){
   }
 
   /* 2) 收益归因 */
-  const roiTxt = isFinite(att.roi) ? (att.roi >= 0 ? '+' : '') + att.roi.toFixed(2) + '%' : '—';
+  const roiTxt = isFinite(att.roi) ? (att.roi >= 0 ? '+' : '') + att.roi.toFixed(3) + '%' : '—';
   const attrHTML =
     '<div class="kpi-grid">' +
     kpi2('金蛋(= 清仓净收益 + 持仓浮动)', sign2(att.totalPnl), cls(att.totalPnl)) +
@@ -3321,12 +3321,12 @@ function renderAnalysis(){
 
   /* 3) 行业暴露 */
   let sectorWarn = '';
-  ind.segs.forEach(s => { if (s.pct > SECTOR_WARN_PCT) sectorWarn += warnRow('⚠️', '行业「' + esc(s.label) + '」占组合 <b>' + s.pct.toFixed(0) + '%</b>（> ' + SECTOR_WARN_PCT + '%），风格过于集中'); });
+  ind.segs.forEach(s => { if (s.pct > SECTOR_WARN_PCT) sectorWarn += warnRow('⚠️', '行业「' + esc(s.label) + '」占组合 <b>' + s.pct.toFixed(3) + '%</b>（> ' + SECTOR_WARN_PCT + '%），风格过于集中'); });
   if (ind.unclassified > 0) sectorWarn += warnRow('ℹ️', '有 <b>' + money(ind.unclassified) + '</b> 市值未设置行业（标记为「未分类」），请在「编辑标的」中补全以获得准确暴露');
   let indTable = ind.segs.map((s, i) =>
     '<tr><td class="l"><span class="dot" style="background:' + POS_PALETTE[i % POS_PALETTE.length] + '"></span>' + esc(s.label) + '</td>' +
-    '<td class="mono">' + money(s.value) + '</td><td class="mono">' + s.pct.toFixed(1) + '%</td>' +
-    '<td class="mono"><div class="bar-in" style="width:' + Math.min(100, s.pct).toFixed(0) + '%"></div></td></tr>').join('');
+    '<td class="mono">' + money(s.value) + '</td><td class="mono">' + s.pct.toFixed(3) + '%</td>' +
+    '<td class="mono"><div class="bar-in" style="width:' + Math.min(100, s.pct).toFixed(3) + '%"></div></td></tr>').join('');
   const industryHTML = '<div class="an-cols"><div class="an-pie">' + pieSVG(ind.segs) + '</div>' +
     '<div class="an-table"><table class="tbl"><thead><tr><th class="l">行业</th><th>市值</th><th>占比</th><th></th></tr></thead><tbody>' +
     (indTable || '<tr><td colspan="4" class="dim">—</td></tr>') + '</tbody></table></div></div>' + sectorWarn;
@@ -3345,7 +3345,7 @@ function renderAnalysis(){
     let ups = '—';
     if (r && r.eps && isFinite(price) && price > 0){
       const gap = (price - r.eps) / r.eps * 100;     // 现价 vs 一致预期 EPS：正=已超预期，负=仍低于预期
-      ups = '<span class="' + (gap >= 0 ? 'up' : 'down') + '">' + (gap > 0 ? '+' : '') + gap.toFixed(0) + '%</span>';
+      ups = '<span class="' + (gap >= 0 ? 'up' : 'down') + '">' + (gap > 0 ? '+' : '') + gap.toFixed(3) + '%</span>';
     }
     researchRows.push({
       h, r,
@@ -3354,8 +3354,8 @@ function renderAnalysis(){
       rating: r ? '<span class="tag ' + (r.rating === '买入' ? 'buy' : (r.rating === '增持' ? 'hold' : 'neutral')) + '">' + esc(r.rating) + '</span>' : '<span class="dim">无研报</span>',
       org: r ? esc(r.org) : '—',
       date: r ? esc(r.date) : '—',
-      eps: r && r.eps ? r.eps.toFixed(2) : '—',
-      target: r && r.target ? r.target.toFixed(2) : '—',
+      eps: r && r.eps ? r.eps.toFixed(3) : '—',
+      target: r && r.target ? r.target.toFixed(3) : '—',
       title: r ? esc(r.title) : '—',
       ups
     });
@@ -3395,7 +3395,7 @@ function renderAnalysis(){
     let topShare = 0, topH = null;
     state.holdings.forEach(h => { const c = calcHolding(h); if (isFinite(c.mv) && c.mv > topShare){ topShare = c.mv; topH = h; } });
     if (topH && topShare / agg.mv * 100 > SINGLE_WARN_PCT)
-      disc += warnRow('⚠️', '单标的集中度：『' + esc(topH.name || topH.code) + '』占组合市值 <b>' + (topShare / agg.mv * 100).toFixed(0) + '%</b>（> ' + SINGLE_WARN_PCT + '%），波动高度依赖单票', 'warn');
+      disc += warnRow('⚠️', '单标的集中度：『' + esc(topH.name || topH.code) + '』占组合市值 <b>' + (topShare / agg.mv * 100).toFixed(3) + '%</b>（> ' + SINGLE_WARN_PCT + '%），波动高度依赖单票', 'warn');
   }
   /* 主力净流出预警（仅股票、仅当前持仓） */
   state.holdings.forEach(h => {
@@ -3404,7 +3404,7 @@ function renderAnalysis(){
     if (effType(h.code, h.type, h.typeLocked) !== 'stock' || !isFinite(h.fundFlow) || h.fundFlow >= 0) return;
     const mv = isFinite(c.mv) ? c.mv : 0; if (mv <= 0) return;
     const ratio = Math.abs(h.fundFlow) / mv * 100;
-    if (ratio >= FUND_FLOW_WARN_PCT) disc += warnRow('🔻', '主力净流出：『' + esc(h.name || h.code) + '』' + fundFlowText(h) + '，占持仓市值 <b>' + ratio.toFixed(1) + '%</b>', 'danger');
+    if (ratio >= FUND_FLOW_WARN_PCT) disc += warnRow('🔻', '主力净流出：『' + esc(h.name || h.code) + '』' + fundFlowText(h) + '，占持仓市值 <b>' + ratio.toFixed(3) + '%</b>', 'danger');
   });
   /* 概念异动预警（按东财题材标签聚合，成分股单日大幅波动；仅当前持仓） */
   const byC = {};
@@ -3420,7 +3420,7 @@ function renderAnalysis(){
   Object.keys(byC).forEach(tag => {
     const movers = byC[tag].filter(x => Math.abs(x.pct) >= CONCEPT_MOVE_PCT);
     if (movers.length){
-      const names = movers.map(x => esc(x.h.name || x.h.code) + (x.pct >= 0 ? '+' : '') + x.pct.toFixed(1) + '%').join('、');
+      const names = movers.map(x => esc(x.h.name || x.h.code) + (x.pct >= 0 ? '+' : '') + x.pct.toFixed(3) + '%').join('、');
       disc += warnRow('⚡', (movers.length >= 2 ? '概念联动异动' : '概念异动') + '：『' + esc(tag) + '』' + names, 'warn');
     }
   });
@@ -3552,19 +3552,19 @@ function zuxunEngineChecks(){
     /* ① 止盈：浮盈 ＞ takeProfit% 卖 1/3 */
     if (rate > takeProfit)
       out.push({ rule:'tp', ic:'📈', sev:'warn',
-        txt:'祖训止盈：『' + nm + '』浮盈 <b>' + rate.toFixed(1) + '%</b>（＞' + takeProfit + '%），应<b>卖出 1/3</b> 落袋，余仓继续做 T 让利润奔跑' });
+        txt:'祖训止盈：『' + nm + '』浮盈 <b>' + rate.toFixed(3) + '%</b>（＞' + takeProfit + '%），应<b>卖出 1/3</b> 落袋，余仓继续做 T 让利润奔跑' });
     /* ② 止损：短线 stopShort% / 中线 stopMid%（以持仓天数区分，阈值 shortDays 天） */
     const stop = days >= shortDays ? stopMid : stopShort;
     if (rate <= -stop)
       out.push({ rule:'sl', ic:'🛑', sev:'danger',
-        txt:'祖训止损：『' + nm + '』浮盈率 <b>' + rate.toFixed(1) + '%</b>（≤ -' + stop + '% · ' + (days >= shortDays ? '中线' : '短线' + (isFinite(days) ? ' ' + days + '天' : '')) + '），应果断卖出离场，不赌翻盘' });
+        txt:'祖训止损：『' + nm + '』浮盈率 <b>' + rate.toFixed(3) + '%</b>（≤ -' + stop + '% · ' + (days >= shortDays ? '中线' : '短线' + (isFinite(days) ? ' ' + days + '天' : '')) + '），应果断卖出离场，不赌翻盘' });
     /* ③ 重仓回撤：占组合 ≥ heavyPct% 且曾浮盈、现回撤到 ≤ revertMax% → 0% 即止损 */
     const share = mvTotal > 0 ? c.mv / mvTotal * 100 : 0;
     if (share >= heavyPct && rate <= revertMax){
       const everUp = (h.txs || []).some(t => Number(t.price) > avg * 1.02);   // 历史有成交价高于成本 → 曾经浮盈
       if (everUp)
         out.push({ rule:'rv', ic:'⚖️', sev:'warn',
-          txt:'重仓回撤止损：『' + nm + '』占组合 <b>' + share.toFixed(0) + '%</b>，浮盈已回撤到 <b>' + rate.toFixed(1) + '%</b>（曾有过浮盈），按祖训 <b>0% 即止损</b>' });
+          txt:'重仓回撤止损：『' + nm + '』占组合 <b>' + share.toFixed(3) + '%</b>，浮盈已回撤到 <b>' + rate.toFixed(3) + '%</b>（曾有过浮盈），按祖训 <b>0% 即止损</b>' });
     }
   });
   return out;
@@ -3786,7 +3786,7 @@ function renderLive(){
       if (isFinite(pct)){
         const arrow = pct > 0 ? '▲' : (pct < 0 ? '▼' : '·');
         const cName = pct > 0 ? 'up' : (pct < 0 ? 'down' : 'flat');
-        pctHtml = '<div class="lc-pct ' + cName + '" ' + dq + '><span class="arrow">' + arrow + '</span>' + (pct > 0 ? '+' : '') + pct.toFixed(2) + '%</div>';
+        pctHtml = '<div class="lc-pct ' + cName + '" ' + dq + '><span class="arrow">' + arrow + '</span>' + (pct > 0 ? '+' : '') + pct.toFixed(3) + '%</div>';
       } else {
         pctHtml = '<div class="lc-noquote">净值</div>';
       }
@@ -3858,8 +3858,8 @@ async function renderMarketLive(){
       const cls = chg > 0.005 ? 'up' : (chg < -0.005 ? 'down' : 'flat');
       const sign = chg > 0 ? '+' : '';
       return '<div class="mkt-chip ' + cls + '" data-sym="' + esc(m.code) + '" data-name="' + esc(m.name) + '"><span class="mkt-name">' + esc(m.name) + '</span>' +
-        '<span class="mkt-val">' + d.price.toFixed(2) + '</span>' +
-        '<span class="mkt-pct">' + sign + chg.toFixed(2) + '%</span></div>';
+        '<span class="mkt-val">' + d.price.toFixed(3) + '</span>' +
+        '<span class="mkt-pct">' + sign + chg.toFixed(3) + '%</span></div>';
     }).join('');
     const sub = document.getElementById('mktLiveSub');
     if (sub) sub.textContent = (isTradingTime() ? '交易时段每 2 秒刷新' : marketPhaseLabel(marketPhase()) + '，已暂停') + ' · 红涨绿跌';
@@ -3944,7 +3944,7 @@ function renderWatch(){
       (isHolding ? '<span class="hold-badge" title="当前持仓标的">持仓</span>' : '') +
       '<button class="watch-del" data-del="' + esc(w.code) + '" title="移除自选">×</button>' +
       '<div class="mc-name">' + esc(name) + '</div>' +
-      '<div class="mc-pct ' + clsN + '">' + (isFinite(pct) ? arrow + (pct > 0 ? '+' : '') + pct.toFixed(2) + '%' : '<span class="dim">—</span>') + '</div>' +
+      '<div class="mc-pct ' + clsN + '">' + (isFinite(pct) ? arrow + (pct > 0 ? '+' : '') + pct.toFixed(3) + '%' : '<span class="dim">—</span>') + '</div>' +
       '<div class="mc-price">' + (isFinite(price) ? price4(price) : '<span class="dim">—</span>') + '</div>' +
     '</div>';
   }).join('');
@@ -4210,7 +4210,7 @@ function klineSVG(rows, name, period){
       let s = 0; for (let j = i - k + 1; j <= i; j++) s += rows[j].close;
       pts.push([xOf(i), yOf(s / k)]);
     }
-    return { d: pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') };
+    return { d: pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(3) + ',' + p[1].toFixed(3)).join(' ') };
   };
   const maLast = k => { if (n < k) return NaN; let s = 0; for (let j = n - k; j < n; j++) s += rows[j].close; return s / k; };
   const ma5 = maLine(5), ma10 = maLine(10), ma20 = maLine(20), ma60 = maLine(60);
@@ -4222,7 +4222,7 @@ function klineSVG(rows, name, period){
       const v = s / k;
       pts.push([xOf(i), volTop + 4 + (1 - v / volMax) * (volArea - 8)]);
     }
-    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(3) + ',' + p[1].toFixed(3)).join(' ');
     const lastV = n >= k ? rows.slice(n - k).reduce((a, r) => a + r.vol, 0) / k : NaN;
     return { d, lastV };
   };
@@ -4246,8 +4246,8 @@ function klineSVG(rows, name, period){
   for (let i = 0; i <= 4; i++){
     const v = hi - range * i / 4;
     const y = yOf(v);
-    gridY += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#eef0f5" stroke-width="1"/>';
-    yLbl += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + v.toFixed(3) + '</text>';
+    gridY += '<line x1="' + padL + '" y1="' + y.toFixed(3) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(3) + '" stroke="#eef0f5" stroke-width="1"/>';
+    yLbl += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(3) + '" text-anchor="end" font-size="10" fill="#9aa3b5">' + v.toFixed(3) + '</text>';
   }
   gridY += '<line x1="' + padL + '" y1="' + (volTop - 2) + '" x2="' + (W - padR) + '" y2="' + (volTop - 2) + '" stroke="#eef0f5" stroke-width="1"/>';
   gridY += '<line x1="' + padL + '" y1="' + (macdTop - 2) + '" x2="' + (W - padR) + '" y2="' + (macdTop - 2) + '" stroke="#eef0f5" stroke-width="1"/>';
@@ -4255,38 +4255,38 @@ function klineSVG(rows, name, period){
   yLbl += '<text x="' + (padL - 6) + '" y="' + (macdTop + 3.5) + '" text-anchor="end" font-size="10" fill="#9aa3b5">MACD</text>';
   /* MACD 副图标签（右） */
   const macdLbl =
-    '<text x="' + (W - padR) + '" y="' + (macdTop + 10) + '" text-anchor="end" font-size="10" fill="#e5484d">DIF ' + dif[n-1].toFixed(2) + '</text>' +
-    '<text x="' + (W - padR) + '" y="' + (macdTop + 23) + '" text-anchor="end" font-size="10" fill="#f59e0b">DEA ' + dea[n-1].toFixed(2) + '</text>' +
-    '<text x="' + (W - padR) + '" y="' + (macdTop + 36) + '" text-anchor="end" font-size="10" fill="#8b5cf6">MACD ' + macd[n-1].toFixed(2) + '</text>';
+    '<text x="' + (W - padR) + '" y="' + (macdTop + 10) + '" text-anchor="end" font-size="10" fill="#e5484d">DIF ' + dif[n-1].toFixed(3) + '</text>' +
+    '<text x="' + (W - padR) + '" y="' + (macdTop + 23) + '" text-anchor="end" font-size="10" fill="#f59e0b">DEA ' + dea[n-1].toFixed(3) + '</text>' +
+    '<text x="' + (W - padR) + '" y="' + (macdTop + 36) + '" text-anchor="end" font-size="10" fill="#8b5cf6">MACD ' + macd[n-1].toFixed(3) + '</text>';
   let cand = '', vol = '', macdBars = '';
   for (let i = 0; i < n; i++){
     const r = rows[i], x = xOf(i);
     const y1 = yOf(r.high), y2 = yOf(r.low), yo = yOf(r.open), yc = yOf(r.close);
     const c = col(r);
-    cand += '<line x1="' + x.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + c + '" stroke-width="1"/>';
+    cand += '<line x1="' + x.toFixed(3) + '" y1="' + y1.toFixed(3) + '" x2="' + x.toFixed(3) + '" y2="' + y2.toFixed(3) + '" stroke="' + c + '" stroke-width="1"/>';
     const top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yo - yc));
-    cand += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + hgt.toFixed(1) + '" fill="' + c + '" rx="0.6"/>';
+    cand += '<rect x="' + (x - bw / 2).toFixed(3) + '" y="' + top.toFixed(3) + '" width="' + bw.toFixed(3) + '" height="' + hgt.toFixed(3) + '" fill="' + c + '" rx="0.6"/>';
     const vh = Math.max(1, r.vol / volMax * (volArea - 8));
-    vol += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + (volTop + 4 + (volArea - 8) - vh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + c + '" opacity="0.6"/>';
+    vol += '<rect x="' + (x - bw / 2).toFixed(3) + '" y="' + (volTop + 4 + (volArea - 8) - vh).toFixed(3) + '" width="' + bw.toFixed(3) + '" height="' + vh.toFixed(3) + '" fill="' + c + '" opacity="0.6"/>';
     /* MACD 柱：红正绿负（沿用 A股红涨绿跌） */
     const mv = macd[i], zeroY = mY(0);
     const my = mY(mv);
     const mh = Math.max(0.8, Math.abs(zeroY - my));
-    macdBars += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + Math.min(zeroY, my).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + mh.toFixed(1) + '" fill="' + (mv >= 0 ? up : down) + '" opacity="' + (Math.abs(mv) / mRange > 0.05 ? 0.85 : 0.45) + '"/>';
+    macdBars += '<rect x="' + (x - bw / 2).toFixed(3) + '" y="' + Math.min(zeroY, my).toFixed(3) + '" width="' + bw.toFixed(3) + '" height="' + mh.toFixed(3) + '" fill="' + (mv >= 0 ? up : down) + '" opacity="' + (Math.abs(mv) / mRange > 0.05 ? 0.85 : 0.45) + '"/>';
   }
   /* MACD 零轴 */
-  macdBars += '<line x1="' + padL + '" y1="' + mY(0).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + mY(0).toFixed(1) + '" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>';
+  macdBars += '<line x1="' + padL + '" y1="' + mY(0).toFixed(3) + '" x2="' + (W - padR) + '" y2="' + mY(0).toFixed(3) + '" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>';
   let xLbl = '';
   [0, Math.floor(n / 4), Math.floor(n / 2), Math.floor(3 * n / 4), n - 1].forEach(i => {
     const anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
-    xLbl += '<text x="' + xOf(i).toFixed(1) + '" y="' + (H - padB + 15) + '" text-anchor="' + anchor + '" font-size="10" fill="#9aa3b5">' + String(rows[i].date).slice(5) + '</text>';
+    xLbl += '<text x="' + xOf(i).toFixed(3) + '" y="' + (H - padB + 15) + '" text-anchor="' + anchor + '" font-size="10" fill="#9aa3b5">' + String(rows[i].date).slice(5) + '</text>';
   });
   const last = rows[n - 1], first = rows[0];
   const chg = first.close > 0 ? (last.close - first.close) / first.close * 100 : 0;
   const chgC = chg > 0 ? up : (chg < 0 ? down : flat);
   const pName = { day:'日K', week:'周K', month:'月K' }[period] || '日K';
   const title = '<text x="' + padL + '" y="' + (padT - 8) + '" font-size="13.5" font-weight="700" fill="#161a22">' + esc(name) + ' · ' + pName + '（前复权）</text>' +
-    '<text x="' + (W - padR) + '" y="' + (padT - 8) + '" text-anchor="end" font-size="12.5" font-weight="700" fill="' + chgC + '">' + last.close.toFixed(3) + '  ' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</text>';
+    '<text x="' + (W - padR) + '" y="' + (padT - 8) + '" text-anchor="end" font-size="12.5" font-weight="700" fill="' + chgC + '">' + last.close.toFixed(3) + '  ' + (chg >= 0 ? '+' : '') + chg.toFixed(3) + '%</text>';
   const leg = k => {
     const v = maLast(k);
     return '<text x="' + (W - padR) + '" y="' + (padT + 10 + [0, 13, 26, 39][[5,10,20,60].indexOf(k)]) + '" text-anchor="end" font-size="10" fill="' + maCols[k] + '">MA' + k + (isFinite(v) ? ':' + v.toFixed(3) : '') + '</text>';
@@ -4309,8 +4309,8 @@ function klineSVG(rows, name, period){
       (ma60.d ? '<path d="' + ma60.d + '" fill="none" stroke="' + maCols[60] + '" stroke-width="1.2"/>' : '') +
       (vma5.d ? '<path d="' + vma5.d + '" fill="none" stroke="#607d8b" stroke-width="1.1"/>' : '') +
       (vma10.d ? '<path d="' + vma10.d + '" fill="none" stroke="#f59e0b" stroke-width="1.1"/>' : '') +
-      '<path d="' + dif.map((d, i) => (i ? 'L' : 'M') + xOf(i).toFixed(1) + ',' + mY(d).toFixed(1)).join(' ') + '" fill="none" stroke="#e5484d" stroke-width="1.2"/>' +
-      '<path d="' + dea.map((d, i) => (i ? 'L' : 'M') + xOf(i).toFixed(1) + ',' + mY(d).toFixed(1)).join(' ') + '" fill="none" stroke="#f59e0b" stroke-width="1.1"/>' +
+      '<path d="' + dif.map((d, i) => (i ? 'L' : 'M') + xOf(i).toFixed(3) + ',' + mY(d).toFixed(3)).join(' ') + '" fill="none" stroke="#e5484d" stroke-width="1.2"/>' +
+      '<path d="' + dea.map((d, i) => (i ? 'L' : 'M') + xOf(i).toFixed(3) + ',' + mY(d).toFixed(3)).join(' ') + '" fill="none" stroke="#f59e0b" stroke-width="1.1"/>' +
       cand + vol + macdBars + xLbl + cross +
     '</svg>';
 }
@@ -4350,9 +4350,9 @@ function bindKlineCross(svg, rows){
     if (cross) cross.style.display = '';
     if (info) info.style.display = '';
     const plotB = padT + (H - padT - padB - volArea - volGap - macdArea - macdGap);
-    if (vl){ vl.setAttribute('x1', cx.toFixed(1)); vl.setAttribute('x2', cx.toFixed(1)); vl.setAttribute('y1', padT); vl.setAttribute('y2', H - padB); }
-    if (hl){ hl.setAttribute('x1', padL); hl.setAttribute('x2', W - padR); hl.setAttribute('y1', y.toFixed(1)); hl.setAttribute('y2', y.toFixed(1)); }
-    if (dot){ dot.setAttribute('cx', cx.toFixed(1)); dot.setAttribute('cy', y.toFixed(1)); }
+    if (vl){ vl.setAttribute('x1', cx.toFixed(3)); vl.setAttribute('x2', cx.toFixed(3)); vl.setAttribute('y1', padT); vl.setAttribute('y2', H - padB); }
+    if (hl){ hl.setAttribute('x1', padL); hl.setAttribute('x2', W - padR); hl.setAttribute('y1', y.toFixed(3)); hl.setAttribute('y2', y.toFixed(3)); }
+    if (dot){ dot.setAttribute('cx', cx.toFixed(3)); dot.setAttribute('cy', y.toFixed(3)); }
     let ix = cx + 12, iy = Math.max(padT, Math.min(plotB - 66, y - 30));
     if (ix + 210 > W - 4) ix = cx - 222;
     if (info) info.setAttribute('transform', 'translate(' + ix + ',' + iy + ')');
@@ -4368,7 +4368,7 @@ function bindKlineCross(svg, rows){
       const e12 = ema(closes, 12), e26 = ema(closes, 26);
       const difArr = closes.map((_, j) => e12[j] - e26[j]);
       const deaArr = ema(difArr, 9);
-      const difV = difArr[i].toFixed(2), deaV = deaArr[i].toFixed(2), macdV = ((difArr[i] - deaArr[i]) * 2).toFixed(2);
+      const difV = difArr[i].toFixed(3), deaV = deaArr[i].toFixed(3), macdV = ((difArr[i] - deaArr[i]) * 2).toFixed(3);
       const mk = (txt, x, fill, dy, wt) => {
         const t = document.createElementNS(SVGNS, 'tspan');
         t.setAttribute('x', x); if (dy !== null) t.setAttribute('dy', dy);
@@ -4376,7 +4376,7 @@ function bindKlineCross(svg, rows){
         t.textContent = txt; return t;
       };
       infoT.appendChild(mk(String(r.date), 8, null, 0, 700));
-      infoT.appendChild(mk((d >= 0 ? '+' : '') + d.toFixed(2) + '%', 118, dC, 0, 700));
+      infoT.appendChild(mk((d >= 0 ? '+' : '') + d.toFixed(3) + '%', 118, dC, 0, 700));
       infoT.appendChild(mk('开 ' + r.open.toFixed(3), 8, null, 14, null));
       infoT.appendChild(mk('高 ' + r.high.toFixed(3), null, 'var(--up)', null, 700));
       infoT.appendChild(mk('低 ' + r.low.toFixed(3), null, 'var(--down)', null, 700));
@@ -4988,11 +4988,11 @@ function tRefCell(h, c){
     : '<span class="tref-badge sell">减仓</span>';
   const d = String(last.date || '').slice(5);  // MM-DD
   return '<div class="tref-row" title="最近一次' + lb + '（' + esc(last.date || '') + '）成交价 ' + price4(tp) +
-    ' → 现价 ' + price4(price) + '，差价 ' + sign2(diff) + '（' + (up ? '+' : '') + pct.toFixed(2) + '%）">' +
+    ' → 现价 ' + price4(price) + '，差价 ' + sign2(diff) + '（' + (up ? '+' : '') + pct.toFixed(3) + '%）">' +
     '<div><span class="dim" style="font-size:10.5px">' + badge + ' ' + esc(d) + '</span>' +
       ' <span class="mono dim" style="font-size:10.5px">' + price4(tp) + '→' + price4(price) + '</span></div>' +
     '<div class="mono ' + clsV + '" style="font-weight:600;font-size:12px;line-height:1.4">' + arrow + ' ' +
-      (up ? '+' : '') + pct.toFixed(2) + '%</div></div>';
+      (up ? '+' : '') + pct.toFixed(3) + '%</div></div>';
 }
 
 /* 做T参考：最近一次加仓 / 最近一次减仓的成交单价 vs 实时净值（现价）的差价与比例。
@@ -5027,7 +5027,7 @@ function tRefBlock(h, c, q){
       '<span class="mono dim">' + price4(tp) + '</span><span class="dim">→</span>' +
       '<span class="mono" style="font-weight:700;font-size:15px">' + price4(price) + '</span>' +
       '<span class="mono ' + cls + '" style="font-weight:700;font-size:15px">' + arrow + ' ' + sign2(diff) +
-        '（' + (up ? '+' : '') + pct.toFixed(2) + '%）</span>' +
+        '（' + (up ? '+' : '') + pct.toFixed(3) + '%）</span>' +
       '<span class="tref-bar"><span style="width:' + barW + '%;background:' + (up ? 'var(--up)' : 'var(--down)') + '"></span></span>' +
       '<span class="dim" style="font-size:11px">' + tip + '</span></div>';
   };
@@ -5047,7 +5047,7 @@ function subPanel(h, c){
     const feePct = t => {
       const amt = Number(t.price) * Number(t.shares);
       const fee = Number(t.fee) || 0;
-      return (amt > 0 && fee > 0) ? ' · 费率 ' + (fee / amt * 100).toFixed(2) + '%' : '';
+      return (amt > 0 && fee > 0) ? ' · 费率 ' + (fee / amt * 100).toFixed(3) + '%' : '';
     };
     flow = '<div class="table-wrap"><table><thead><tr><th class="l">日期</th><th class="l">方向</th><th>价格</th><th>股数</th>' +
       '<th title="点击数值可直接改手续费">手续费 ✎</th><th>成交额</th><th>含费净额</th><th>成交后持股</th><th>本次实现盈亏</th><th>成交后均价</th><th class="l">备注</th><th class="l"></th></tr></thead><tbody>' +
@@ -5161,7 +5161,7 @@ function renderTrades(){
   const foot = g => {
     const roi = g.cost > 0 ? g.pnl / g.cost * 100 : NaN;
     return '<span class="' + cls(g.pnl) + '">' + sign2(g.pnl) + '</span> · 平均收益率 <span class="' + cls(roi) + '">' + pct2(roi) + '</span> · ' +
-      g.n + ' 笔 · 胜率 ' + (g.n ? (g.win / g.n * 100).toFixed(0) : 0) + '%';
+      g.n + ' 笔 · 胜率 ' + (g.n ? (g.win / g.n * 100).toFixed(3) : 0) + '%';
   };
   const all = { pnl: sum.T.pnl + sum.swing.pnl, cost: sum.T.cost + sum.swing.cost, n: sum.T.n + sum.swing.n, win: sum.T.win + sum.swing.win };
   /* 可排序表头 */
@@ -5329,9 +5329,9 @@ function renderPosition(){
       '<td class="r"><input type="number" step="100" min="0" data-full="' + esc(r.h.id) + '" value="' + (r.full || '') + '" placeholder="如 10000" style="width:105px;text-align:right"></td>' +
       '<td class="r"><b>' + money(r.cost) + '</b></td>' +
       '<td class="r">' + (isFinite(r.mv) ? money(r.mv) : '<span class="dim">—</span>') + '</td>' +
-      '<td class="r">' + (isFinite(r.ratio) ? r.ratio.toFixed(1) + '%' : '—') + '</td>' +
+      '<td class="r">' + (isFinite(r.ratio) ? r.ratio.toFixed(3) + '%' : '—') + '</td>' +
       '<td class="l"><span class="pos-badge ' + r.badgeCls + '">' + r.status + '</span></td>' +
-      (colTotal ? '<td class="r">' + (isFinite(r.totPct) ? r.totPct.toFixed(1) + '%' : '—') + '</td>' : '') +
+      (colTotal ? '<td class="r">' + (isFinite(r.totPct) ? r.totPct.toFixed(3) + '%' : '—') + '</td>' : '') +
       '</tr>';
   });
   html += '</tbody><tfoot><tr class="hold-total">' +
@@ -5340,7 +5340,7 @@ function renderPosition(){
     '<td class="r"><b>' + money(totalCost) + '</b></td>' +
     '<td class="r"><b>' + money(totalMv) + '</b></td>' +
     '<td></td><td></td>' +
-    (colTotal ? '<td class="r"><b>' + (totalTarget > 0 ? (totalMv / totalTarget * 100).toFixed(1) + '%' : '—') + '</b></td>' : '') +
+    (colTotal ? '<td class="r"><b>' + (totalTarget > 0 ? (totalMv / totalTarget * 100).toFixed(3) + '%' : '—') + '</b></td>' : '') +
     '</tr></tfoot></table>';
   box.innerHTML = html;
   const chkPos = $('#chkPosShowClosed');
@@ -5349,7 +5349,7 @@ function renderPosition(){
   /* 汇总文案（仓位占比按市值口径） */
   const sumLines = ['总满仓金额合计 <b>' + money(totalFull) + '</b> · 总市值 <b>' + money(totalMv) + '</b> · 总持仓成本 <b>' + money(totalCost) + '</b>'];
   if (totalTarget > 0){
-    sumLines.push('总仓位目标 <b>' + money(totalTarget) + '</b> · 占用率 <b class="' + cls(totalMv - totalTarget) + '">' + (totalMv / totalTarget * 100).toFixed(1) + '%</b>');
+    sumLines.push('总仓位目标 <b>' + money(totalTarget) + '</b> · 占用率 <b class="' + cls(totalMv - totalTarget) + '">' + (totalMv / totalTarget * 100).toFixed(3) + '%</b>');
     if (totalFull > totalTarget) sumLines.push('<span style="color:var(--warn)">⚠ 单标的满仓合计 ' + money(totalFull) + ' 超过总目标 ' + money(totalTarget) + '，无法同时打满</span>');
   }
   if (overList.length) sumLines.push('<span style="color:#991b1b">⚠ ' + overList.length + ' 个标的已超额，请减仓或上调满仓金额</span>');
@@ -5373,12 +5373,12 @@ function posDonut(items){
     const frac = it.value / total;
     const dash = frac * C;
     segs += '<circle r="' + R + '" cx="52" cy="52" fill="none" stroke="' + it.color + '" stroke-width="12"' +
-      ' stroke-dasharray="' + dash.toFixed(2) + ' ' + (C - dash).toFixed(2) + '"' +
-      ' stroke-dashoffset="' + (-acc * C).toFixed(2) + '" transform="rotate(-90 52 52)"/>';
+      ' stroke-dasharray="' + dash.toFixed(3) + ' ' + (C - dash).toFixed(3) + '"' +
+      ' stroke-dashoffset="' + (-acc * C).toFixed(3) + '" transform="rotate(-90 52 52)"/>';
     acc += frac;
   });
   const top = items[0];
-  const pct = top ? (top.value / total * 100).toFixed(0) : '0';
+  const pct = top ? (top.value / total * 100).toFixed(3) : '0';
   return '<svg class="an-chart" viewBox="0 0 104 104" style="display:block;margin:0 auto">' + segs +
     '<text x="52" y="49" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)" font-variant-numeric="tabular-nums">' + pct + '%</text>' +
     '<text x="52" y="63" text-anchor="middle" font-size="9" fill="var(--muted)">' + esc(top ? top.label : '') + '</text></svg>';
@@ -5395,8 +5395,8 @@ function renderTargetOcc(totalTarget, totalMv){
   const over = mv > totalTarget;
   el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12px">' +
     '<span>当前市值 <b class="mono">' + money(mv) + '</b> / 目标 <b class="mono">' + money(totalTarget) + '</b></span>' +
-    '<span class="' + (over ? 'up' : '') + '" style="font-weight:700">占用 ' + (mv / totalTarget * 100).toFixed(1) + '%' + (over ? ' ⚠ 超目标' : '') + '</span></div>' +
-    '<div class="ob"><i style="width:' + pct.toFixed(1) + '%;' + (over ? 'background:linear-gradient(90deg,#f59e0b,#ef4444)' : '') + '"></i></div>';
+    '<span class="' + (over ? 'up' : '') + '" style="font-weight:700">占用 ' + (mv / totalTarget * 100).toFixed(3) + '%' + (over ? ' ⚠ 超目标' : '') + '</span></div>' +
+    '<div class="ob"><i style="width:' + pct.toFixed(3) + '%;' + (over ? 'background:linear-gradient(90deg,#f59e0b,#ef4444)' : '') + '"></i></div>';
 }
 /* v53.29：顶部「当前市值分布」卡（环形图 + 图例），与总目标卡左右并列 */
 function renderDonutCard(rows){
@@ -5455,22 +5455,22 @@ function renderPositionAnalysis(rows, agg){
   /* ---------- 建议清单 ---------- */
   const advice = [];
   if (overN > 0) advice.push({ cls: 'danger', ic: '⛔', text: '<b>' + overN + ' 个标的已超额</b>（' + agg.overList.map(x => esc(x.name || x.code)).join('、') + '）——投入成本已超满仓金额，建议优先减仓，或上调该标的满仓上限' });
-  if (isFinite(occ) && occ >= 100) advice.push({ cls: 'danger', ic: '⛔', text: '总仓位占用率已达 <b>' + occ.toFixed(0) + '%</b>，本金基本全部在场上、无现金缓冲——建议留出 10-20% 现金应对波动' });
-  else if (isFinite(occ) && occ >= 80) advice.push({ cls: 'warn', ic: '⚠️', text: '总仓位占用率 <b>' + occ.toFixed(0) + '%</b>，接近满仓，加仓空间有限，优先去重/去超额' });
-  else if (isFinite(occ) && occ < 50) advice.push({ cls: 'good', ic: '💡', text: '总仓位占用率仅 <b>' + occ.toFixed(0) + '%</b>，资金利用率偏低，可结合行情机会分批补仓' });
-  if (top1Share >= 40) advice.push({ cls: 'warn', ic: '⚠️', text: '单标的集中度过高：「' + esc(top1.h.name || top1.h.code) + '」占当前市值 <b>' + top1Share.toFixed(0) + '%</b>（>40%），波动高度依赖单票，建议单标的占比控制在 25-30% 以内' });
-  else if (top3SharePct >= 70) advice.push({ cls: 'warn', ic: '⚠️', text: '前 3 大持仓合计占 <b>' + top3SharePct.toFixed(0) + '%</b>，组合集中度偏高——若三者关联度高，风险并未真正分散' });
+  if (isFinite(occ) && occ >= 100) advice.push({ cls: 'danger', ic: '⛔', text: '总仓位占用率已达 <b>' + occ.toFixed(3) + '%</b>，本金基本全部在场上、无现金缓冲——建议留出 10-20% 现金应对波动' });
+  else if (isFinite(occ) && occ >= 80) advice.push({ cls: 'warn', ic: '⚠️', text: '总仓位占用率 <b>' + occ.toFixed(3) + '%</b>，接近满仓，加仓空间有限，优先去重/去超额' });
+  else if (isFinite(occ) && occ < 50) advice.push({ cls: 'good', ic: '💡', text: '总仓位占用率仅 <b>' + occ.toFixed(3) + '%</b>，资金利用率偏低，可结合行情机会分批补仓' });
+  if (top1Share >= 40) advice.push({ cls: 'warn', ic: '⚠️', text: '单标的集中度过高：「' + esc(top1.h.name || top1.h.code) + '」占当前市值 <b>' + top1Share.toFixed(3) + '%</b>（>40%），波动高度依赖单票，建议单标的占比控制在 25-30% 以内' });
+  else if (top3SharePct >= 70) advice.push({ cls: 'warn', ic: '⚠️', text: '前 3 大持仓合计占 <b>' + top3SharePct.toFixed(3) + '%</b>，组合集中度偏高——若三者关联度高，风险并未真正分散' });
   if (fullN > 0) advice.push({ cls: 'note', ic: '📌', text: '<b>' + fullN + '</b> 个标的已打满/超额，无加仓空间，新增资金优先流向轻仓标的' });
   if (lightN > 0) advice.push({ cls: 'note', ic: '📌', text: '<b>' + lightN + '</b> 个标的处于轻仓（市值 < 满仓 30%）——要么补到半仓以上形成有效仓位，要么考虑归并清仓，避免「僵尸持仓」' });
   const stockShare = allocTotal > 0 ? (typeAlloc.stock || 0) / allocTotal * 100 : 0;
-  if (stockShare >= 50) advice.push({ cls: 'note', ic: '📌', text: '股票类市值占比 <b>' + stockShare.toFixed(0) + '%</b>，组合受权益市场单边波动影响较大，与基金的互补性一般' });
+  if (stockShare >= 50) advice.push({ cls: 'note', ic: '📌', text: '股票类市值占比 <b>' + stockShare.toFixed(3) + '%</b>，组合受权益市场单边波动影响较大，与基金的互补性一般' });
   if (tradeN >= 30) advice.push({ cls: 'note', ic: '🎯', text: '做T/波段台账 <b>' + tradeN + '</b> 笔，交易相当活跃——注意手续费与滑点摩擦，T 收益需稳定覆盖成本才有意义' });
   if (!advice.length) advice.push({ cls: 'good', ic: '✅', text: '当前组合结构健康：无超额、集中度适中、仓位与目标匹配，按既定计划执行即可' });
   /* ---------- 组装 HTML ---------- */
   const guide = '当前组合共 <b>' + n + '</b> 个在持标的，当前市值合计 <b>' + money(totalMv) + '</b>（投入本金 ' + money(totalCost) + '）' +
-    (totalTarget > 0 ? '（总目标 ' + money(totalTarget) + ' · 占用率 <b>' + occ.toFixed(1) + '%</b>）' : '') +
-    '；前 1 大持仓占 <b>' + top1Share.toFixed(1) + '%</b>，前 3 大占 <b>' + top3SharePct.toFixed(1) + '%</b>；类型分布 ' +
-    typeKeys.map(t => typeNames[t] + ' ' + (allocTotal > 0 ? (typeAlloc[t] / allocTotal * 100).toFixed(0) + '%' : '0%')).join(' / ') +
+    (totalTarget > 0 ? '（总目标 ' + money(totalTarget) + ' · 占用率 <b>' + occ.toFixed(3) + '%</b>）' : '') +
+    '；前 1 大持仓占 <b>' + top1Share.toFixed(3) + '%</b>，前 3 大占 <b>' + top3SharePct.toFixed(3) + '%</b>；类型分布 ' +
+    typeKeys.map(t => typeNames[t] + ' ' + (allocTotal > 0 ? (typeAlloc[t] / allocTotal * 100).toFixed(3) + '%' : '0%')).join(' / ') +
     '；做T台账 ' + tradeN + ' 笔。整体风格偏<b>' + riskTag + '</b>。';
   /* 环形图 items：Top6 + 其他（按当前市值） */
   const items = sortedByCost.slice(0, 6).map((r, i) => ({ label: r.h.name || r.h.code, value: r.mv, color: POS_PALETTE[i % POS_PALETTE.length] }));
@@ -5485,12 +5485,12 @@ function renderPositionAnalysis(rows, agg){
     const col = barColor[r.status] || '#94a3b8';
     return '<div class="an-bar-row"><span class="bl" title="' + esc(r.h.name || r.h.code) + '">' + esc((r.h.name || r.h.code).slice(0, 8)) + '</span>' +
       '<span class="bt"><span class="bf" style="width:' + w + '%;background:' + col + '"></span><span class="full-line"></span></span>' +
-      '<span class="bv">' + r.ratio.toFixed(0) + '%</span></div>';
+      '<span class="bv">' + r.ratio.toFixed(3) + '%</span></div>';
   }).join('');
   /* 指标卡 */
   const metrics =
     mkv('在持数', n) + mkv('投入本金', money(totalCost)) +
-    mkv('占用率', isFinite(occ) ? occ.toFixed(0) + '%' : '—') + mkv('前1占比', top1Share.toFixed(0) + '%') +
+    mkv('占用率', isFinite(occ) ? occ.toFixed(3) + '%' : '—') + mkv('前1占比', top1Share.toFixed(3) + '%') +
     mkv('超额', overN) + mkv('满仓/超额', fullN);
   function mkv(k, v){ return '<div class="an-metric"><div class="m-k">' + k + '</div><div class="m-v' + (k === '超额' && overN > 0 ? '" style="color:var(--up)' : '') + '">' + v + '</div></div>'; }
   /* v53.29：市值分布卡已上移到顶部与总目标卡并列；an-grid 只留占用率 + 组合指标两卡 */
@@ -5578,7 +5578,7 @@ function renderSettlement(){
     '<div class="settle-total"><b>收益合计 <span class="' + cls(t.realized) + '">' + sign2(t.realized) + '</span></b>' +
       '<span class="st-split">＝ 盈利 <span class="up">' + sign2(t.pos) + '</span> ＋ 亏损 <span class="down">' + sign2(t.neg) + '</span></span>' +
       '<span class="st-n">' + t.n + ' 笔（' + t.win + ' 盈 / ' + t.loss + ' 亏' + (t.flat ? ' / ' + t.flat + ' 平' : '') + '）· 胜率 ' +
-      (isFinite(t.winRate) ? t.winRate.toFixed(0) + '%' : '—') + '</span></div>' +
+      (isFinite(t.winRate) ? t.winRate.toFixed(3) + '%' : '—') + '</span></div>' +
     '<div class="settle-sub">买入 ' + money(t.buy) + ' · 卖出 ' + money(t.sell) + ' · 手续费 ' + n2(t.fees) +
     (t.div > 0.005 ? ' · 分红 <span class="up">' + money(t.div) + '</span>（已计入收益）' : '') +
     ' · 净投入 ' + money(t.invested) + ' · 净回收 ' + money(t.proceeds) +
@@ -5725,7 +5725,7 @@ async function manualQuoteEntry(holdingId){
     high: NaN, low: NaN, ts: Date.now(), err: null, manual: true
   };
   if (picked.name && (!h.name || h.name === h.code)){ h.name = picked.name; persist.holdings(); }
-  toast('已手动录入 ' + (h.name || h.code) + ' 的行情（¥' + picked.price.toFixed(2) + '）', 'ok');
+  toast('已手动录入 ' + (h.name || h.code) + ' 的行情（¥' + picked.price.toFixed(3) + '）', 'ok');
   renderAll();
 }
 
@@ -5972,8 +5972,8 @@ function bind(){
     st.forEach(s => {
       const netShr = Math.abs(Number(s[10])) < 1 ? 0 : Number(s[10]);   // 净份额 |x|<1 按 0 算
       const row = [csvCell(s[0] || s[1]), csvCell(s[1]), csvCell(typeLabel(s[1], s[2])),
-        s[3], s[4], s[5].toFixed(2), s[6].toFixed(2), s[7].toFixed(2),
-        s[8].toFixed(2), s[9].toFixed(2), netShr.toFixed(2), s[11]];
+        s[3], s[4], s[5].toFixed(3), s[6].toFixed(3), s[7].toFixed(3),
+        s[8].toFixed(3), s[9].toFixed(3), netShr.toFixed(3), s[11]];
       lines.push(row.join(','));
     });
     const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
@@ -6312,7 +6312,7 @@ function quickTx(btn, id, side){
       if (shares > c.shares + 1e-8) throw new Error('减仓股数超过当前持仓（' + shr(c.shares) + '）');
     }
     addTx(h, { date, side, price, shares, fee });
-    toast((side === 'buy' ? '已加仓 ' : '已减仓 ') + shr(shares) + ' @' + price4(price) + (fee > 0 ? ' (费' + fee.toFixed(2) + ')' : ''), 'ok');
+    toast((side === 'buy' ? '已加仓 ' : '已减仓 ') + shr(shares) + ' @' + price4(price) + (fee > 0 ? ' (费' + fee.toFixed(3) + ')' : ''), 'ok');
     renderAll();
   } catch (e) { toast(e.message, 'err'); }
 }
@@ -6427,10 +6427,10 @@ function warnStorageCapacity(){
     if (!el) return pct;
     if (pct >= 90){
       el.style.display = '';
-      el.innerHTML = '⚠️ 本地存储已用 <b>' + (used / 1048576).toFixed(1) + 'MB</b>（约 ' + pct.toFixed(0) + '% 上限）。建议：导出 JSON 备份后清理，或删除不必要的历史数据。';
+      el.innerHTML = '⚠️ 本地存储已用 <b>' + (used / 1048576).toFixed(3) + 'MB</b>（约 ' + pct.toFixed(3) + '% 上限）。建议：导出 JSON 备份后清理，或删除不必要的历史数据。';
     } else if (pct >= 60){
       el.style.display = '';
-      el.innerHTML = 'ℹ️ 本地存储已用 <b>' + (used / 1048576).toFixed(1) + 'MB</b>（约 ' + pct.toFixed(0) + '% 上限）。建议定期导出 JSON 备份以防清缓存丢失。';
+      el.innerHTML = 'ℹ️ 本地存储已用 <b>' + (used / 1048576).toFixed(3) + 'MB</b>（约 ' + pct.toFixed(3) + '% 上限）。建议定期导出 JSON 备份以防清缓存丢失。';
     } else {
       el.style.display = 'none';
     }
@@ -6451,16 +6451,16 @@ function exportSettlementCSV(){
     lines.push([
       csvCell(h.name || h.code), csvCell(isExternal ? h.code : fullCode(h)), csvCell(typeLabel(h.code, h.type || 'stock')),
       csvCell(s.firstDate || ''), csvCell(s.lastDate || ''), s.days,
-      s.buyAmount.toFixed(2), s.sellAmount.toFixed(2), s.fees.toFixed(2),
-      s.netInvested.toFixed(2), s.netProceeds.toFixed(2), s.realized.toFixed(2),
-      isFinite(s.roi) ? s.roi.toFixed(2) : '', s.trades
+      s.buyAmount.toFixed(3), s.sellAmount.toFixed(3), s.fees.toFixed(3),
+      s.netInvested.toFixed(3), s.netProceeds.toFixed(3), s.realized.toFixed(3),
+      isFinite(s.roi) ? s.roi.toFixed(3) : '', s.trades
     ].join(','));
   });
   lines.push([
     csvCell('合计'),'','',  '','',  '',
-    t.buy.toFixed(2), t.sell.toFixed(2), t.fees.toFixed(2),
-    t.invested.toFixed(2), t.proceeds.toFixed(2), t.realized.toFixed(2),
-    isFinite(t.roi) ? t.roi.toFixed(2) : '', t.n
+    t.buy.toFixed(3), t.sell.toFixed(3), t.fees.toFixed(3),
+    t.invested.toFixed(3), t.proceeds.toFixed(3), t.realized.toFixed(3),
+    isFinite(t.roi) ? t.roi.toFixed(3) : '', t.n
   ].join(','));
   const csv = '﻿' + lines.join('\r\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
@@ -6485,13 +6485,13 @@ function settlementReportHTML(){
     kpi('已清仓标的', t.n + ' 个'),
     kpi('合计已清仓盈亏', sign2(t.realized), R(t.realized)),
     kpi('整体收益率', pct2(t.roi), R(t.roi)),
-    kpi('胜率', isFinite(t.winRate) ? t.winRate.toFixed(1) + '%（' + t.win + '盈/' + t.loss + '亏）' : '—'),
+    kpi('胜率', isFinite(t.winRate) ? t.winRate.toFixed(3) + '%（' + t.win + '盈/' + t.loss + '亏）' : '—'),
     kpi('累计买入金额', money(t.buy)),
     kpi('累计卖出金额', money(t.sell)),
     kpi('净投入', money(t.invested)),
     kpi('净回收', money(t.proceeds)),
     kpi('累计手续费', money(t.fees)),
-    kpi('平均持股天数', isFinite(t.avgDays) ? t.avgDays.toFixed(1) + ' 天' : '—'),
+    kpi('平均持股天数', isFinite(t.avgDays) ? t.avgDays.toFixed(3) + ' 天' : '—'),
     kpi('最佳标的', best ? esc(best.h.name || best.h.code) + ' ' + sign2(best.s.realized) : '—', best ? R(best.s.realized) : ''),
     kpi('最差标的', worst ? esc(worst.h.name || worst.h.code) + ' ' + sign2(worst.s.realized) : '—', worst ? R(worst.s.realized) : '')
   ].join('');
@@ -6511,7 +6511,7 @@ function settlementReportHTML(){
       '<td class="mono">' + n2(s.netProceeds) + '</td>' +
       '<td class="mono ' + R(s.realized) + '"><b>' + sign2(s.realized) + '</b></td>' +
       '<td class="mono ' + R(s.roi) + '">' + pct2(s.roi) + '</td>' +
-      '<td class="barcell"><span class="bar ' + R(s.realized) + '" style="width:' + w.toFixed(1) + '%"></span></td></tr>';
+      '<td class="barcell"><span class="bar ' + R(s.realized) + '" style="width:' + w.toFixed(3) + '%"></span></td></tr>';
   }).join('');
 
   return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>清仓盈亏简报 ' + esc(nowStr()) + '</title><style>' +
@@ -6545,7 +6545,7 @@ function settlementReportHTML(){
     '<th>持股天数</th><th>买入金额</th><th>卖出金额</th><th>手续费</th><th>净投入</th><th>净回收</th><th>已清仓盈亏</th><th>收益率</th><th class="l">盈亏幅度</th></tr></thead>' +
     '<tbody>' + body + '</tbody>' +
     '<tfoot><tr><td></td><td class="l">合计（' + t.n + ' 笔）</td><td colspan="3"></td>' +
-    '<td class="mono">' + (isFinite(t.avgDays) ? t.avgDays.toFixed(1) : '—') + '</td>' +
+    '<td class="mono">' + (isFinite(t.avgDays) ? t.avgDays.toFixed(3) : '—') + '</td>' +
     '<td class="mono">' + n2(t.buy) + '</td><td class="mono">' + n2(t.sell) + '</td><td class="mono">' + n2(t.fees) + '</td>' +
     '<td class="mono">' + n2(t.invested) + '</td><td class="mono">' + n2(t.proceeds) + '</td>' +
     '<td class="mono ' + R(t.realized) + '">' + sign2(t.realized) + '</td>' +
@@ -7861,9 +7861,9 @@ function feeBreakdown(amount, feeType, side){
   const rates = getFeeRates();
   const cfg = rates[feeType] || rates.stock;
   const comm = Math.max(amount * cfg.commissionRate, cfg.minCommission);
-  const parts = ['佣金 ' + comm.toFixed(2)];
-  if ((cfg.transferFeeRate || 0) > 0) parts.push('过户费 ' + (amount * cfg.transferFeeRate).toFixed(2));
-  if (side === 'sell' && (cfg.stampTaxRate || 0) > 0) parts.push('印花税 ' + (amount * cfg.stampTaxRate).toFixed(2));
+  const parts = ['佣金 ' + comm.toFixed(3)];
+  if ((cfg.transferFeeRate || 0) > 0) parts.push('过户费 ' + (amount * cfg.transferFeeRate).toFixed(3));
+  if (side === 'sell' && (cfg.stampTaxRate || 0) > 0) parts.push('印花税 ' + (amount * cfg.stampTaxRate).toFixed(3));
   return parts.join(' + ');
 }
 
