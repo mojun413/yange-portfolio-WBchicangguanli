@@ -476,55 +476,22 @@ tr.wd-row td{background:#f3f4f6}
 #holdTable .hold-amt{font-size:15px;line-height:1.25}
 #holdTable .hold-amt .tag{font-size:13.5px;padding:2px 10px}
 
-/* 列头长短标题切换：窄屏下显示短标题，为总览表 12 列全可见留空间 */
+/* 列头长短标题切换：窄屏下显示短标题，为总览表列宽留空间 */
 .col-short{display:none}
 
-/* 1BK_V68.13.1.031：总览持仓表 12 列强制落进视口、取消横向滚动。
-   之前仅在 ≤1100px 生效，13 寸平板横屏（1366px 以内）没触发导致右边仍被裁。
-   现扩展到 ≤1366px，并把「短列头 + 类型标签缩短」扩展到大屏平板；
-   桌面宽屏（>1366px）保持默认自适应布局，仅在必要时 also 兜底。 */
+/* 1BK_V68.13.1.032：回退「强制 12 列挤压」——恢复默认表格布局 + 横向滚动
+   （避免手机/窄屏被挤成一堆）。仅保留用户要的两项：
+   ① 短列头（名称/类型/股数/成本/现价/市值/成本/盈亏/收益率/当日%/做T/操作）在 ≤1366px 生效；
+   ② 类型标签缩短为「股/E/基」（场外基金只显示「基」）在 ≤1366px 生效。
+   做T参考恢复完整版（徽章+日期+价格+百分比），不再只留百分比；
+   首/末列 sticky 钉边保留（line 462-473），横向滑动时名称常驻左、操作常驻右。 */
 @media (max-width:1366px){
-  #holdTable.table-wrap{overflow-x:visible}
-  #holdTable table{width:100%;table-layout:fixed;border-collapse:collapse}
-  #holdTable colgroup{display:none}
-  #holdTable th,#holdTable td{white-space:normal;padding:4px 5px;font-size:10px;line-height:1.3;border-right:1px solid var(--line-2)}
-  #holdTable th:last-child,#holdTable td:last-child{border-right:none}
-  #holdTable th{vertical-align:bottom}
   #holdTable .col-long{display:none}
   #holdTable .col-short{display:inline}
-  #holdTable .hold-amt{font-size:10.5px}
-  #holdTable .name-cell .n{font-size:11px}
-  #holdTable .name-cell .c{font-size:9px}
   #holdTable .tag{font-size:0;padding:1px 4px}
   #holdTable .tag.stock::before{content:'股';font-size:9px}
   #holdTable .tag.etf::before{content:'E';font-size:9px}
   #holdTable .tag.fund::before{content:'基';font-size:9px}
-  #holdTable .btn-sm{padding:3px 5px;font-size:10px;border-radius:6px}
-  #holdTable .tref-row{gap:0}
-  #holdTable .tref-row > div:first-child{display:none}
-  #holdTable .tref-row > div:last-child{font-size:10.5px;line-height:1.3}
-  /* 12 列百分比列宽：名称最宽，类型/做T/操作较窄，其余均分 */
-  #holdTable thead th:nth-child(1), #holdTable tbody td:nth-child(1){width:13%}
-  #holdTable thead th:nth-child(2), #holdTable tbody td:nth-child(2){width:6%}
-  #holdTable thead th:nth-child(3), #holdTable tbody td:nth-child(3){width:8%}
-  #holdTable thead th:nth-child(4), #holdTable tbody td:nth-child(4){width:8%}
-  #holdTable thead th:nth-child(5), #holdTable tbody td:nth-child(5){width:8%}
-  #holdTable thead th:nth-child(6), #holdTable tbody td:nth-child(6){width:10%}
-  #holdTable thead th:nth-child(7), #holdTable tbody td:nth-child(7){width:9%}
-  #holdTable thead th:nth-child(8), #holdTable tbody td:nth-child(8){width:9%}
-  #holdTable thead th:nth-child(9), #holdTable tbody td:nth-child(9){width:8%}
-  #holdTable thead th:nth-child(10), #holdTable tbody td:nth-child(10){width:7%}
-  #holdTable thead th:nth-child(11), #holdTable tbody td:nth-child(11){width:8%}
-  #holdTable thead th:nth-child(12), #holdTable tbody td:nth-child(12){width:9%}
-  /* sticky 列在不需要横向滚动时仍是安全兜底，但去掉阴影避免看起来像可滑 */
-  #holdTable tbody tr.clickable > td:first-child,
-  #holdTable tbody tr.clickable > td:last-child{position:static;box-shadow:none;background:transparent}
-  #holdTable thead th:first-child,
-  #holdTable thead th:last-child{position:static;box-shadow:none;background:var(--panel-2)}
-  #holdTable tbody tr.clickable:hover > td:first-child,
-  #holdTable tbody tr.clickable:hover > td:last-child,
-  #holdTable tbody tr.expanded > td:first-child,
-  #holdTable tbody tr.expanded > td:last-child{background:transparent}
 }
 
 /* 1BK_V68.13.1.015：持仓搜索框 + 联想下拉 + 定位闪烁 */
@@ -926,7 +893,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.031</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.032</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1325,7 +1292,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.031 · 2026-08-14 21:57 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.032 · 2026-08-14 22:10 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1385,8 +1352,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.031';
-const APP_BUILD   = '2026-08-14 21:57';
+const APP_VERSION = '1BK_V68.13.1.032';
+const APP_BUILD   = '2026-08-14 22:10';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
