@@ -881,7 +881,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.037</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.038</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1281,7 +1281,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.037 · 2026-08-14 23:39 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.038 · 2026-08-14 23:48 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1341,8 +1341,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.037';
-const APP_BUILD   = '2026-08-14 23:39';
+const APP_VERSION = '1BK_V68.13.1.038';
+const APP_BUILD   = '2026-08-14 23:48';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -6548,8 +6548,21 @@ function quickTx(btn, id, side){
       const c = calcHolding(h);
       if (shares > c.shares + 1e-8) throw new Error('减仓股数超过当前持仓（' + shr(c.shares) + '）');
     }
+    const _tradesBefore = state.trades.length;
     addTx(h, { date, side, price, shares, fee });
-    toast((side === 'buy' ? '已加仓 ' : '已减仓 ') + shr(shares) + ' @' + price4(price) + (fee > 0 ? ' (费' + fee.toFixed(3) + ')' : ''), 'ok');
+    /* 做T联动（v68.13.1.038）：录入买卖后自动同步配对，当场提示本次做T/波段盈亏 + 持仓成本已更新 */
+    const _autoN = syncAutoTrades();
+    const _c2 = calcHolding(h);
+    toast((side === 'buy' ? '已加仓 ' : '已减仓 ') + shr(shares) + ' @' + price4(price) +
+      (fee > 0 ? ' (费' + fee.toFixed(3) + ')' : '') + ' · 成本更新为 ' + money(_c2.spreadCost), 'ok');
+    if (_autoN > 0){
+      state.trades.slice(_tradesBefore).forEach(t => {
+        if (!t.auto) return;
+        const _pnl = (Number(t.sellPrice) - Number(t.buyPrice)) * Number(t.shares) - (Number(t.fee) || 0);
+        toast((t.type === 'T' ? '本次做T ' : '本次波段 ') + Number(t.shares) + '股 盈亏 ' +
+          (_pnl >= 0 ? '+' : '') + _pnl.toFixed(2) + ' 元', _pnl >= 0 ? 'ok' : 'err');
+      });
+    }
     renderAll();
   } catch (e) { toast(e.message, 'err'); }
 }
