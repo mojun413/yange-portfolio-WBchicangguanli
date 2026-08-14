@@ -165,6 +165,8 @@ label.fl{display:block;font-size:12px;color:var(--muted);margin:0 0 4px 2px}
 
 /* ===================== 面板 / 区块 ===================== */
 .wrap{padding:0 var(--page-pad) 96px;margin:0 auto;max-width:var(--page-maxw)}
+/* 总览页左右留白再收一点，给 13 寸平板/手机横屏下的持仓表腾宽度 */
+#page-overview .wrap{padding-left:6px;padding-right:6px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:0 0 18px;overflow:hidden}
 .panel:first-child{margin-top:0}
 .panel:last-child{margin-bottom:18px}
@@ -186,10 +188,10 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .filterbar.on select.mini{border-color:var(--accent);background:var(--accent-soft)}
 
 /* ===================== 总览 KPI 卡片 ===================== */
-.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px}
 .card{
   position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:10px 12px 9px;box-shadow:var(--shadow);min-width:0;overflow:hidden;
+  padding:8px 10px 7px;box-shadow:var(--shadow);min-width:0;overflow:hidden;
   transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:#d7dcec}
@@ -474,19 +476,14 @@ tr.wd-row td{background:#f3f4f6}
 .trade-badge.tb-lose{background:rgba(21,163,74,.1);color:var(--down);border:1px solid rgba(21,163,74,.28)}
 .trade-badge.tb-flat{background:#eef2f7;color:#64748b;border:1px solid #e2e8f0}
 #holdTable .hold-amt{font-size:15px;line-height:1.25}
-#holdTable .hold-amt .tag{font-size:13.5px;padding:2px 10px}
+#holdTable .hold-amt .tag{font-size:11px;padding:1px 6px;min-width:18px;text-align:center;display:inline-block}
 
-/* 1BK_V68.13.1.033：总览持仓表短列头 + 短类型标签全局生效
+/* 1BK_V68.13.1.034：总览持仓表短列头 + 短类型标签全局生效
    列头：名称/类型/股数/成本/现价/市值/成本/盈亏/收益率/当日%/做T/操作
-   类型：股票→股，场内ETF→E，场外基金→基
+   类型：股票→股，场内ETF→E，场外基金→基，港股→港
    目的：在所有屏幕宽度下压缩表头/类型列宽度，缓解右侧做T参考/操作列被裁 */
 #holdTable .col-long{display:none}
 #holdTable .col-short{display:inline}
-#holdTable .tag{font-size:0;padding:1px 5px}
-#holdTable .tag.stock::before{content:'股';font-size:10.5px}
-#holdTable .tag.etf::before{content:'E';font-size:10.5px}
-#holdTable .tag.fund::before{content:'基';font-size:10.5px}
-#holdTable .tag.hk::before{content:'港';font-size:10.5px}
 
 /* 1BK_V68.13.1.015：持仓搜索框 + 联想下拉 + 定位闪烁 */
 .hold-search{position:relative}
@@ -793,8 +790,9 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
   .topbar-in{padding:12px 16px}
 }
 @media (min-width:1101px) and (max-width:1366px){
-  /* 13 寸横屏：卡片 6 列（与基准一致），gap 收紧适配窄卡 */
+  /* 13 寸横屏：卡片 6 列，gap 保持 8px，卡片 padding 收紧，给下方表格腾宽度 */
   .cards{grid-template-columns:repeat(6,1fr);gap:8px}
+  .card{padding:7px 8px 6px}
 }
 /* ---- 竖屏平板 641-900px：主区 2 列，底部导航自动横向滚动 ---- */
 @media (min-width:641px) and (max-width:900px){
@@ -887,7 +885,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.033</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.034</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1286,7 +1284,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.033 · 2026-08-14 22:24 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.034 · 2026-08-14 22:46 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1346,8 +1344,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.033';
-const APP_BUILD   = '2026-08-14 22:24';
+const APP_VERSION = '1BK_V68.13.1.034';
+const APP_BUILD   = '2026-08-14 22:46';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4984,7 +4982,7 @@ function renderHoldings(){
         conceptChipsHtml(h) +
         tradeBadgeHTML(h.code) +
         '</div></td>' +
-      '<td class="l hold-amt"><span class="tag ' + effType(h.code, h.type, h.typeLocked) + '">' + typeLabel(h.code, h.type, h.typeLocked) + '</span></td>' +
+      '<td class="l hold-amt"><span class="tag ' + effType(h.code, h.type, h.typeLocked) + '">' + shortTypeLabel(h.code, h.type, h.typeLocked) + '</span></td>' +
       '<td class="mono hold-amt">' + shr(c.shares) + '</td>' +
       '<td class="mono hold-amt">' + (c.shares > 0 ? '<span class="' + (c.spreadAvg < 0 ? 'neg-cost' : '') + '">' + price4(c.spreadAvg) + '</span>' : '—') + '</td>' +
       '<td class="mono q-price hold-amt ' + cls(c.pct) + '" data-q="' + qkey(h) + '">' + price4(c.price) + '</td>' +
@@ -8047,6 +8045,9 @@ function effType(code, type, locked){
 }
 function typeLabel(code, type, locked){
   return ({ stock:'股票', etf:'场内ETF', fund:'场外基金' })[effType(code, type, locked)] || '股票';
+}
+function shortTypeLabel(code, type, locked){
+  return ({ stock:'股', etf:'E', fund:'基', hk:'港' })[effType(code, type, locked)] || '股';
 }
 /* init() 调用已移至文件末尾（cloud 是后置 const，此处调用会 TDZ 崩溃导致云端永不自动连接） */
 function _parseYangE2(){
