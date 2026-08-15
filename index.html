@@ -378,6 +378,39 @@ tr.row-warn td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 .ds-watch{font-size:12.5px;padding:4px 10px;border-radius:6px;margin-top:2px}
 .ds-watch.up{background:rgba(229,72,77,.08);color:var(--up);border:1px solid rgba(229,72,77,.25)}
 .ds-watch.down{background:rgba(21,163,74,.08);color:var(--down);border:1px solid rgba(21,163,74,.25)}
+/* 1BK_V68.13.1.041：盈亏日历 / 周报 / 持仓宽度 */
+.cal-grid-wrap{display:flex;flex-wrap:wrap;gap:14px}
+.cal-month{width:200px;flex:0 0 auto}
+.cal-mh{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cal-wk{display:grid;grid-template-columns:repeat(7,1fr);font-size:9px;color:var(--muted);text-align:center;margin-bottom:2px}
+.cal-wk span{padding:1px 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-cell{position:relative;min-height:30px;border-radius:5px;background:var(--panel-2);border:1px solid var(--line-2);padding:2px;font-size:9px;overflow:hidden;cursor:default}
+.cal-cell.blank{background:transparent;border-color:transparent}
+.cal-cell.has{cursor:pointer}
+.cal-cell .cal-d{position:absolute;top:1px;left:3px;color:var(--muted);font-size:9px}
+.cal-cell .cal-p{position:absolute;bottom:1px;right:3px;font-size:9px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cal-cell.flat{background:rgba(148,163,184,.12)}
+.cal-cell.up.s1{background:rgba(229,72,77,.18)} .cal-cell.up.s2{background:rgba(229,72,77,.34)} .cal-cell.up.s3{background:rgba(229,72,77,.55)}
+.cal-cell.down.s1{background:rgba(21,163,74,.18)} .cal-cell.down.s2{background:rgba(21,163,74,.34)} .cal-cell.down.s3{background:rgba(21,163,74,.55)}
+.cal-cell.up .cal-p{color:#b91c1c} .cal-cell.down .cal-p{color:#15803d} .cal-cell.flat .cal-p{color:var(--muted)}
+.cal-cell.has:hover{outline:1px solid var(--accent)}
+.cal-detail{margin-top:10px;background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:10px 12px;font-size:12.5px;min-height:20px}
+.cal-detail b{font-variant-numeric:tabular-nums}
+.cal-dt-title{font-size:13px;margin-bottom:6px}
+.cal-dk{color:var(--muted);margin-right:6px}
+.wr-block{display:flex;flex-direction:column;gap:4px}
+.wr-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;padding:3px 0}
+.wr-k{color:var(--muted);min-width:56px}
+.wr-v{font-weight:700;font-variant-numeric:tabular-nums}
+.breadth{margin-top:4px}
+.br-bar{display:flex;height:18px;border-radius:6px;overflow:hidden;background:var(--panel-2);border:1px solid var(--line-2)}
+.br-seg{display:block;height:100%}
+.br-seg.up{background:var(--up)} .br-seg.down{background:var(--down)} .br-seg.flat{background:#94a3b8}
+.br-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums}
+.br-legend .up{color:var(--up)} .br-legend .down{color:var(--down)} .br-legend .flat{color:var(--muted)}
+.br-note{font-size:11px;color:var(--muted);margin-top:4px}
+
 .an-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:1px}
 .an-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .an-metric{background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:8px 10px}
@@ -877,7 +910,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.040</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.041</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1277,7 +1310,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.040 · 2026-08-15 00:58 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.041 · 2026-08-15 10:40 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1337,8 +1370,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.040';
-const APP_BUILD   = '2026-08-15 00:58';
+const APP_VERSION = '1BK_V68.13.1.041';
+const APP_BUILD   = '2026-08-15 10:40';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -3425,6 +3458,131 @@ function dailyCloseSummaryHTML(){
 }
 
 /* ---------- 渲染：分析中心 ---------- */
+
+/* ===== 盈亏日历 / 周报 / 持仓宽度（1BK_V68.13.1.041）：借鉴养基宝的盈亏日历 + 周报，落地自己的「攒股收息」视图 ===== */
+function pnlByDay(){
+  const rows = snapshotRows();          // 已按日期升序：[{d, mv, cost, floatPnl, net, div, ts}]
+  const map = {};
+  let prev = null;
+  rows.forEach(r => {
+    const fp = isFinite(r.floatPnl) ? r.floatPnl : 0;
+    const dv = isFinite(r.div) ? r.div : 0;
+    let delta = fp, divDay = dv;
+    if (prev){ delta -= isFinite(prev.floatPnl) ? prev.floatPnl : 0; divDay -= isFinite(prev.div) ? prev.div : 0; }
+    map[r.d] = { pnl: delta + divDay, floatPnl: fp, divDay: Math.max(0, divDay), div: dv, mv: r.mv, cost: r.cost, net: r.net };
+    prev = r;
+  });
+  return map;
+}
+function pnlCalendarHTML(){
+  const map = pnlByDay();
+  const days = Object.keys(map);
+  if (!days.length) return '<div class="empty">暂无每日净值快照——每天 15:05 收盘后自动记录，打开页面也会记录「今日」。</div>';
+  const vals = days.map(d => Math.abs(map[d].pnl)).filter(v => isFinite(v) && v > 0);
+  const maxAbs = vals.length ? Math.max.apply(null, vals) : 1;
+  const now = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--){ const dt = new Date(now.getFullYear(), now.getMonth() - i, 1); months.push({ y: dt.getFullYear(), m: dt.getMonth() + 1 }); }
+  const WK = ['日','一','二','三','四','五','六'];
+  const cell = (y, m, d) => {
+    const key = y + '-' + String(m).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const rec = map[key];
+    let cls = 'cal-cell', inner = '<span class="cal-d">' + d + '</span>';
+    if (rec){
+      const p = rec.pnl, mag = maxAbs ? Math.min(1, Math.abs(p) / maxAbs) : 0;
+      const tone = p > 0 ? 'up' : (p < 0 ? 'down' : 'flat');
+      cls += ' has ' + tone + (mag > 0.66 ? ' s3' : (mag > 0.33 ? ' s2' : ' s1'));
+      inner += '<span class="cal-p ' + (p >= 0 ? 'up' : 'down') + '">' + (p >= 0 ? '+' : '') + money(p) + '</span>';
+    }
+    return '<div class="' + cls + '" data-cal-date="' + key + '">' + inner + '</div>';
+  };
+  let html = '<div class="cal-grid-wrap">';
+  months.forEach(mo => {
+    const startW = new Date(mo.y, mo.m - 1, 1).getDay();
+    const dim = new Date(mo.y, mo.m, 0).getDate();
+    let cells = '';
+    for (let i = 0; i < startW; i++) cells += '<div class="cal-cell blank"></div>';
+    for (let d = 1; d <= dim; d++) cells += cell(mo.y, mo.m, d);
+    html += '<div class="cal-month"><div class="cal-mh">' + mo.y + '-' + String(mo.m).padStart(2,'0') + '</div>' +
+      '<div class="cal-wk">' + WK.map(w => '<span>' + w + '</span>').join('') + '</div>' +
+      '<div class="cal-grid">' + cells + '</div></div>';
+  });
+  html += '</div><div class="cal-detail" id="calDetail">点击任意有记录的日期，查看当日盈亏 / 浮盈 / 分红与交易明细。</div>';
+  return html;
+}
+function calDetailHTML(key){
+  const map = pnlByDay();
+  const rec = map[key];
+  if (!rec) return '该日（' + key + '）无净值记录。';
+  const txs = [];
+  state.holdings.forEach(h => (h.txs||[]).forEach(t => { if (String(t.date||'')===key) txs.push({ name: h.name||h.code, side: t.side, shares: t.shares, price: t.price }); }));
+  (state.trades||[]).forEach(t => { if (String(t.date||'')===key) txs.push({ name: t.name||t.code, side: 'T', shares: t.shares, price: (Number(t.sellPrice)+Number(t.buyPrice))/2 }); });
+  const txRows = txs.length ? txs.map(t =>
+    '<div class="ds-move"><span class="ds-name">' + esc(t.name) + '</span>' +
+    '<span class="' + (t.side==='buy'?'up':(t.side==='sell'?'down':'flat')) + '">' + (t.side==='buy'?'加仓':(t.side==='sell'?'减仓':'做T')) + '</span>' +
+    '<span class="mono">' + (t.shares||0) + ' 股 @ ' + price4(t.price) + '</span></div>').join('')
+    : '<div class="empty">当日无交易记录</div>';
+  return '<div class="cal-dt-title"><b>' + key + '</b> · 当日盈亏 <b class="' + (rec.pnl>=0?'up':'down') + '">' + sign2(rec.pnl) + '</b></div>' +
+    '<div class="wr-row"><span class="cal-dk">收盘浮盈</span><b class="' + (rec.floatPnl>=0?'up':'down') + '">' + money(rec.floatPnl) + '</b>' +
+    '<span class="cal-dk">当日分红</span><b class="up">' + money(rec.divDay) + '</b>' +
+    '<span class="cal-dk">市值</span><b>' + money(rec.mv) + '</b>' +
+    '<span class="cal-dk">累计净投入</span><b>' + money(rec.net) + '</b></div>' +
+    '<div class="ds-sub">当日交易（' + txs.length + ' 笔）</div>' + txRows;
+}
+function weeklyReviewHTML(){
+  const rows = snapshotRows();
+  if (!rows.length) return '<div class="empty">暂无每日净值快照——周报将在有数据后自动生成。</div>';
+  const now = new Date(), dow = now.getDay();
+  const monday = new Date(now); monday.setDate(now.getDate() - ((dow + 6) % 7));
+  const monStr = ymdOf(monday);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const sunStr = ymdOf(sunday);
+  const inWeek = rows.filter(r => r.d >= monStr && r.d <= sunStr);
+  const prevRows = rows.filter(r => r.d < monStr);
+  const lastInWeek = inWeek.length ? inWeek[inWeek.length-1] : null;
+  const lastPrev = prevRows.length ? prevRows[prevRows.length-1] : null;
+  let weekPnl = NaN, divWeek = 0;
+  if (lastInWeek && lastPrev){ weekPnl = (lastInWeek.floatPnl - lastPrev.floatPnl) + (lastInWeek.div - lastPrev.div); divWeek = Math.max(0, lastInWeek.div - lastPrev.div); }
+  const map = pnlByDay();
+  let best = null, worst = null;
+  inWeek.forEach(r => { const p = map[r.d] ? map[r.d].pnl : 0; if (best===null||p>best.p) best={d:r.d,p}; if (worst===null||p<worst.p) worst={d:r.d,p}; });
+  const tw = [];
+  state.holdings.forEach(h => (h.txs||[]).forEach(t => { const d=String(t.date||''); if (d>=monStr&&d<=sunStr) tw.push(t); }));
+  (state.trades||[]).forEach(t => { const d=String(t.date||''); if (d>=monStr&&d<=sunStr) tw.push(t); });
+  const cls = v => isFinite(v) ? (v>0?'up':(v<0?'down':'flat')) : 'flat';
+  return '<div class="wr-block">' +
+    '<div class="wr-row"><span class="wr-k">本周区间</span><span class="wr-v">' + monStr + ' → ' + sunStr + '</span></div>' +
+    '<div class="wr-row"><span class="wr-k">本周盈亏</span><span class="wr-v ' + cls(weekPnl) + '">' + (isFinite(weekPnl)?sign2(weekPnl):'—') + '</span>' +
+    '<span class="wr-k">交易</span><span class="wr-v">' + tw.length + ' 笔</span>' +
+    '<span class="wr-k">分红</span><span class="wr-v up">' + money(divWeek) + '</span></div>' +
+    '<div class="wr-row"><span class="wr-k">最佳日</span><span class="wr-v up">' + (best?best.d+' '+sign2(best.p):'—') + '</span>' +
+    '<span class="wr-k">最差日</span><span class="wr-v down">' + (worst?worst.d+' '+sign2(worst.p):'—') + '</span></div>' +
+    (lastInWeek ? '<div class="an-note">本周收盘市值 ' + money(lastInWeek.mv) + ' · 累计净投入 ' + money(lastInWeek.net) + '</div>'
+                : '<div class="an-note">本周尚无收盘快照（' + monStr + ' 之后还未到 15:05 记录）</div>') +
+    '</div>';
+}
+function breadthBarHTML(){
+  let up=0, down=0, flat=0, na=0;
+  state.holdings.forEach(h => {
+    if (h.closed) return;
+    const q = state.quotes[qkey(h)];
+    if (!q || !isFinite(q.pct)) { na++; return; }
+    if (q.pct > 0) up++; else if (q.pct < 0) down++; else flat++;
+  });
+  const total = up + down + flat;
+  if (!total) return '<div class="empty">行情未加载——交易时段刷新后显示你的持仓涨/跌/平分布。</div>';
+  const pUp = up/total*100, pDown = down/total*100, pFlat = flat/total*100;
+  return '<div class="breadth"><div class="br-bar">' +
+    '<span class="br-seg up" style="width:' + pUp.toFixed(2) + '%"></span>' +
+    '<span class="br-seg down" style="width:' + pDown.toFixed(2) + '%"></span>' +
+    '<span class="br-seg flat" style="width:' + pFlat.toFixed(2) + '%"></span></div>' +
+    '<div class="br-legend"><span class="up">▲ 涨 ' + up + ' (' + pUp.toFixed(0) + '%)</span>' +
+    '<span class="down">▼ 跌 ' + down + ' (' + pDown.toFixed(0) + '%)</span>' +
+    '<span class="flat">— 平 ' + flat + '</span>' + (na ? '<span class="muted">· 未更新 '+na+'</span>' : '') + '</div>' +
+    '<div class="br-note">你的持仓宽度（实时）· 红涨绿跌，反映「攒股收息」组合当日的冷热分布</div></div>';
+}
+
+
 function renderAnalysis(){
   const box = document.getElementById('analysisBody'); if (!box) return;
   const att = returnAttribution(), ind = industryAgg(), rows = snapshotRows();
@@ -3620,6 +3778,16 @@ function renderAnalysis(){
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>每日收盘小结</div>' +
     '<div class="panel-sub">最近交易日持仓变动 + 明日关注（跌>3% 可观察 · 涨>5% 可高抛）</div></div>' +
     '<div class="panel-body">' + dailyCloseSummaryHTML() + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>盈亏日历</div>' +
+    '<div class="panel-sub">每日盈亏热力图（红涨绿跌）· 点击有记录的日期看明细 · 数据来自每日净值快照</div></div>' +
+    '<div class="panel-body">' + pnlCalendarHTML() + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>盈亏周报</div>' +
+    '<div class="panel-sub">本周盈亏 / 交易 / 分红 / 最佳最差日（1BK_V68.13.1.041）</div></div>' +
+    '<div class="panel-body">' + weeklyReviewHTML() + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>持仓宽度（实时）</div>' +
+    '<div class="panel-sub">你的持仓当日涨/跌/平家数——低位潜伏的「组合温度计」（红涨绿跌）</div></div>' +
+    '<div class="panel-body">' + breadthBarHTML() + '</div></div>' +
+
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>月度资金流水</div>' +
     '<div class="panel-sub">近 12 个月买入/卖出/分红（红=买入 · 绿=卖出 · 净值=买入−卖出）</div></div>' +
     '<div class="panel-body">' + monthlyFlowHTML() + '</div></div>' +
@@ -3631,6 +3799,9 @@ function renderAnalysis(){
     '<div class="panel-body">' + alertHTML + '</div></div>';
   box.querySelectorAll('[data-an-range]').forEach(b => b.onclick = () => { state.settings.analysisRange = b.dataset.anRange; persist.settings(); renderAnalysis(); });
   box.querySelectorAll('[data-bench]').forEach(b => b.onclick = () => { state.settings.benchmark = b.dataset.bench; persist.settings(); renderAnalysis(); });
+  const calWrap = box.querySelector('.cal-grid-wrap');
+  if (calWrap) calWrap.addEventListener('click', e => { const c = e.target.closest('[data-cal-date]'); if (!c) return; const det = box.querySelector('#calDetail'); if (det) det.innerHTML = calDetailHTML(c.dataset.calDate); });
+
   loadBenchmarks(view);   /* 手动叠加基准：联网拉指数日K并归一化叠加（缓存1天） */
   const nb = box.querySelector('#btnEnableNotify');
   if (nb) nb.onclick = () => { try { if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') Notification.requestPermission().then(p => toast('浏览器通知' + (p === 'granted' ? '已开启' : '保持关闭'), 'info')); else toast('浏览器通知已开启或不支持', 'info'); } catch(e){ toast('通知开启失败：' + e.message, 'err'); } };
