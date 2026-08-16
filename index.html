@@ -1101,6 +1101,33 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
 :root[data-theme="warm"] .setting-row,:root:not([data-theme]) .setting-row{padding-top:13px;padding-bottom:13px}
 :root[data-theme="warm"] p,:root:not([data-theme]) p{line-height:1.55}
 </style>
+<style id="ths-ui">
+/* ===================== 同花顺式全局指数条 + 终端化密度（v68.13.1.049） ===================== */
+/* —— 全局指数条：顶栏下常驻跑马灯，所有页面可见；红涨绿跌；点击看 K 线 —— */
+.idxbar{display:flex;align-items:stretch;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.idx-lead{flex:none;display:flex;align-items:center;gap:6px;padding:0 14px;font-weight:700;font-size:12px;color:var(--muted);border-right:1px solid var(--line);background:var(--panel-2)}
+.idx-dot{width:7px;height:7px;border-radius:50%;background:var(--up);transition:background .3s}
+.idx-lead .idx-dot{animation:idxPulse 1.6s infinite}
+@keyframes idxPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.idx-scroll{flex:1;display:flex;min-width:0}
+.idx{flex:1;min-width:0;padding:8px 12px;border-right:1px solid var(--line-2);text-align:center;cursor:pointer;transition:background .15s}
+.idx:last-child{border-right:none}
+.idx:hover{background:var(--panel-2)}
+.idx .nm{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idx .val{font:700 15px/1.25 ui-monospace,"SF Mono",Menlo,Consolas,monospace;margin-top:2px;font-variant-numeric:tabular-nums}
+.idx .pc{font:600 11px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;margin-top:2px;font-variant-numeric:tabular-nums}
+.idx .pc.up{color:var(--up)} .idx .pc.down{color:var(--down)} .idx .pc.flat{color:var(--text)}
+.idx.flash-up{animation:idxFu .7s} .idx.flash-down{animation:idxFd .7s}
+@keyframes idxFu{0%{background:rgba(229,72,77,.16)}100%{background:transparent}}
+@keyframes idxFd{0%{background:rgba(21,163,74,.16)}100%{background:transparent}}
+@media(max-width:680px){.idxbar{flex-direction:column}.idx-lead{border-right:none;border-bottom:1px solid var(--line)}.idx-scroll{flex-wrap:wrap}.idx{flex:1 0 33.33%;border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}}
+
+/* —— 终端化密度：表格等宽右对齐 + 行 hover 高亮（不改动功能/数据） —— */
+.table-wrap td,.table-wrap th{font-variant-numeric:tabular-nums}
+.table-wrap tbody tr:hover{background:var(--panel-2)}
+/* KPI 卡：强化大数字终端感（.card:hover 边色已由暖纸层处理） */
+.card .v{font-variant-numeric:tabular-nums}
+</style>
 </head>
 <body>
 <!-- ============ 访问密码门禁（新设备校验；无密码自动放行） ============ -->
@@ -1134,7 +1161,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.048</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.049</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1150,6 +1177,12 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
     </div>
 
     <div class="wrap">
+
+      <!-- ========== 全局指数条（同花顺式顶栏跑马灯，所有页面常驻） ========== -->
+      <div class="idxbar" id="idxbar" aria-label="大盘指数">
+        <div class="idx-lead"><span class="idx-dot"></span>大盘</div>
+        <div class="idx-scroll" id="idxScroll"></div>
+      </div>
 
       <!-- ========== 页：总览 ========== -->
       <section class="page active" id="page-overview">
@@ -1535,7 +1568,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.048 · 2026-08-16 22:37 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.049 · 2026-08-16 22:55 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1597,8 +1630,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.048';
-const APP_BUILD   = '2026-08-16 22:37';
+const APP_VERSION = '1BK_V68.13.1.049';
+const APP_BUILD   = '2026-08-16 22:55';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4506,6 +4539,53 @@ async function renderMarketLive(){
     if (sym && typeof showKlineDialog === 'function') showKlineDialog(name || sym, sym);
   });
 })();
+
+/* 1BK_V68.13.1.049：全局指数条（同花顺式顶栏跑马灯）— 交易时段每 2 秒刷新并闪烁，休市零请求；点击看 K 线 */
+const IDX_TICKER = [
+  { code:'sh000001', name:'上证指数' }, { code:'sz399001', name:'深证成指' },
+  { code:'sz399006', name:'创业板指' }, { code:'sh000300', name:'沪深300' },
+  { code:'sh000688', name:'科创50' }, { code:'sh000016', name:'上证50' }
+];
+let idxTickerLoading = false, idxTickerPrev = {};
+async function renderIdxTicker(){
+  const row = document.getElementById('idxScroll'); if (!row) return;
+  if (idxTickerLoading) return; idxTickerLoading = true;
+  try {
+    const q = await fetchQuotes(IDX_TICKER.map(x => x.code));
+    row.innerHTML = IDX_TICKER.map(m => {
+      const d = q && q[m.code];
+      const prev = idxTickerPrev[m.code];
+      if (!d || !isFinite(d.price)) return '<div class="idx"><div class="nm">' + esc(m.name) + '</div><div class="val">—</div><div class="pc flat">—</div></div>';
+      const chg = isFinite(d.pct) ? d.pct : 0;
+      const cls = chg > 0.005 ? 'up' : (chg < -0.005 ? 'down' : 'flat');
+      const sign = chg > 0 ? '+' : '';
+      let flash = '';
+      if (prev !== undefined && d.price !== prev) flash = d.price > prev ? ' flash-up' : ' flash-down';
+      idxTickerPrev[m.code] = d.price;
+      return '<div class="idx' + flash + '" data-sym="' + esc(m.code) + '" data-name="' + esc(m.name) + '">' +
+        '<div class="nm">' + esc(m.name) + '</div>' +
+        '<div class="val">' + d.price.toFixed(2) + '</div>' +
+        '<div class="pc ' + cls + '">' + sign + chg.toFixed(2) + '%</div></div>';
+    }).join('');
+    const dot = document.querySelector('.idx-dot');
+    if (dot) dot.style.background = isTradingTime() ? 'var(--up)' : 'var(--muted)';
+  } catch(e){}
+  idxTickerLoading = false;
+}
+(function bindIdxTickerKline(){
+  const bar = document.getElementById('idxbar');
+  if (!bar || bar.dataset.klBound) return;
+  bar.dataset.klBound = '1';
+  bar.addEventListener('click', e => {
+    const el = e.target.closest('.idx'); if (!el) return;
+    const sym = el.getAttribute('data-sym'), name = el.getAttribute('data-name');
+    if (sym && typeof showKlineDialog === 'function') showKlineDialog(name || sym, sym);
+  });
+})();
+function initIdxTicker(){
+  renderIdxTicker();
+  setInterval(() => { if (isTradingTime() && document.visibilityState === 'visible') renderIdxTicker(); }, 2000);
+}
 
 /* 渲染自选标的卡片（排序；卡片点击看 K 线，× 移除） */
 function renderWatch(){
@@ -8401,7 +8481,8 @@ const UI_THEMES = [
   { id:'carbon', name:'碳素冷蓝', bg:'#eef1f6', accent:'#2563eb', gold:'#f59e0b', dark:false, vars:{ '--bg':'#eef1f6', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.06), transparent 60%)', '--panel':'#ffffff', '--panel-2':'#f4f6fa', '--line':'#e2e8f1', '--line-2':'#eef2f8', '--text':'#0f1722', '--muted':'#5a6577', '--accent':'#2563eb', '--accent-2':'#3b82f6', '--accent-soft':'#e2ecff', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'12px', '--shadow':'0 1px 2px rgba(15,30,60,.05), 0 6px 16px rgba(15,30,60,.08)', '--ring':'0 0 0 3px var(--accent-soft)' } },
   { id:'dark-indigo', name:'暗夜靛蓝', bg:'#0f1420', accent:'#6366f1', gold:'#f59e0b', dark:true, vars:{ '--bg':'#0f1420', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(99,102,241,.10), transparent 60%)', '--panel':'#171c2a', '--panel-2':'#1d2333', '--line':'#2a3142', '--line-2':'#232a3a', '--text':'#e8ebf2', '--muted':'#9aa3b5', '--accent':'#6366f1', '--accent-2':'#818cf8', '--accent-soft':'rgba(99,102,241,.16)', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'16px', '--shadow':'0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35)', '--ring':'0 0 0 3px rgba(99,102,241,.35)' } },
   { id:'dark-teal', name:'暗夜墨绿', bg:'#0c1614', accent:'#2dd4bf', gold:'#f59e0b', dark:true, vars:{ '--bg':'#0c1614', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(45,212,191,.10), transparent 60%)', '--panel':'#13201d', '--panel-2':'#182a26', '--line':'#264039', '--line-2':'#1d312c', '--text':'#e6f3ef', '--muted':'#8fb3a8', '--accent':'#2dd4bf', '--accent-2':'#5eead4', '--accent-soft':'rgba(45,212,191,.16)', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'16px', '--shadow':'0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35)', '--ring':'0 0 0 3px rgba(45,212,191,.35)' } },
-  { id:'dark-graphite', name:'暗夜石墨', bg:'#121418', accent:'#38bdf8', gold:'#f59e0b', dark:true, vars:{ '--bg':'#121418', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(56,189,248,.10), transparent 60%)', '--panel':'#1a1d22', '--panel-2':'#21252b', '--line':'#2c313a', '--line-2':'#24282f', '--text':'#e9edf2', '--muted':'#9aa1ad', '--accent':'#38bdf8', '--accent-2':'#7dd3fc', '--accent-soft':'rgba(56,189,248,.16)', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'12px', '--shadow':'0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35)', '--ring':'0 0 0 3px rgba(56,189,248,.35)' } }
+  { id:'dark-graphite', name:'暗夜石墨', bg:'#121418', accent:'#38bdf8', gold:'#f59e0b', dark:true, vars:{ '--bg':'#121418', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(56,189,248,.10), transparent 60%)', '--panel':'#1a1d22', '--panel-2':'#21252b', '--line':'#2c313a', '--line-2':'#24282f', '--text':'#e9edf2', '--muted':'#9aa1ad', '--accent':'#38bdf8', '--accent-2':'#7dd3fc', '--accent-soft':'rgba(56,189,248,.16)', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'12px', '--shadow':'0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35)', '--ring':'0 0 0 3px rgba(56,189,248,.35)' } },
+  { id:'dark-ths', name:'同花顺终端', bg:'#0a0e14', accent:'#f5a623', gold:'#f59e0b', dark:true, vars:{ '--bg':'#0a0e14', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(245,166,35,.08), transparent 60%)', '--panel':'#0f141c', '--panel-2':'#151b24', '--line':'#1e2733', '--line-2':'#18212c', '--text':'#e6edf3', '--muted':'#8a97a6', '--accent':'#f5a623', '--accent-2':'#ffc24d', '--accent-soft':'rgba(245,166,35,.16)', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'14px', '--shadow':'0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.4)', '--ring':'0 0 0 3px rgba(245,166,35,.35)' } }
 ];
 const MANAGED_VARS = ['--bg','--bg-grid','--panel','--panel-2','--line','--line-2','--text','--muted','--accent','--accent-2','--accent-soft','--gold','--gold-2','--radius','--shadow','--ring'];
 function getUITheme(){ try { return localStorage.getItem(K('uitheme')) || 'warm'; } catch(e){ return 'warm'; } }
@@ -8441,6 +8522,7 @@ function init(){
   initNav();
   bind();
   renderThemeGrid();          /* 设置页主题选择网格 */
+  initIdxTicker();            /* 全局指数条（同花顺式顶栏跑马灯）*/
   try { bindAnalysis(); } catch(e){}
   /* 养鹅心法 · 买卖纪律卡片（阈值 inline-edit，首次启动渲染一次）+ 心法速览 */
   try { renderZuxunDealCards(); renderCreedStats(); } catch(e){}
