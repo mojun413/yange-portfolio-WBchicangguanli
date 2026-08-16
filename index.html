@@ -858,6 +858,39 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
   .panel-body.tight{padding:0 10px}
   .tb-brand .motto{display:none}  /* v53.27：手机端隐藏座右铭 */
 }
+
+/* ===================== UI 精修层（design-taste-frontend × impeccable）===================== */
+/* 仅视觉 / 交互增强，零功能改动、零文案改动；原规则一字未动。 */
+
+/* A. 键盘焦点可见环：覆盖按钮 / 底栏导航 / 标签 / 可聚焦元素（鼠标 hover 不受影响） */
+:where(button, .btn, .bn, .kt, .wc, .seg button, .tag, .chip, .eye-btn, a, [role="button"], [tabindex]):focus-visible{
+  outline:2px solid var(--accent-2);
+  outline-offset:2px;
+  box-shadow:0 0 0 4px rgba(99,102,241,.28);
+}
+/* 输入框已有独立 :focus 处理（line ~159），此处不重复，避免双环 */
+
+/* B. 减弱动效偏好：眩晕 / 电池敏感用户的强制无障碍项 */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+
+/* C. 主题化滚动条：统一为靛蓝细条，消除原生灰色毛刺（表格 / 弹窗 / 盯盘 / 截图等滚动区） */
+* { scrollbar-width:thin; scrollbar-color:rgba(99,102,241,.45) transparent; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:rgba(99,102,241,.34); border-radius:8px; border:2px solid transparent; background-clip:content-box; }
+::-webkit-scrollbar-thumb:hover{ background:rgba(99,102,241,.62); background-clip:content-box; }
+
+/* D. 轻量按压触觉 + 占位符 + 数字等宽对齐（金融工具数值更易读） */
+button:not(.no-press):active, .btn:active, .bn:active, .kt:active, .wc:active{ transform:translateY(1px); }
+::placeholder{ color:rgba(107,114,128,.6); opacity:1; }
+input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-variant-numeric:tabular-nums; }
 </style>
 <script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
 <script>
@@ -913,7 +946,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.042</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.043</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1314,7 +1347,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.042 · 2026-08-15 12:04 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.043 · 2026-08-16 20:33 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1374,8 +1407,8 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.042';
-const APP_BUILD   = '2026-08-15 12:04';
+const APP_VERSION = '1BK_V68.13.1.043';
+const APP_BUILD   = '2026-08-16 20:33';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
