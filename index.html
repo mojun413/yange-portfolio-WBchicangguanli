@@ -12,28 +12,28 @@
 :root{
   --page-maxw:1600px;          /* 主区最大宽度（页面全宽上限，可微调；超宽屏居中） */
   --page-pad:12px;             /* 主区左右留白（可微调；留一点点白整体更协调） */
-  --bg:#f3f4f8;
-  --bg-grid: radial-gradient(1200px 600px at 80% -10%, rgba(79,70,229,.05), transparent 60%);
-  --panel:#ffffff;
-  --panel-2:#f7f8fb;
-  --line:#e7e9f0;
-  --line-2:#eef0f5;
-  --text:#161a22;
-  --muted:#5b6472;
+  --bg:#f6f1e7;
+  --bg-grid: radial-gradient(1200px 600px at 80% -10%, rgba(190,150,90,.07), transparent 60%);
+  --panel:#fffdf8;
+  --panel-2:#f0e8d8;
+  --line:#e7dcc8;
+  --line-2:#f2ebde;
+  --text:#2c2620;
+  --muted:#8a7d6c;
   --up:#e5484d;      /* 涨 = 红（A股惯例） */
   --down:#15a34a;    /* 跌 = 绿 */
   --flat:#6b7280;
-  --accent:#4f46e5;
-  --accent-2:#6366f1;
-  --accent-soft:#eceeff;
-  --gold:#f59e0b;
-  --gold-2:#fbbf24;
-  --warn:#d97706;
-  --radius:16px;
-  --radius-sm:10px;
+  --accent:#b5563a;
+  --accent-2:#c9785c;
+  --accent-soft:rgba(181,86,58,.12);
+  --gold:#c9882e;
+  --gold-2:#d99a2b;
+  --warn:#c2693a;
+  --radius:18px;
+  --radius-sm:12px;
   --radius-xs:8px;
-  --shadow:0 1px 2px rgba(16,24,40,.04), 0 6px 18px rgba(16,24,40,.06);
-  --shadow-lg:0 14px 34px rgba(16,24,40,.12);
+  --shadow:0 1px 2px rgba(90,70,50,.05), 0 8px 22px rgba(90,70,50,.07);
+  --shadow-lg:0 14px 34px rgba(90,70,50,.12);
   --ring:0 0 0 3px var(--accent-soft);
 }
 *{box-sizing:border-box}
@@ -933,7 +933,161 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
     });
   }catch(e){}
 })();
-</script></head>
+</script>
+<style id="theme-system">
+/* ===================== 外观主题系统（v68.15） ===================== */
+/* 主题变量由 JS 以 inline style 写入 <html>，优先级高于「账户偏好·主题色」；
+   此处仅放外壳组件覆盖（.topbar/.botnav/.bn/输入/按钮），用 var() 取主题色 */
+
+/* —— 设置页：主题选择网格 —— */
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin:4px 0 10px}
+.theme-card{position:relative;border:1px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;background:var(--panel-2);transition:.15s;overflow:hidden}
+.theme-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.theme-card.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.theme-card .sw{height:40px;border-radius:8px;margin-bottom:7px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.06)}
+.theme-card .nm{font-size:11.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.theme-card .tick{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;display:none;align-items:center;justify-content:center;font-size:12px;line-height:1}
+.theme-card.active .tick{display:flex}
+
+/* —— 浅色主题外壳（各自底色不同） —— */
+:root[data-theme="warm"] .topbar{background:rgba(255,253,248,.88);border-bottom-color:var(--line)}
+:root[data-theme="warm"] .botnav{background:linear-gradient(180deg,#2b241b,#1a140d);border-top:1px solid rgba(255,255,255,.05)}
+:root[data-theme="warm"] .bn{color:#b9ad97}
+:root[data-theme="warm"] .bn:hover{background:rgba(255,255,255,.05)}
+:root[data-theme="warm"] .bn.active{background:linear-gradient(135deg,rgba(181,86,58,.42),rgba(217,140,106,.26))}
+:root[data-theme="warm"] .bn.active::before{background:linear-gradient(90deg,#b5563a,#c9785c)}
+:root[data-theme="warm"] .bn .bdot{border:1.5px solid #1a140d}
+:root[data-theme="warm"] .ver-chip{background:var(--accent-soft);color:var(--accent);border:1px solid rgba(181,86,58,.22)}
+:root[data-theme="warm"] .ver-chip:hover{background:rgba(181,86,58,.18);border-color:rgba(181,86,58,.4);transform:translateY(-1px)}
+:root[data-theme="warm"] .ver-chip::before{background:#b5563a;box-shadow:0 0 0 2px rgba(181,86,58,.18)}
+:root[data-theme="warm"] .tb-brand .dot{background:linear-gradient(135deg,#c9785c,#b5563a);box-shadow:0 4px 12px rgba(181,86,58,.35), inset 0 1px 0 rgba(255,255,255,.4)}
+:root[data-theme="warm"] .tb-brand,.brand,.page-title-current,h1,h2,h3,.card-title,.sec-title,.summary-title{font-family:"Songti SC","STSong","Noto Serif SC",Georgia,"Times New Roman",serif}
+
+:root[data-theme="teal"] .topbar{background:rgba(255,255,255,.82)}
+:root[data-theme="teal"] .botnav{background:linear-gradient(180deg,#0d2b27,#081c19);border-top:1px solid rgba(255,255,255,.06)}
+:root[data-theme="teal"] .bn{color:#9fc3bc}
+:root[data-theme="teal"] .bn:hover{background:rgba(255,255,255,.06)}
+:root[data-theme="teal"] .bn.active{background:linear-gradient(135deg,rgba(13,148,136,.40),rgba(245,158,11,.22))}
+:root[data-theme="teal"] .bn.active::before{background:linear-gradient(90deg,#14b8a6,#f59e0b)}
+:root[data-theme="teal"] .bn .bdot{border:1.5px solid #081c19}
+:root[data-theme="teal"] .ver-chip{border:1px solid rgba(13,148,136,.18)}
+:root[data-theme="teal"] .ver-chip:hover{background:#cdeee8;border-color:rgba(13,148,136,.35)}
+
+:root[data-theme="twilight"] .topbar{background:rgba(255,255,255,.82)}
+:root[data-theme="twilight"] .botnav{background:linear-gradient(180deg,#1e1430,#140d22);border-top:1px solid rgba(255,255,255,.06)}
+:root[data-theme="twilight"] .bn{color:#b3a3cf}
+:root[data-theme="twilight"] .bn:hover{background:rgba(255,255,255,.06)}
+:root[data-theme="twilight"] .bn.active{background:linear-gradient(135deg,rgba(124,58,237,.40),rgba(236,72,153,.24))}
+:root[data-theme="twilight"] .bn.active::before{background:linear-gradient(90deg,#a855f7,#ec4899)}
+:root[data-theme="twilight"] .bn .bdot{border:1.5px solid #140d22}
+:root[data-theme="twilight"] .ver-chip{border:1px solid rgba(124,58,237,.18)}
+:root[data-theme="twilight"] .ver-chip:hover{background:#e7d6ff;border-color:rgba(124,58,237,.35)}
+
+:root[data-theme="carbon"] .topbar{background:rgba(255,255,255,.82)}
+:root[data-theme="carbon"] .botnav{background:linear-gradient(180deg,#10182a,#0a1020);border-top:1px solid rgba(255,255,255,.06)}
+:root[data-theme="carbon"] .bn{color:#98a6bd}
+:root[data-theme="carbon"] .bn:hover{background:rgba(255,255,255,.06)}
+:root[data-theme="carbon"] .bn.active{background:linear-gradient(135deg,rgba(37,99,235,.38),rgba(245,158,11,.22))}
+:root[data-theme="carbon"] .bn.active::before{background:linear-gradient(90deg,#3b82f6,#f59e0b)}
+:root[data-theme="carbon"] .bn .bdot{border:1.5px solid #0a1020}
+:root[data-theme="carbon"] .ver-chip{border:1px solid rgba(37,99,235,.18)}
+:root[data-theme="carbon"] .ver-chip:hover{background:#d4e1ff;border-color:rgba(37,99,235,.35)}
+
+/* —— 深色主题外壳（通用，accent 由各主题变量驱动） —— */
+:root[data-theme^="dark"] .topbar{background:rgba(10,13,20,.80);border-bottom-color:var(--line)}
+:root[data-theme^="dark"] .botnav{background:linear-gradient(180deg,#0b0e14,#070a10);border-top:1px solid rgba(255,255,255,.06)}
+:root[data-theme^="dark"] .bn{color:#8b95a8}
+:root[data-theme^="dark"] .bn:hover{background:rgba(255,255,255,.06)}
+:root[data-theme^="dark"] .bn.active{background:linear-gradient(135deg,var(--accent-soft),rgba(245,158,11,.18))}
+:root[data-theme^="dark"] .bn.active::before{background:linear-gradient(90deg,var(--accent-2),var(--gold-2))}
+:root[data-theme^="dark"] .bn .bdot{border:1.5px solid #070a10}
+:root[data-theme^="dark"] input,
+:root[data-theme^="dark"] select,
+:root[data-theme^="dark"] textarea{background:rgba(255,255,255,.04);color:var(--text);border-color:var(--line)}
+:root[data-theme^="dark"] button,
+:root[data-theme^="dark"] .btn{background:rgba(255,255,255,.05);color:var(--text);border-color:var(--line)}
+:root[data-theme^="dark"] button:hover,.btn:hover{background:rgba(255,255,255,.09);border-color:var(--line)}
+:root[data-theme^="dark"] .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border-color:transparent}
+:root[data-theme^="dark"] .btn-primary:hover{color:#fff}
+:root[data-theme^="dark"] .ver-chip{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-soft)}
+:root[data-theme^="dark"] .ver-chip:hover{background:var(--accent-soft);filter:brightness(1.15)}
+
+/* —— 暗夜：重映射全站硬编码浅色组件（避免亮卡） —— */
+:root[data-theme^="dark"] .live-card{background:var(--panel-2)}
+:root[data-theme^="dark"] .monitor-card.up{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.12)}
+:root[data-theme^="dark"] .watch-card.holding{background:var(--panel-2)}
+:root[data-theme^="dark"] .watch-card.up{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.12)}
+:root[data-theme^="dark"] .chip{background:rgba(255,255,255,.06);color:var(--muted);border-color:var(--line)}
+:root[data-theme^="dark"] .btn-danger{background:rgba(220,38,38,.14);color:#fca5a5;border-color:rgba(220,38,38,.4)}
+:root[data-theme^="dark"] .btn-danger:hover{background:rgba(220,38,38,.22);border-color:rgba(220,38,38,.55)}
+:root[data-theme^="dark"] .btn-ghost:hover{background:rgba(255,255,255,.06)}
+:root[data-theme^="dark"] input:focus,
+:root[data-theme^="dark"] .monitor-bar .mb-search input:focus,
+:root[data-theme^="dark"] .fix-tb input:focus,
+:root[data-theme^="dark"] .deal-card .dc-edit:focus{background:var(--panel-2);color:var(--text)}
+:root[data-theme^="dark"] .tag{background:var(--panel-2);color:var(--muted)}
+:root[data-theme^="dark"] .tag.t{background:rgba(245,158,11,.14);color:var(--gold-2);border-color:rgba(245,158,11,.35)}
+:root[data-theme^="dark"] .tag.stock{background:rgba(56,189,248,.12);color:#7dd3fc;border-color:rgba(56,189,248,.32)}
+:root[data-theme^="dark"] .pos-badge.tag-empty{background:rgba(255,255,255,.06);color:var(--muted)}
+:root[data-theme^="dark"] .pos-badge.tag-heavy{background:rgba(245,158,11,.16);color:#fcd34d}
+:root[data-theme^="dark"] .pos-badge.tag-over{background:rgba(239,68,68,.16);color:#fca5a5}
+:root[data-theme^="dark"] .trade-badge.tb-flat{background:rgba(255,255,255,.06);color:var(--muted);border-color:var(--line)}
+:root[data-theme^="dark"] .an-advice li.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35);color:var(--text)}
+:root[data-theme^="dark"] .an-advice li.danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4);color:var(--text)}
+:root[data-theme^="dark"] .an-advice li.good{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:var(--text)}
+:root[data-theme^="dark"] .an-bar-row .bt{background:rgba(255,255,255,.08)}
+:root[data-theme^="dark"] .an-warn.sev-warn{background:rgba(245,158,11,.12)}
+:root[data-theme^="dark"] .ze-card.hit{background:rgba(239,68,68,.12)}
+:root[data-theme^="dark"] .ze-card.hit .ze-st{background:rgba(239,68,68,.18);color:#fca5a5}
+:root[data-theme^="dark"] .ac-badge.hit{background:rgba(239,68,68,.14);color:#fca5a5}
+:root[data-theme^="dark"] .ac-badge.watch{background:rgba(99,102,241,.16);color:#a5b4fc}
+:root[data-theme^="dark"] th[data-sort]:hover{background:rgba(255,255,255,.06)}
+:root[data-theme^="dark"] .pv-bad td{background:rgba(239,68,68,.12)}
+:root[data-theme^="dark"] .pv-dup td{background:rgba(245,158,11,.10)}
+:root[data-theme^="dark"] .shot-view{background:var(--panel)}
+:root[data-theme^="dark"] .fix-tb td.low input{background:rgba(245,158,11,.12);box-shadow:inset 0 0 0 1px rgba(245,158,11,.4)}
+:root[data-theme^="dark"] .fix-tb td.bad input{background:rgba(239,68,68,.12);box-shadow:inset 0 0 0 1px rgba(239,68,68,.4)}
+:root[data-theme^="dark"] .modal{background:var(--panel)}
+:root[data-theme^="dark"] .sk-card{background:var(--panel)}
+:root[data-theme^="dark"] #page-analysis .an-chart{background:var(--panel)}
+:root[data-theme^="dark"] #page-analysis .an-warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35);color:var(--text)}
+:root[data-theme^="dark"] .cs-rule{background:rgba(255,255,255,.06);color:var(--muted)}
+:root[data-theme^="dark"] .cs-rule.hit{background:rgba(239,68,68,.14);color:#fca5a5}
+:root[data-theme^="dark"] .chip-src{background:rgba(245,158,11,.14);color:var(--gold-2);border-color:rgba(245,158,11,.35)}
+:root[data-theme^="dark"] .veto-item{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.3)}
+:root[data-theme^="dark"] .kl-tabs .kt:hover{color:var(--text);background:rgba(255,255,255,.10)}
+:root[data-theme^="dark"] .kl-zoom button:hover{background:rgba(255,255,255,.10)}
+:root[data-theme^="dark"] .al-card{background:var(--panel)}
+:root[data-theme^="dark"] .card:hover{border-color:var(--line)}
+
+/* ===== 暖纸编辑风 · 实装层（v68.16） ===== */
+/* 作用域：warm 主题 + 默认（无 data-theme）主题；其他浅色/深色主题不受影响 */
+:root[data-theme="warm"] .topbar,
+:root:not([data-theme]) .topbar{background:rgba(255,253,248,.88);border-bottom-color:var(--line)}
+:root[data-theme="warm"] .ver-chip,
+:root:not([data-theme]) .ver-chip{background:var(--accent-soft);color:var(--accent);border:1px solid rgba(181,86,58,.22)}
+:root[data-theme="warm"] .ver-chip:hover,
+:root:not([data-theme]) .ver-chip:hover{background:rgba(181,86,58,.18);border-color:rgba(181,86,58,.4);transform:translateY(-1px)}
+:root[data-theme="warm"] .ver-chip::before,
+:root:not([data-theme]) .ver-chip::before{background:#b5563a;box-shadow:0 0 0 2px rgba(181,86,58,.18)}
+:root[data-theme="warm"] h1,:root[data-theme="warm"] h2,:root[data-theme="warm"] h3,
+:root[data-theme="warm"] .card-title,:root[data-theme="warm"] .sec-title,:root[data-theme="warm"] .summary-title,
+:root[data-theme="warm"] .page-title-current,:root[data-theme="warm"] .brand,
+:root:not([data-theme]) h1,:root:not([data-theme]) h2,:root:not([data-theme]) h3,
+:root:not([data-theme]) .card-title,:root:not([data-theme]) .sec-title,:root:not([data-theme]) .summary-title,
+:root:not([data-theme]) .page-title-current,:root:not([data-theme]) .brand{font-family:"Songti SC","STSong","Noto Serif SC",Georgia,"Times New Roman",serif;letter-spacing:.3px}
+:root[data-theme="warm"] .sec-title,
+:root:not([data-theme]) .sec-title{border-left:3px solid var(--accent);padding-left:12px;color:var(--text)}
+:root[data-theme="warm"] .card .v,
+:root:not([data-theme]) .card .v{font-family:"Songti SC","STSong","Noto Serif SC",Georgia,serif;letter-spacing:.2px}
+:root[data-theme="warm"] .card:hover,
+:root:not([data-theme]) .card:hover{border-color:var(--accent)}
+:root[data-theme="warm"] .brand .dot,
+:root:not([data-theme]) .brand .dot{background:linear-gradient(135deg,#c9785c,#b5563a);box-shadow:0 4px 12px rgba(181,86,58,.35), inset 0 1px 0 rgba(255,255,255,.4)}
+:root[data-theme="warm"] .page-title-current::before,
+:root:not([data-theme]) .page-title-current::before{background:linear-gradient(180deg,var(--accent),var(--gold))}
+</style>
+</head>
 <body>
 <!-- ============ 访问密码门禁（新设备校验；无密码自动放行） ============ -->
 <div id="accessLock" class="access-lock" role="dialog" aria-label="访问验证">
@@ -966,7 +1120,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.044</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.047</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1367,12 +1521,14 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.044 · 2026-08-16 20:54 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.047 · 2026-08-16 22:17 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
             <div class="setting-row"><div><div class="t">账户偏好</div><div class="d">主题色、涨跌色、刷新间隔、自动刷新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnSettings2">打开设置</button></div></div>
+            <div class="setting-row"><div><div class="t">外观主题</div><div class="d">整套配色（含 3 套深色），点击即时切换并自动保存；与「账户偏好 · 主题色」互补，主题激活时优先</div></div></div>
+            <div class="theme-grid" id="themeGrid"></div>
             <div class="setting-row"><div><div class="t">布局</div><div class="d">底部导航常驻（总览/盯盘/做T/统计/清仓/分析/仓位/心法/设置）· 手机端横向滑动</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><span class="dim" style="font-size:12px">方案 B</span></div></div>
             <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">同步全部数据：持仓(含流水/满仓金额/手动类型)、仓位目标金额、盯盘自选、做T台账、每日操作、设置、清仓结算、资产快照。<b>全手动同步（v68.14）</b>：上传 = 点「本机覆盖云端」；拉取 = 点「云端覆盖本机」。打开/刷新页面<b>绝不自动上传、也不自动拉取</b>，任何自动云同步均已取消</div></div>
@@ -1427,8 +1583,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.044';
-const APP_BUILD   = '2026-08-16 20:54';
+const APP_VERSION = '1BK_V68.13.1.047';
+const APP_BUILD   = '2026-08-16 22:17';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -6074,7 +6230,7 @@ function renderAll(){
   /* v68.14.3：收盘后自动移出清仓标的（盘中不动；非交易时段每次重绘前兜底清理） */
   autoCloseAfterMarket();
   renderOverview(); renderHoldings(); renderSettlement(); renderOps(); renderTrades(); renderStats(); renderPosition(); renderAnalysis(); refreshTargetSelect();
-  document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
+  if (!document.documentElement.getAttribute('data-theme')) document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
 }
 let opTargetTouched = false;   // 用户是否手动选过标的
 /* 标的搜索过滤：关键词匹配 名称 / 代码 / 名称(代码)，只保留匹配项 + 固定选项 */
@@ -8209,7 +8365,7 @@ function setupTick(){
   }, 30000);
 }
 function applySettingsToUI(){
-  document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
+  if (!document.documentElement.getAttribute('data-theme')) document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
   if (state.settings.upColor)   document.documentElement.style.setProperty('--up', state.settings.upColor);
   if (state.settings.downColor) document.documentElement.style.setProperty('--down', state.settings.downColor);
   $('#chkAuto').checked = !!state.settings.autoRefresh;
@@ -8222,12 +8378,55 @@ function applySettingsToUI(){
   const oGen = $('#o_gen');
   if (oGen && !oGen.dataset.userTouched){ oGen.checked = true; $('#o_txBox').style.display = ''; }
 }
+/* ===================== 外观主题系统（v68.15） ===================== */
+const UI_THEMES = [
+  { id:'default', name:'默认浅色', bg:'#f3f4f8', accent:'#4f46e5', gold:'#f59e0b', dark:false, vars:{} },
+  { id:'warm', name:'暖纸编辑', bg:'#f6f1e7', accent:'#b5563a', gold:'#c9882e', dark:false, vars:{ '--bg':'#f6f1e7', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(190,150,90,.07), transparent 60%)', '--panel':'#fffdf8', '--panel-2':'#f0e8d8', '--line':'#e7dcc8', '--line-2':'#f2ebde', '--text':'#2c2620', '--muted':'#8a7d6c', '--accent':'#b5563a', '--accent-2':'#c9785c', '--accent-soft':'rgba(181,86,58,.12)', '--gold':'#c9882e', '--gold-2':'#d99a2b', '--radius':'18px', '--shadow':'0 1px 2px rgba(90,70,50,.05), 0 8px 22px rgba(90,70,50,.07)', '--ring':'0 0 0 3px var(--accent-soft)' } },
+  { id:'teal', name:'极光青绿', bg:'#eef6f4', accent:'#0d9488', gold:'#f59e0b', dark:false, vars:{ '--bg':'#eef6f4', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(13,148,136,.07), transparent 60%)', '--panel':'#ffffff', '--panel-2':'#f1f8f6', '--line':'#dcebe7', '--line-2':'#eaf3f0', '--text':'#10201c', '--muted':'#5a726c', '--accent':'#0d9488', '--accent-2':'#14b8a6', '--accent-soft':'#d6f3ee', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'16px', '--shadow':'0 1px 2px rgba(13,80,72,.05), 0 6px 18px rgba(13,80,72,.07)', '--ring':'0 0 0 3px var(--accent-soft)' } },
+  { id:'twilight', name:'暮光紫粉', bg:'#f5f1fb', accent:'#7c3aed', gold:'#ec4899', dark:false, vars:{ '--bg':'#f5f1fb', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(124,58,237,.07), transparent 60%)', '--panel':'#ffffff', '--panel-2':'#f6f2fc', '--line':'#e7ddf5', '--line-2':'#f1ebf9', '--text':'#1c1426', '--muted':'#6b5d7e', '--accent':'#7c3aed', '--accent-2':'#a855f7', '--accent-soft':'#efe2ff', '--gold':'#ec4899', '--gold-2':'#f472b6', '--radius':'16px', '--shadow':'0 1px 2px rgba(80,30,140,.05), 0 6px 18px rgba(80,30,140,.07)', '--ring':'0 0 0 3px var(--accent-soft)' } },
+  { id:'carbon', name:'碳素冷蓝', bg:'#eef1f6', accent:'#2563eb', gold:'#f59e0b', dark:false, vars:{ '--bg':'#eef1f6', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.06), transparent 60%)', '--panel':'#ffffff', '--panel-2':'#f4f6fa', '--line':'#e2e8f1', '--line-2':'#eef2f8', '--text':'#0f1722', '--muted':'#5a6577', '--accent':'#2563eb', '--accent-2':'#3b82f6', '--accent-soft':'#e2ecff', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'12px', '--shadow':'0 1px 2px rgba(15,30,60,.05), 0 6px 16px rgba(15,30,60,.08)', '--ring':'0 0 0 3px var(--accent-soft)' } },
+  { id:'dark-indigo', name:'暗夜靛蓝', bg:'#0f1420', accent:'#6366f1', gold:'#f59e0b', dark:true, vars:{ '--bg':'#0f1420', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(99,102,241,.10), transparent 60%)', '--panel':'#171c2a', '--panel-2':'#1d2333', '--line':'#2a3142', '--line-2':'#232a3a', '--text':'#e8ebf2', '--muted':'#9aa3b5', '--accent':'#6366f1', '--accent-2':'#818cf8', '--accent-soft':'rgba(99,102,241,.16)', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'16px', '--shadow':'0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35)', '--ring':'0 0 0 3px rgba(99,102,241,.35)' } },
+  { id:'dark-teal', name:'暗夜墨绿', bg:'#0c1614', accent:'#2dd4bf', gold:'#f59e0b', dark:true, vars:{ '--bg':'#0c1614', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(45,212,191,.10), transparent 60%)', '--panel':'#13201d', '--panel-2':'#182a26', '--line':'#264039', '--line-2':'#1d312c', '--text':'#e6f3ef', '--muted':'#8fb3a8', '--accent':'#2dd4bf', '--accent-2':'#5eead4', '--accent-soft':'rgba(45,212,191,.16)', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'16px', '--shadow':'0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35)', '--ring':'0 0 0 3px rgba(45,212,191,.35)' } },
+  { id:'dark-graphite', name:'暗夜石墨', bg:'#121418', accent:'#38bdf8', gold:'#f59e0b', dark:true, vars:{ '--bg':'#121418', '--bg-grid':'radial-gradient(1200px 600px at 80% -10%, rgba(56,189,248,.10), transparent 60%)', '--panel':'#1a1d22', '--panel-2':'#21252b', '--line':'#2c313a', '--line-2':'#24282f', '--text':'#e9edf2', '--muted':'#9aa1ad', '--accent':'#38bdf8', '--accent-2':'#7dd3fc', '--accent-soft':'rgba(56,189,248,.16)', '--gold':'#f59e0b', '--gold-2':'#fbbf24', '--radius':'12px', '--shadow':'0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35)', '--ring':'0 0 0 3px rgba(56,189,248,.35)' } }
+];
+const MANAGED_VARS = ['--bg','--bg-grid','--panel','--panel-2','--line','--line-2','--text','--muted','--accent','--accent-2','--accent-soft','--gold','--gold-2','--radius','--shadow','--ring'];
+function getUITheme(){ try { return localStorage.getItem(K('uitheme')) || 'warm'; } catch(e){ return 'warm'; } }
+function applyUITheme(t){
+  const r = document.documentElement;
+  if (!t || t === 'default'){
+    r.removeAttribute('data-theme');
+    MANAGED_VARS.forEach(v => r.style.removeProperty(v));
+    r.style.setProperty('--accent', (state.settings && state.settings.theme) || CONFIG.accent);
+    return;
+  }
+  r.setAttribute('data-theme', t);
+  const th = UI_THEMES.find(x => x.id === t);
+  if (th && th.vars){ for (const k in th.vars){ r.style.setProperty(k, th.vars[k]); } }
+}
+function setUITheme(t){ try { localStorage.setItem(K('uitheme'), t || 'default'); } catch(e){} applyUITheme(t); }
+function renderThemeGrid(){
+  const grid = document.getElementById('themeGrid');
+  if (!grid) return;
+  const cur = getUITheme();
+  grid.innerHTML = '';
+  UI_THEMES.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (cur === t.id ? ' active' : '');
+    card.innerHTML = '<div class="sw" style="background:' + t.bg + '"><span style="position:absolute;left:8px;right:8px;bottom:8px;height:5px;border-radius:3px;background:linear-gradient(90deg,' + t.accent + ',' + t.gold + ')"></span></div>' +
+                     '<div class="nm">' + t.name + '</div><div class="tick">✓</div>';
+    card.onclick = () => { setUITheme(t.id); renderThemeGrid(); toast('已切换到「' + t.name + '」', 'ok'); };
+    grid.appendChild(card);
+  });
+}
+
 function init(){
+  applyUITheme(getUITheme());   /* 外观主题：尽早应用，避免闪烁 */
   accessGate();                 /* 访问密码门禁：新设备未授权时锁定（无密码自动放行） */
   syncPwdRowUI();               /* 设置页「访问密码」行状态 */
   applySettingsToUI();
   initNav();
   bind();
+  renderThemeGrid();          /* 设置页主题选择网格 */
   try { bindAnalysis(); } catch(e){}
   /* 养鹅心法 · 买卖纪律卡片（阈值 inline-edit，首次启动渲染一次）+ 心法速览 */
   try { renderZuxunDealCards(); renderCreedStats(); } catch(e){}
