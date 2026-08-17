@@ -262,6 +262,9 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .watch-card .mc-sub{display:block;font-size:9px;font-weight:500;color:var(--muted);margin-top:1px}
 /* v53.24：持仓徽章移到右下角（与左上角删除 × 对称，名称区更清爽） */
 .watch-card .hold-badge{position:absolute;bottom:-1px;right:-1px;background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#7c2d12;font-size:9px;font-weight:800;padding:1px 5px;border-radius:0 0 8px 0;line-height:1.4;letter-spacing:.5px;z-index:3}
+/* v69.1：自选卡片「入池」快捷按钮（右上角） */
+.watch-card .watch-buy{position:absolute;top:2px;right:2px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);font-size:9px;padding:1px 5px;border-radius:6px;cursor:pointer;line-height:1.5;z-index:3;opacity:.75;transition:.15s}
+.watch-card .watch-buy:hover{opacity:1;color:var(--accent);border-color:var(--accent)}
 .watch-card .mc-name{font-size:11px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;padding-right:12px}
 .watch-card .mc-pct{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.2px;line-height:1.15}
 .watch-card .mc-price{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.3}
@@ -1179,7 +1182,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.057</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.058</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1257,8 +1260,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="panel-title"><span class="bar"></span>盯盘看板</div>
             <div class="panel-sub" id="monitorSub">自选标的 · 交易时段每 2 秒自动刷新 · 休市自动暂停 · 红涨绿跌</div>
             <div class="spacer"></div>
-            <div class="mb-search"><input id="watchInput" type="text" placeholder="代码批量添加自选（如 002517/512000/600519，支持 / 空格 分隔）" autocomplete="off"></div>
-            <button class="btn-sm" id="btnWatchAdd" title="将输入的代码加入自选（多个代码用 / 或空格分隔，可批量添加）">＋ 添加</button>
+            <div class="mb-search"><input id="watchInput" type="text" placeholder="代码添加自选；建仓池用 代码:目标价（如 600519:1400）" autocomplete="off"></div>
+            <button class="btn-sm" id="btnWatchAdd" title="添加代码到自选；带「:目标价」（如 600519:1400）则加入建仓池">＋ 添加</button>
           </div>
           <div class="panel-body tight">
             <div class="watch-cats" id="watchCats">
@@ -1580,7 +1583,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.057 · 2026-08-17 23:32 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.058 · 2026-08-18 00:10 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1641,8 +1644,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.057';
-const APP_BUILD   = '2026-08-17 23:32';
+const APP_VERSION = '1BK_V68.13.1.058';
+const APP_BUILD   = '2026-08-18 00:10';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4654,6 +4657,7 @@ function renderWatch(){
     return '<div class="watch-card ' + clsN + (isHolding ? ' holding' : '') + '" data-code="' + esc(w.code) + '" title="' + esc(name) + '（' + esc(w.code) + '）· ' + (isHolding ? '当前持仓 · ' : '') + '点击查看K线">' +
       (isHolding ? '<span class="hold-badge" title="当前持仓标的">持仓</span>' : '') +
       '<button class="watch-del" data-del="' + esc(w.code) + '" title="移除自选">×</button>' +
+      '<button class="watch-buy" data-buy="' + esc(w.code) + '" title="加入建仓池（设置目标买入价，到价提醒建仓）">入池</button>' +
       '<div class="mc-name">' + esc(name) + '</div>' +
       '<div class="mc-pct ' + clsN + '">' + (isFinite(pct) ? arrow + (pct > 0 ? '+' : '') + pct.toFixed(3) + '%' : '<span class="dim">—</span>') + '</div>' +
       '<div class="mc-price">' + (isFinite(price) ? price4(price) : '<span class="dim">—</span>') + '</div>' +
@@ -4677,7 +4681,7 @@ function renderWatchBuy(grid){
   const foot = document.getElementById('monitorFoot');
   if (!watchBuy.length){
     grid.innerHTML = '<div class="empty" style="padding:30px 16px"><div class="big">建仓池空空如也</div>' +
-      '<div style="font-size:12.5px;color:var(--muted)">把心水股加入建仓池并设定目标买入价（四毛买一块），跌到目标价自动提醒</div></div>';
+      '<div style="font-size:12.5px;color:var(--muted)">输入 <b>代码:目标价</b>（如 600519:1400）点添加，或在自选卡片点「入池」——跌到目标价自动提醒（四毛买一块）</div></div>';
     if (foot) foot.innerHTML = '';
     return;
   }
@@ -4725,19 +4729,34 @@ function checkWatchBuy(){
 
 /* 添加自选标的（输入代码 → 查行情 → 入库） */
 /* 批量添加自选：支持 / 、空格、逗号、顿号分隔多个代码（如 "002517/512000/600519"）。
-   返回 [{ digits, isFund, sym }] 待查询列表（已在自选中的自动跳过）。 */
-function splitWatchInput(raw){
-  const out = [];
-  const seen = new Set(watchList.map(w => w.code));
-  String(raw || '').split(/[\/\s,，、;；]+/).map(s => s.trim()).filter(Boolean).forEach(c => {
-    const digits = c.replace(/\D/g, '');
+   v69.1 扩展：`代码:目标价`（如 600519:1400，冒号/：/@ 均可）→ 直接加入建仓池并设目标价；
+   普通代码 → 加入自选。返回 { codes:[普通自选], buyReq:[带 target 的建仓池] }，各自去重。 */
+function parseWatchInput(raw){
+  const codes = [], buyReq = [];
+  const seenList = new Set(watchList.map(w => w.code));
+  const seenBuy = new Set(watchBuy.map(w => w.code));
+  String(raw || '').split(/[\/\s,，、;；]+/).map(s => s.trim()).filter(Boolean).forEach(part => {
+    const m = part.match(/^(\d{5,6})(?::|：|@)(\d+(?:\.\d+)?)$/);
+    let digits, target = 0;
+    if (m){ digits = m[1]; target = Number(m[2]); }
+    else { digits = part.replace(/\D/g, ''); }
     if (!digits || digits.length < 5) return;
-    if (seen.has(digits)) return;
-    seen.add(digits);
     const isFund = /^0\d{5}$/.test(digits) && !/^00[0-4]\d{3}/.test(digits);
-    out.push({ digits, isFund, sym: quoteSymbol({ code: digits, type: isFund ? 'fund' : 'stock', market: '' }) });
+    const item = { digits, isFund, sym: quoteSymbol({ code: digits, type: isFund ? 'fund' : 'stock', market: '' }), target };
+    if (target > 0){
+      if (seenBuy.has(digits)) return;
+      seenBuy.add(digits);
+      buyReq.push(item);
+    } else {
+      if (seenList.has(digits)) return;
+      seenList.add(digits);
+      codes.push(item);
+    }
   });
-  return out;
+  return { codes, buyReq };
+}
+function splitWatchInput(raw){
+  return parseWatchInput(raw).codes;
 }
 /* ===== 自选中文搜索联想（1BK_V68.13.1.015）：watchInput 输入中文/代码 → smartbox 关键词联想下拉 ===== */
 let watchSugTimer = null;
@@ -4856,14 +4875,16 @@ async function addWatchOne(cand){
 async function addWatch(){
   const inp = document.getElementById('watchInput');
   const raw = (inp ? inp.value : '').trim();
-  if (!raw){ toast('请输入标的代码（支持多个，用 / 或空格分隔）', 'warn'); return; }
-  const toAdd = splitWatchInput(raw);
-  if (!toAdd.length){ toast('没有可添加的标的（代码格式无效或已在自选中）', 'warn'); return; }
-  if (watchCat === 'buy') return addWatchBuy(toAdd);   /* v69：建仓池模式 → 设目标价入库 */
+  if (!raw){ toast('请输入标的代码（多个用 / 或空格分隔；加入建仓池用「代码:目标价」，如 600519:1400）', 'warn'); return; }
+  const { codes, buyReq } = parseWatchInput(raw);
+  if (!codes.length && !buyReq.length){ toast('没有可添加的标的（代码格式无效或已存在）', 'warn'); return; }
+  if (buyReq.length) await addWatchBuy(buyReq);   /* v69.1：带目标价 → 直接进建仓池 */
+  if (watchCat === 'buy'){ await addWatchBuy(codes); if (inp) inp.value = ''; return; }   /* 建仓池 tab：普通代码也进池（弹窗问目标价） */
+  if (!codes.length){ if (inp) inp.value = ''; return; }
   const ok = [], fail = [];
   try {
-    const map = await fetchQuotes(toAdd.map(x => x.sym));   /* 腾讯接口批量一次查完 */
-    toAdd.forEach(x => {
+    const map = await fetchQuotes(codes.map(x => x.sym));   /* 腾讯接口批量一次查完 */
+    codes.forEach(x => {
       const q = map[x.sym];
       if (!q || q.err || !q.name){ fail.push(x.digits); return; }
       watchList.push({ code: x.digits, name: q.name, market: x.sym.slice(0, 2) === 'jj' ? '' : x.sym.slice(0, 2), type: x.isFund ? 'fund' : 'stock' });
@@ -4877,21 +4898,37 @@ async function addWatch(){
   } catch (e) { toast('批量查询失败：' + e.message, 'err'); }
 }
 
-/* v69：添加目标建仓池标的（批量查行情 → 逐个设定目标买入价 → 到价自动提醒） */
-async function addWatchBuy(toAdd){
+/* v69.1：弹窗输入目标买入价（替代 prompt，兼容内嵌预览/移动端；取消或非法返回 0） */
+function askBuyTarget(name, code, price){
+  return new Promise(resolve => {
+    let v = 0;
+    dialog({
+      title: '加入建仓池',
+      bodyHTML: '<div style="font-size:13px;margin-bottom:10px"><b>' + esc(name) + '</b>（' + code + '）<div class="dim">现价 ¥' + (isFinite(price) ? price : '—') + ' · 现价 ≤ 目标价时提醒建仓</div></div>' +
+        '<input id="buyTargetInp" type="number" step="0.001" min="0.01" placeholder="目标买入价（元）" style="width:100%;box-sizing:border-box;font-size:16px">',
+      buttons: [
+        { label: '跳过', value: null },
+        { label: '加入建仓池', value: true, cls: 'btn-primary', before: m => { v = parseFloat(m.querySelector('#buyTargetInp').value); if (!isFinite(v) || v <= 0) return false; } }
+      ]
+    }).then(r => resolve(r && v > 0 ? v : 0));
+  });
+}
+/* v69：添加目标建仓池标的（已带 target 直接用；未带 → 弹窗逐个设定；到价自动提醒） */
+async function addWatchBuy(list){
   const ok = [], fail = [];
   try {
-    const map = await fetchQuotes(toAdd.map(x => x.sym));   /* 腾讯接口批量一次查完 */
-    toAdd.forEach(x => {
+    const map = await fetchQuotes(list.map(x => x.sym));   /* 腾讯接口批量一次查完 */
+    for (const x of list){
       const q = map[x.sym];
-      if (!q || q.err || !q.name){ fail.push(x.digits); return; }
-      const cur = Number(prompt('「' + q.name + '」（' + x.digits + '）目标买入价（元）？\n现价 ¥' + (isFinite(q.price) ? q.price : '—') + '\n留空或取消 = 跳过'));
-      if (!isFinite(cur) || cur <= 0) return;
+      if (!q || q.err || !q.name){ fail.push(x.digits); continue; }
+      let cur = x.target || 0;
+      if (!(cur > 0)) cur = await askBuyTarget(q.name, x.digits, q.price);
+      if (!(cur > 0)) continue;
       const h = { code: x.digits, name: q.name, market: x.sym.slice(0, 2) === 'jj' ? '' : x.sym.slice(0, 2), type: x.isFund ? 'fund' : 'stock', target: cur, hitAt: 0 };
       watchBuy = watchBuy.filter(w => w.code !== h.code);
       watchBuy.push(h);
       ok.push(q.name + ' ¥' + cur);
-    });
+    }
     persistWatchBuy();
     if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();
     const inp = document.getElementById('watchInput');
@@ -4899,6 +4936,26 @@ async function addWatchBuy(toAdd){
     await refreshMonitor(true);
     toast(ok.length ? '已加入建仓池 ' + ok.length + ' 个' + (fail.length ? '；未成功 ' + fail.length + '（' + fail.join('、') + '）' : '') : (fail.length ? '添加失败：' + fail.join('、') : '已取消'), ok.length ? (fail.length ? 'warn' : 'ok') : 'warn');
   } catch (e) { toast('批量查询失败：' + e.message, 'err'); }
+}
+
+/* v69.1：从自选卡片一键加入建仓池（弹窗设目标价；到价提醒） */
+async function addToWatchBuy(code){
+  const w = watchList.find(x => x.code === code);
+  const sym = w ? watchSym(w) : quoteSymbol({ code, type: 'stock', market: '' });
+  try {
+    const map = await fetchQuotes([sym]);
+    const q = map[sym];
+    if (!q || q.err || !q.name){ toast('查不到行情：' + code, 'err'); return; }
+    const cur = await askBuyTarget(q.name, code, q.price);
+    if (!(cur > 0)) return;
+    const h = { code, name: q.name, market: sym.slice(0, 2) === 'jj' ? '' : sym.slice(0, 2), type: (w && w.type) || 'stock', target: cur, hitAt: 0 };
+    watchBuy = watchBuy.filter(x => x.code !== h.code);
+    watchBuy.push(h);
+    persistWatchBuy();
+    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();
+    renderWatch();
+    toast('已加入建仓池 ' + q.name + ' ¥' + cur, 'ok');
+  } catch(e){ toast('加入失败：' + e.message, 'err'); }
 }
 
 /* 移除自选（1BK_V68.13.1.013：删除会同步到云端，其他设备拉取后同样消失） */
@@ -6727,6 +6784,8 @@ function bind(){
   $('#watchInput').onkeydown = e => { if (e.key === 'Enter') addWatch(); };
   /* 自选卡片：点击看 K 线，点 × 移除（事件委托） */
   $('#monitorGrid').addEventListener('click', e => {
+    const buyBtn = e.target.closest('.watch-buy');
+    if (buyBtn){ addToWatchBuy(buyBtn.getAttribute('data-buy')); return; }   /* v69.1：一键入池 */
     const del = e.target.closest('.watch-del');
     if (del){ removeWatch(del.getAttribute('data-del')); return; }
     const card = e.target.closest('.watch-card');
