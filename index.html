@@ -1165,7 +1165,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.053</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.054</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1175,7 +1175,6 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
           <button id="btnImport" class="btn-sm">导入</button>
           <button id="btnDiag" class="btn-sm">行情自检</button>
           <button id="btnFeeSettings" class="btn-sm" title="配置股票/基金的交易费率标准">费率</button>
-          <button id="btnSettings" class="btn-sm">设置</button>
         </div>
       </div>
     </div>
@@ -1191,7 +1190,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
         <div class="panel" style="margin-top:14px">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>实时行情</div>
-            <div class="panel-sub" id="liveSub">交易时段每 2 秒自动刷新并联动重算 · 休市自动暂停 · 红涨绿跌 · 默认按涨跌幅排序</div>
+            <div class="panel-sub" id="liveSub">交易中 · 2秒刷新联动重算 · 红涨绿跌 · 按涨跌幅排序</div>
           </div>
           <div class="panel-body tight"><div class="live-grid" id="liveGrid"></div></div>
         </div>
@@ -1566,7 +1565,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.053 · 2026-08-16 23:40 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.054 · 2026-08-17 09:34 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1574,8 +1573,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnSettings2">打开设置</button></div></div>
             <div class="setting-row"><div><div class="t">外观主题</div><div class="d">整套配色（含 3 套深色），点击即时切换并自动保存；与「账户偏好 · 主题色」互补，主题激活时优先</div></div></div>
             <div class="theme-grid" id="themeGrid"></div>
-            <div class="setting-row"><div><div class="t">布局</div><div class="d">底部导航常驻（总览/盯盘/做T/统计/清仓/分析/仓位/心法/设置）· 手机端横向滑动</div></div>
-              <div style="display:flex;gap:8px;justify-content:flex-end"><span class="dim" style="font-size:12px">方案 B</span></div></div>
+            <div class="setting-row"><div><div class="t">布局</div><div class="d">底部导航常驻（总览/盯盘/做T/统计/清仓/分析/仓位/心法/设置）· 手机端横向滑动</div></div></div>
             <div class="setting-row"><div><div class="t">云端同步（Supabase）</div><div class="d" id="cloudRowDesc">同步全部数据：持仓(含流水/满仓金额/手动类型)、仓位目标金额、盯盘自选、做T台账、每日操作、设置、清仓结算、资产快照。<b>全手动同步（v68.14）</b>：上传 = 点「本机覆盖云端」；拉取 = 点「云端覆盖本机」。打开/刷新页面<b>绝不自动上传、也不自动拉取</b>，任何自动云同步均已取消</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
                 <button class="btn-sm" id="btnCloudCfg" title="填写 Supabase 项目的 URL 与 anon key">云同步设置</button>
@@ -1628,8 +1626,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.053';
-const APP_BUILD   = '2026-08-16 23:40';
+const APP_VERSION = '1BK_V68.13.1.054';
+const APP_BUILD   = '2026-08-17 09:34';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2506,8 +2504,8 @@ function renderMarketStatus(force){
   const sub = document.getElementById('liveSub');
   if (sub){
     sub.textContent = open
-      ? ('交易中 · 每 ' + (CONFIG.quoteTickSec || 2) + ' 秒自动刷新并联动重算 · 红涨绿跌 · 默认按涨跌幅排序')
-      : (marketPhaseLabel(ph) + ' · 已暂停自动刷新（' + nextOpenText() + '） · 红涨绿跌 · 默认按涨跌幅排序');
+      ? ('交易中 · 2秒刷新联动重算 · 红涨绿跌 · 按涨跌幅排序')
+      : (marketPhaseLabel(ph) + ' · 已暂停自动刷新（' + nextOpenText() + '） · 红涨绿跌 · 按涨跌幅排序');
   }
   const msub = document.getElementById('monitorSub');
   if (msub && !open && watchList.length){
@@ -3869,10 +3867,8 @@ function renderAnalysis(){
     kpi2('累计分红(已摊入成本)', '+' + money(att.divTotal), '') +
     kpi2('收益率 = 金蛋 ÷ 峰值投入', roiTxt, cls(att.roi)) +
     '</div>' +
-    '<div class="an-note"><b>计算依据</b>：<b>金蛋 = 清仓净收益 + 持仓浮动收益</b>，与「总览」页的 <b>金蛋</b> 完全一致（同一套算法、同一份数据，不重不漏）。' +
-    '① <b>清仓净收益</b> = 「清仓结算」页全量汇总里的「已清仓盈亏」合计（所有已清仓标的净收益，落袋为安）；' +
-    '② <b>持仓浮动收益</b> = 当前持仓按最新价算的浮动盈亏，<b>实时随股价变动</b>，与「总览」的「持仓浮盈」数字相同。' +
-    '分红已摊入摊薄成本，不重复计。仅保留<b>唯一一个收益率</b>：<b>收益率 = 金蛋 ÷ 峰值投入本金</b>（峰值投入 = 历史上最多压进本金的金额，最贴近真实占用、不被申赎稀释）。</div>';
+    '<div class="an-note"><b>计算依据</b>：<b>金蛋 = 清仓净收益 + 持仓浮动收益</b>，与「总览」金蛋完全一致（同源同算、不重不漏）。' +
+    '分红已摊入成本不重复计；<b>收益率 = 金蛋 ÷ 峰值投入</b>（峰值投入 = 历史最多压进本金，最贴近真实占用、不被申赎稀释）。</div>';
 
   /* 3) 行业暴露 */
   let sectorWarn = '';
@@ -4386,15 +4382,15 @@ function renderOverview(){
   /* 同步持有「未掩码」的 extraLine 原稿，供持仓市值小眼睛联动时即时调用 maskExtraDigits */
   _extraLineRaw =
     '<span title="金蛋 = 持仓市值 + 累计赎回 + 累计分红 − 累计购买；等价于 持仓浮盈 + 已清仓盈亏">' +
-      '金蛋（浮盈 + 已清仓）：<b class="' + cls(total) + '">' + (isFinite(total) ? sign2(total) : '—') + '</b></span>' +
+      '金蛋(浮盈+清仓)：<b class="' + cls(total) + '">' + (isFinite(total) ? sign2(total) : '—') + '</b></span>' +
     '<span title="历史时间轴上累计净流出的最大值，即最多的时候占用了多少本金（' + esc(cf.peakDate || '—') + '）">' +
-      '峰值投入本金：' + money(cf.peakInvested) + '</span>' +
-    '<span title="当前还压在市场里的钱 = 累计购买 − 累计赎回 − 累计分红">当前净投入：' + money(cf.netInvested) + '</span>' +
-    '<span>累计购买金额：' + money(buyTotal) + '（含费 · ' + cf.buyN + ' 笔）</span>' +
-    '<span>累计赎回金额：' + money(sellTotal) + '（净额 · ' + cf.sellN + ' 笔）</span>' +
-    '<span>累计分红：<b class="up">' + money(cf.divTotal) + '</b>（' + cf.divN + ' 笔）</span>' +
-    '<span>资金回笼率：<b class="' + cls((recycleRate - 1) * 100) + '">' + pct2(recycleRate * 100) + '</b></span>' +
-    '<span>做T/波段台账：<b class="' + cls(tPnl) + '">' + sign2(tPnl) + '</b>（' + state.trades.length + ' 笔，不计入金蛋）</span>' +
+      '峰值投入：' + money(cf.peakInvested) + '</span>' +
+    '<span title="当前还压在市场里的钱 = 累计申购 − 累计赎回 − 累计分红">净投入：' + money(cf.netInvested) + '</span>' +
+    '<span>累计申购：' + money(buyTotal) + '（含费 · ' + cf.buyN + ' 笔）</span>' +
+    '<span>累计赎回：' + money(sellTotal) + '（净额 · ' + cf.sellN + ' 笔）</span>' +
+    '<span>分红：<b class="up">' + money(cf.divTotal) + '</b>（' + cf.divN + ' 笔）</span>' +
+    '<span>回笼率：<b class="' + cls((recycleRate - 1) * 100) + '">' + pct2(recycleRate * 100) + '</b></span>' +
+    '<span>T/波段：<b class="' + cls(tPnl) + '">' + sign2(tPnl) + '</b>（' + state.trades.length + ' 笔，不计入金蛋）</span>' +
     '<span title="沪深300 自你首笔建仓日(' + (BENCH ? BENCH.since : '—') + ')以来的区间涨幅，作组合收益对照基准（近似）">沪深300同期：<b class="' + (BENCH ? cls(BENCH.pct) : '') + '">' + (BENCH ? pct2(BENCH.pct) : '—') + '</b></span>' +
     (BENCH && isFinite(roi) ? '<span title="组合金蛋收益率 − 沪深300同期 = 超额收益（近似）">超额：<b class="' + cls(roi - BENCH.pct) + '">' + sign2(roi - BENCH.pct) + '%</b></span>' : '');
   $('#extraLine').innerHTML = loadHidden().indexOf('持仓市值') >= 0 ? maskExtraDigits(_extraLineRaw) : _extraLineRaw;
@@ -6560,7 +6556,6 @@ function bind(){
   $('#btnImport').onclick = () => $('#fileInput').click();
   $('#fileInput').onchange = doImport;
   $('#btnDiag').onclick = () => { diagnose().catch(e => toast('自检失败：' + e.message, 'err')); };
-  $('#btnSettings').onclick = () => { switchPage('settings'); openSettings(); };
   /* --- 仓位管理：总目标 + 单标的满仓金额 ---
      注意：用 change（回车/失焦）而不是 input —— input 会在每敲一个数字时
      触发 renderPosition() 重建表格，把输入框焦点弹走（用户反馈的 bug）。 */
