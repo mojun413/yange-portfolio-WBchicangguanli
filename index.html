@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>持仓与交易管理</title>
+<!-- PWA（v69：手机添加到主屏幕 = 全屏 APP；network-first SW，在线永远最新） -->
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c9882e'/%3E%3Crect x='15' y='15' width='34' height='34' rx='8' fill='%231b2336'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="./apple-touch-icon-180.png">
+<meta name="theme-color" id="metaThemeColor" content="#b5563a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
 /* ============================================================
    养鹅怡情 · 2026 重排版设计系统
@@ -1167,7 +1175,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.055</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.056</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1567,7 +1575,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.055 · 2026-08-17 22:10 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.056 · 2026-08-17 22:44 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1628,8 +1636,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.055';
-const APP_BUILD   = '2026-08-17 22:10';
+const APP_VERSION = '1BK_V68.13.1.056';
+const APP_BUILD   = '2026-08-17 22:44';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -8446,17 +8454,33 @@ const UI_THEMES = [
 ];
 const MANAGED_VARS = ['--bg','--bg-grid','--panel','--panel-2','--line','--line-2','--text','--muted','--accent','--accent-2','--accent-soft','--gold','--gold-2','--radius','--shadow','--ring'];
 function getUITheme(){ try { return localStorage.getItem(K('uitheme')) || 'warm'; } catch(e){ return 'warm'; } }
+/* v69：主题「跟随系统」— 浅色映射 warm（暖纸），深色映射 dark-ths（同花顺终端） */
+const SYS_THEME_LIGHT = 'warm', SYS_THEME_DARK = 'dark-ths';
+function systemPrefersDark(){ try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch(e){ return false; } }
+function resolveUITheme(t){ return (t === 'auto') ? (systemPrefersDark() ? SYS_THEME_DARK : SYS_THEME_LIGHT) : t; }
 function applyUITheme(t){
   const r = document.documentElement;
-  if (!t || t === 'default'){
+  const eff = resolveUITheme(t);
+  if (!eff || eff === 'default'){
     r.removeAttribute('data-theme');
     MANAGED_VARS.forEach(v => r.style.removeProperty(v));
     r.style.setProperty('--accent', (state.settings && state.settings.theme) || CONFIG.accent);
     return;
   }
-  r.setAttribute('data-theme', t);
-  const th = UI_THEMES.find(x => x.id === t);
+  r.setAttribute('data-theme', eff);
+  const th = UI_THEMES.find(x => x.id === eff);
   if (th && th.vars){ for (const k in th.vars){ r.style.setProperty(k, th.vars[k]); } }
+  try {
+    const mt = document.getElementById('metaThemeColor');
+    if (mt && th) mt.setAttribute('content', th.bg || '#b5563a');
+  } catch(e){}
+}
+function setupSystemThemeWatch(){
+  if (typeof window.matchMedia !== 'function') return;
+  const mql = window.matchMedia('(prefers-color-scheme: dark)');
+  const onChange = () => { if (getUITheme() === 'auto'){ applyUITheme('auto'); try { renderThemeGrid(); } catch(e){} } };
+  if (mql.addEventListener) mql.addEventListener('change', onChange);
+  else if (mql.addListener) mql.addListener(onChange);
 }
 function setUITheme(t){ try { localStorage.setItem(K('uitheme'), t || 'default'); } catch(e){} applyUITheme(t); }
 function renderThemeGrid(){
@@ -8464,6 +8488,13 @@ function renderThemeGrid(){
   if (!grid) return;
   const cur = getUITheme();
   grid.innerHTML = '';
+  /* v69：跟随系统（置顶） */
+  const autoCard = document.createElement('div');
+  autoCard.className = 'theme-card' + (cur === 'auto' ? ' active' : '');
+  autoCard.innerHTML = '<div class="sw" style="background:linear-gradient(135deg,#f6f1e7 0 50%,#0a0e14 50% 100%)"><span style="position:absolute;left:8px;right:8px;bottom:8px;height:5px;border-radius:3px;background:linear-gradient(90deg,#b5563a,#c9882e)"></span></div>' +
+                       '<div class="nm">跟随系统</div><div class="tick">✓</div>';
+  autoCard.onclick = () => { setUITheme('auto'); renderThemeGrid(); toast('已切换到「跟随系统」（当前' + (systemPrefersDark() ? '深色' : '浅色') + '）', 'ok'); };
+  grid.appendChild(autoCard);
   UI_THEMES.forEach(t => {
     const card = document.createElement('div');
     card.className = 'theme-card' + (cur === t.id ? ' active' : '');
@@ -8476,6 +8507,11 @@ function renderThemeGrid(){
 
 function init(){
   applyUITheme(getUITheme());   /* 外观主题：尽早应用，避免闪烁 */
+  setupSystemThemeWatch();      /* v69：主题「跟随系统」实时响应系统深浅色切换 */
+  /* PWA：注册 service worker（network-first，在线永远最新；仅 HTTPS/localhost） */
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
+    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
+  }
   accessGate();                 /* 访问密码门禁：新设备未授权时锁定（无密码自动放行） */
   syncPwdRowUI();               /* 设置页「访问密码」行状态 */
   applySettingsToUI();
