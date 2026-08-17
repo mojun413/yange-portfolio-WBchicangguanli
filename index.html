@@ -256,6 +256,10 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 /* v53.22：当前持仓的自选卡 → 金色高亮边框 + 左上角「持仓」徽章 */
 .watch-card.holding{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset, 0 1px 4px rgba(245,158,11,.25);background:rgba(201,136,46,.10)}
 .watch-card.holding .mc-name{color:#92400e;font-weight:700}
+/* v69：建仓池到价态（红卡 + 「已到价」徽章） */
+.watch-card.hit{border-color:var(--up);box-shadow:0 0 0 1px var(--up) inset, 0 1px 4px rgba(229,72,77,.22);background:rgba(229,72,77,.10)}
+.watch-card .buy-badge{position:absolute;bottom:-1px;right:-1px;background:linear-gradient(135deg,#e5484d,#b91c1c);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:0 0 8px 0;line-height:1.4;letter-spacing:.5px;z-index:3}
+.watch-card .mc-sub{display:block;font-size:9px;font-weight:500;color:var(--muted);margin-top:1px}
 /* v53.24：持仓徽章移到右下角（与左上角删除 × 对称，名称区更清爽） */
 .watch-card .hold-badge{position:absolute;bottom:-1px;right:-1px;background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#7c2d12;font-size:9px;font-weight:800;padding:1px 5px;border-radius:0 0 8px 0;line-height:1.4;letter-spacing:.5px;z-index:3}
 .watch-card .mc-name{font-size:11px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;padding-right:12px}
@@ -1175,7 +1179,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.056</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.057</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1261,6 +1265,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
               <span class="wc active" data-c="all">全部 <b>0</b></span>
               <span class="wc" data-c="stock">个股 <b>0</b></span>
               <span class="wc" data-c="etf">ETF <b>0</b></span>
+              <span class="wc" data-c="buy">建仓池 <b>0</b></span>
             </div>
             <div class="monitor-grid" id="monitorGrid"></div>
             <div class="monitor-foot" id="monitorFoot"></div>
@@ -1575,7 +1580,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.056 · 2026-08-17 22:44 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.057 · 2026-08-17 23:32 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1636,8 +1641,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.056';
-const APP_BUILD   = '2026-08-17 22:44';
+const APP_VERSION = '1BK_V68.13.1.057';
+const APP_BUILD   = '2026-08-17 23:32';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1900,6 +1905,7 @@ function num(v, name, { min = -Infinity, max = Infinity, allowEmpty = false, def
 const DEFAULT_SETTINGS = {
   refreshSec: CONFIG.defaultRefreshSec, /* defaultFee 已废弃 */
   theme: CONFIG.accent, autoRefresh: CONFIG.autoRefreshOnStart,
+  sctKey: '',                        /* v69：Server酱 SendKey（微信推送预警；留空=关闭） */
   /* 清仓结算面板的时间筛选（会随设置一起持久化 / 导出） */
   settleRange: 'all', settleFrom: '', settleTo: '',
   /* 持仓表排序：key 为空表示按录入顺序；dir = 'asc' | 'desc' */
@@ -2561,6 +2567,7 @@ async function tickQuotes(force){
   const syms = new Set();
   state.holdings.forEach(h => syms.add(quoteSymbol(h)));
   watchList.forEach(w => syms.add(watchSym(w)));
+  watchBuy.forEach(w => syms.add(watchSym(w)));   /* v69：建仓池标的一并拉行情（到价提醒） */
   if (!syms.size) return;
   ticking = true;
   try {
@@ -2584,7 +2591,16 @@ async function tickQuotes(force){
       if (cur && cur.price === q.price && cur.pct === q.pct) return;
       watchQuotes[k] = q; changed = true;
     });
+    watchBuy.forEach(w => {   /* v69：建仓池行情同样写入 watchQuotes */
+      const k = watchSym(w);
+      const q = map[k];
+      if (!q || q.err) return;
+      const cur = watchQuotes[k];
+      if (cur && cur.price === q.price && cur.pct === q.pct) return;
+      watchQuotes[k] = q; changed = true;
+    });
     if (changed) updateLivePrices();
+    try { checkWatchBuy(); } catch(e){}   /* v69：建仓池到价检查（每拍，含去重与回价重置） */
     /* 交易时段内每拍都刷新「实时」时间戳，让用户确认行情是活的 */
     if (typeof setStatus === 'function'){
       setStatus('交易中 · 实时 <b>' + new Date().toLocaleTimeString('zh-CN', { hour12: false }) +
@@ -3425,11 +3441,24 @@ function fundFlowPanelHTML(){
 }
 
 /* ---------- 预警与纪律 ---------- */
+/* v69：微信推送预警（Server酱 sctapi.ftqq.com，settings.sctKey = SendKey；免费每天 5 条）。
+   仅价格类预警（止损/止盈/目标价）与建仓池到价使用，避免概念异动等高频事件刷爆配额；失败静默不影响主流程。 */
+function pushWechat(title, desp){
+  try {
+    const key = state.settings && state.settings.sctKey;
+    if (!key || typeof fetch !== 'function') return;
+    fetch('https://sctapi.ftqq.com/' + encodeURIComponent(String(key).trim()) + '.send', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: String(title || '').slice(0, 32), desp: String(desp || '') })
+    }).catch(() => {});
+  } catch(e){}
+}
 function fireAlert(h, type, target, price){
   const nm = h.name || h.code, verb = type === '止损' ? '跌破' : '突破';
   const body = nm + ' 现价 ¥' + price.toFixed(3) + ' 已' + verb + type + '线 ¥' + target.toFixed(3);
   try { if (typeof Notification !== 'undefined' && Notification.permission === 'granted'){ new Notification('【' + type + '预警】' + nm, { body }); } } catch(e){}
   toast(body + (type === '止损' ? ' · 注意A股T+1（今日买入次日方可卖），涨跌停±10%/±20%可能无成交' : ''), 'warn', 6000);
+  pushWechat('【' + type + '预警】' + nm, body + ' · ' + new Date().toLocaleString('zh-CN', { hour12: false }));
 }
 /* 非价格类预警（概念异动 / 主力净流出）的站内+系统通知 */
 function fireAlertInfo(h, kind, msg){
@@ -4478,30 +4507,33 @@ function renderLive(){
    行情源与持仓一致（腾讯 qt.gtimg.cn 批量接口 fetchQuotes）。卡片点击可看 60 日 K 线。 */
 let watchList = load('watchlist', []);   // [{code, name, market, type}] market:'sh'|'sz'|'bj'|'hk'|''（场外jj）
 let watchQuotes = {};                    // sym -> quote（现价/涨跌幅）
+let watchBuy = load('watchbuy', []);     // v69：目标建仓池 [{code,name,market,type,target,hitAt}] target=想买的价位，现价≤target 触发提醒
 let monitorSortKey = 'pct';  // 'pct' | 'name' | 'price'
 let monitorSortDir = 'desc';
 let monitorLoading = false;
-let watchCat = 'all';        // 盯盘分类：'all' | 'stock' | 'etf'
+let watchCat = 'all';        // 盯盘分类：'all' | 'stock' | 'etf' | 'buy'（建仓池）
 const persistWatch = () => save('watchlist', watchList);
+const persistWatchBuy = () => save('watchbuy', watchBuy);
 const watchSym = w => {
   const c = String(w.code || '').replace(/\D/g, '');
   return quoteSymbol({ code: c, type: w.type || 'stock', market: w.market || '' });
 };
 
-/* 刷新自选行情（复用持仓同款腾讯行情接口） */
+/* 刷新自选行情（复用持仓同款腾讯行情接口；v69 起合并建仓池标的） */
 async function refreshMonitor(silent){
   if (monitorLoading) return;
   const sub = document.getElementById('monitorSub');
-  if (!watchList.length){ renderWatch(); if (sub) sub.textContent = '自选标的 · 交易时段每 2 秒自动刷新 · 休市自动暂停 · 红涨绿跌'; return; }
+  if (!watchList.length && !watchBuy.length){ renderWatch(); if (sub) sub.textContent = '自选标的 · 交易时段每 2 秒自动刷新 · 休市自动暂停 · 红涨绿跌'; return; }
   monitorLoading = true;
   if (!silent && sub) sub.innerHTML = '<span class="spin"></span>正在拉取自选行情…';
   try {
-    const syms = [...new Set(watchList.map(watchSym))];
+    const syms = [...new Set([...watchList.map(watchSym), ...watchBuy.map(watchSym)])];
     const map = await fetchQuotes(syms);
     watchQuotes = map;
     renderWatch();
+    try { checkWatchBuy(); } catch(e){}
     const nf = syms.filter(s => { const q = map[s]; return !q || q.err || !isFinite(q.price); }).length;
-    if (sub) sub.textContent = '自选 ' + watchList.length + ' 个 · ' + (syms.length - nf) + ' 个有行情 · ' + (isTradingTime() ? '交易时段每 2 秒自动刷新' : marketPhaseLabel(marketPhase()) + '，已暂停刷新') + ' · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
+    if (sub) sub.textContent = '自选 ' + watchList.length + ' 个' + (watchBuy.length ? ' · 建仓池 ' + watchBuy.length + ' 个' : '') + ' · ' + (syms.length - nf) + ' 个有行情 · ' + (isTradingTime() ? '交易时段每 2 秒自动刷新' : marketPhaseLabel(marketPhase()) + '，已暂停刷新') + ' · 红涨绿跌' + (silent ? '' : ' · 已更新 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}));
   } catch (e) {
     if (!silent){
       const grid = document.getElementById('monitorGrid');
@@ -4560,11 +4592,12 @@ async function renderMarketLive(){
 function renderWatch(){
   const grid = document.getElementById('monitorGrid');
   if (!grid) return;
-  /* 分类计数：全部 / 个股 / ETF（ETF = 场内基金 isExchangeTraded） */
+  /* 分类计数：全部 / 个股 / ETF（ETF = 场内基金 isExchangeTraded）/ 建仓池 */
   const cats = {
     all: watchList.length,
     etf: watchList.filter(w => isExchangeTraded(w.code)).length,
-    stock: watchList.length - watchList.filter(w => isExchangeTraded(w.code)).length
+    stock: watchList.length - watchList.filter(w => isExchangeTraded(w.code)).length,
+    buy: watchBuy.length
   };
   const catsEl = document.getElementById('watchCats');
   if (catsEl){
@@ -4574,6 +4607,7 @@ function renderWatch(){
       el.classList.toggle('active', el.dataset.c === watchCat);
     });
   }
+  if (watchCat === 'buy'){ renderWatchBuy(grid); return; }
   if (!watchList.length){
     grid.innerHTML = '<div class="empty" style="padding:30px 16px"><div class="big">暂无自选标的</div>' +
       '<div style="font-size:12.5px;color:var(--muted)">在面板顶部输入代码 / 名称，点「＋ 添加」加入盯盘</div></div>';
@@ -4637,6 +4671,57 @@ function renderWatch(){
 }
 /* 兼容别名（原板块版函数名，测试/绑定沿用） */
 const renderMonitor = renderWatch;
+
+/* v69：目标建仓池渲染（现价 ≤ 目标价 = 已到价，红卡 + 「已到价」徽章；点击看K线，× 移出） */
+function renderWatchBuy(grid){
+  const foot = document.getElementById('monitorFoot');
+  if (!watchBuy.length){
+    grid.innerHTML = '<div class="empty" style="padding:30px 16px"><div class="big">建仓池空空如也</div>' +
+      '<div style="font-size:12.5px;color:var(--muted)">把心水股加入建仓池并设定目标买入价（四毛买一块），跌到目标价自动提醒</div></div>';
+    if (foot) foot.innerHTML = '';
+    return;
+  }
+  grid.innerHTML = watchBuy.map(w => {
+    const sym = watchSym(w);
+    const q = watchQuotes[sym] || {};
+    const price = isFinite(q.price) ? q.price : NaN;
+    const hit = !!w.hitAt || (isFinite(price) && w.target > 0 && price <= w.target);
+    const diff = (isFinite(price) && w.target > 0) ? (price / w.target - 1) * 100 : NaN;   /* ≤0 = 已到价/更低 */
+    return '<div class="watch-card' + (hit ? ' hit' : '') + '" data-code="' + esc(w.code) + '" title="' + esc(w.name || w.code) + '（' + esc(w.code) + '）· 目标价 ¥' + w.target + ' · 点击查看K线">' +
+      (hit ? '<span class="buy-badge" title="已到目标价，可考虑建仓">已到价</span>' : '') +
+      '<button class="watch-del" data-del="' + esc(w.code) + '" title="移出建仓池">×</button>' +
+      '<div class="mc-name">' + esc(w.name || w.code) + '<span class="mc-sub">目标 ¥' + w.target + '</span></div>' +
+      '<div class="mc-pct ' + (isFinite(diff) ? (diff <= 0 ? 'up' : 'down') : 'flat') + '">' + (isFinite(diff) ? (diff <= 0 ? '' : '+') + diff.toFixed(3) + '%' : '<span class="dim">—</span>') + '</div>' +
+      '<div class="mc-price">' + (isFinite(price) ? price4(price) : '<span class="dim">—</span>') + '</div>' +
+    '</div>';
+  }).join('');
+  if (foot){
+    foot.innerHTML = '<span>建仓池 <b class="mf-num">' + watchBuy.length + '</b> 个 · 现价 ≤ 目标价即提醒</span>' +
+      '<span class="dim">红 = 已到价可买 · 绿 = 未到价继续等</span>';
+  }
+}
+
+/* v69：建仓池到价检查（交易时段每拍调用；现价 ≤ 目标价首次触发 → 站内 + 浏览器 + 微信，回价自动重置） */
+function checkWatchBuy(){
+  if (!isTradingTime()) return;
+  let fired = 0;
+  watchBuy.forEach(w => {
+    const q = watchQuotes[watchSym(w)];
+    const price = q && isFinite(q.price) ? q.price : NaN;
+    if (!isFinite(price) || !(w.target > 0)) return;
+    if (price <= w.target && !w.hitAt){
+      w.hitAt = Date.now();
+      const msg = (w.name || w.code) + ' 现价 ¥' + price.toFixed(3) + ' ≤ 目标价 ¥' + w.target.toFixed(3) + '，可考虑建仓';
+      try { if (typeof Notification !== 'undefined' && Notification.permission === 'granted'){ new Notification('【建仓池到价】' + (w.name || w.code), { body: msg }); } } catch(e){}
+      toast(msg, 'ok', 6000);
+      pushWechat('【建仓池到价】' + (w.name || w.code), msg + ' · ' + new Date().toLocaleString('zh-CN', { hour12: false }));
+      fired++;
+    } else if (price > w.target && w.hitAt){
+      delete w.hitAt;   /* 回到目标价上方 → 重新武装 */
+    }
+  });
+  if (fired){ persistWatchBuy(); renderWatch(); }
+}
 
 /* 添加自选标的（输入代码 → 查行情 → 入库） */
 /* 批量添加自选：支持 / 、空格、逗号、顿号分隔多个代码（如 "002517/512000/600519"）。
@@ -4774,6 +4859,7 @@ async function addWatch(){
   if (!raw){ toast('请输入标的代码（支持多个，用 / 或空格分隔）', 'warn'); return; }
   const toAdd = splitWatchInput(raw);
   if (!toAdd.length){ toast('没有可添加的标的（代码格式无效或已在自选中）', 'warn'); return; }
+  if (watchCat === 'buy') return addWatchBuy(toAdd);   /* v69：建仓池模式 → 设目标价入库 */
   const ok = [], fail = [];
   try {
     const map = await fetchQuotes(toAdd.map(x => x.sym));   /* 腾讯接口批量一次查完 */
@@ -4791,8 +4877,40 @@ async function addWatch(){
   } catch (e) { toast('批量查询失败：' + e.message, 'err'); }
 }
 
+/* v69：添加目标建仓池标的（批量查行情 → 逐个设定目标买入价 → 到价自动提醒） */
+async function addWatchBuy(toAdd){
+  const ok = [], fail = [];
+  try {
+    const map = await fetchQuotes(toAdd.map(x => x.sym));   /* 腾讯接口批量一次查完 */
+    toAdd.forEach(x => {
+      const q = map[x.sym];
+      if (!q || q.err || !q.name){ fail.push(x.digits); return; }
+      const cur = Number(prompt('「' + q.name + '」（' + x.digits + '）目标买入价（元）？\n现价 ¥' + (isFinite(q.price) ? q.price : '—') + '\n留空或取消 = 跳过'));
+      if (!isFinite(cur) || cur <= 0) return;
+      const h = { code: x.digits, name: q.name, market: x.sym.slice(0, 2) === 'jj' ? '' : x.sym.slice(0, 2), type: x.isFund ? 'fund' : 'stock', target: cur, hitAt: 0 };
+      watchBuy = watchBuy.filter(w => w.code !== h.code);
+      watchBuy.push(h);
+      ok.push(q.name + ' ¥' + cur);
+    });
+    persistWatchBuy();
+    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();
+    const inp = document.getElementById('watchInput');
+    if (inp) inp.value = '';
+    await refreshMonitor(true);
+    toast(ok.length ? '已加入建仓池 ' + ok.length + ' 个' + (fail.length ? '；未成功 ' + fail.length + '（' + fail.join('、') + '）' : '') : (fail.length ? '添加失败：' + fail.join('、') : '已取消'), ok.length ? (fail.length ? 'warn' : 'ok') : 'warn');
+  } catch (e) { toast('批量查询失败：' + e.message, 'err'); }
+}
+
 /* 移除自选（1BK_V68.13.1.013：删除会同步到云端，其他设备拉取后同样消失） */
 function removeWatch(code){
+  if (watchCat === 'buy'){   /* v69：建仓池模式 → 移出建仓池 */
+    watchBuy = watchBuy.filter(w => w.code !== code);
+    persistWatchBuy();
+    if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();
+    refreshMonitor(true);
+    toast('已移出建仓池', 'ok');
+    return;
+  }
   watchList = watchList.filter(w => w.code !== code);
   persistWatch();
   if (typeof scheduleFastCloudPush === 'function') scheduleFastCloudPush();   /* 即时上云已关闭（v68.13.1.001）：改完手动「本机覆盖云端」 */
@@ -7152,6 +7270,8 @@ async function openSettings(){
     '<div class="setting-row"><div><div class="t">手续费</div><div class="d">新建交易时按 <b>费率自动计算</b>（股票/场内ETF/场外基金分档；手动可改）</div></div><div class="setting-link"><a id="openFeeFromSettings" href="javascript:void(0)">打开费率设置 →</a></div></div>' +
     '<div class="setting-row"><div><div class="t">自动刷新间隔</div><div class="d">最小 ' + CONFIG.minRefreshSec + ' 秒，页面隐藏时自动暂停</div></div>' +
       '<input id="s_sec" type="number" step="1" min="' + CONFIG.minRefreshSec + '" value="' + s.refreshSec + '"></div>' +
+    '<div class="setting-row"><div><div class="t">微信推送（Server酱）</div><div class="d">止损/止盈/目标价破线与建仓池到价推送到微信 · 免费每天 5 条 · <a href="https://sct.ftqq.com" target="_blank" rel="noopener">获取 SendKey →</a></div></div>' +
+      '<div style="display:flex;gap:6px;align-items:center"><input id="s_sct" type="text" placeholder="留空=关闭微信推送" value="' + esc(s.sctKey || '') + '" style="flex:1;min-width:120px"><button class="btn-sm" id="s_sct_test" title="发一条测试推送验证配置">测试</button></div></div>' +
     '<div class="setting-row"><div><div class="t">主题色</div><div class="d">强调色（按钮、标题条）</div></div>' +
       '<input id="s_theme" type="color" value="' + (s.theme || CONFIG.accent) + '"></div>' +
     '<div class="setting-row"><div><div class="t">涨 / 跌 配色</div><div class="d">默认遵循 A 股惯例：涨红跌绿</div></div>' +
@@ -7166,7 +7286,8 @@ async function openSettings(){
         try {
           picked = {
             refreshSec: Math.max(CONFIG.minRefreshSec, Math.round(num(v('s_sec'), '刷新间隔', { min: CONFIG.minRefreshSec }))),
-            theme: v('s_theme'), upColor: v('s_up'), downColor: v('s_down')
+            theme: v('s_theme'), upColor: v('s_up'), downColor: v('s_down'),
+            sctKey: v('s_sct').trim()
           };
         } catch (e) { toast(e.message, 'err'); return false; }
       } } ] });
@@ -7180,6 +7301,15 @@ async function openSettings(){
       /* 云端同步：同时清空云端数据库（若有配置），防止 reload 后云端旧数据回灌 */
       try { if (typeof cloudReset === 'function') cloudReset(); } catch(e){}
       location.reload();
+    };
+    /* v69：微信推送「测试」按钮（临时写入 sctKey 发一条验证） */
+    const sctTest = document.getElementById('s_sct_test');
+    if (sctTest) sctTest.onclick = () => {
+      const k = document.getElementById('s_sct').value.trim();
+      if (!k){ toast('请先填写 SendKey', 'warn'); return; }
+      state.settings.sctKey = k;
+      pushWechat('养鹅怡情 · 测试推送', '这是测试消息，收到即表示微信推送配置成功。');
+      toast('测试推送已发送（免费版每天 5 条，注意配额）', 'info');
     };
   }, 0);
   const ok = await p;
@@ -7198,7 +7328,7 @@ function doExport(){
   const payload = {
     app: 'portfolio-manager', version: 2, exportedAt: new Date().toISOString(),
     data: { holdings: state.holdings, dailyOps: state.dailyOps, trades: state.trades, settings: state.settings,
-            externalClosed: state.externalClosed || [], watchlist: watchList || [], snapshots: state.snapshots || {} }
+            externalClosed: state.externalClosed || [], watchlist: watchList || [], watchbuy: watchBuy || [], snapshots: state.snapshots || {} }
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
   const d = new Date();
@@ -9381,6 +9511,7 @@ async function cloudPush(){
       holdings: state.holdings, dailyOps: state.dailyOps, trades: state.trades,
       settings: state.settings, externalClosed: state.externalClosed || [], snapshots: state.snapshots,
       watchlist: watchList || [],                    /* 自选同步：本机为准，增删都推云端（1BK_V68.13.1.013 明确） */
+      watchbuy: watchBuy || [],                      /* v69：目标建仓池同步（同自选：本机为准） */
       devices: Object.assign({}, deviceNameMap),     /* 设备名映射（跨设备共享友好名） */
       accessPwdHash: (() => { try { return localStorage.getItem(K('accessPwdHash')) || ''; } catch(e){ return ''; } })(),
       savedAt: Date.now()
@@ -9442,6 +9573,11 @@ function applyCloudSnapshot(snap){
   if (Array.isArray(snap.watchlist)){          /* 自选同步：云端为准覆盖本机（增删都同步；删除在其他设备同样生效） */
     watchList = snap.watchlist.slice();        /* 1BK_V68.13.1.013：不再并集合并，删除也能同步 */
     persistWatch();
+    if (typeof renderWatch === 'function') renderWatch();
+  }
+  if (Array.isArray(snap.watchbuy)){           /* v69：目标建仓池同步（云端为准覆盖） */
+    watchBuy = snap.watchbuy.slice();
+    persistWatchBuy();
     if (typeof renderWatch === 'function') renderWatch();
   }
   if (snap.devices && typeof snap.devices === 'object'){  /* 设备名映射：只并入本地没有的（不覆盖本地自定义） */
