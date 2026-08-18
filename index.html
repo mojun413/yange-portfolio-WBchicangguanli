@@ -1182,7 +1182,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.067</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.068</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1583,7 +1583,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.067 · 2026-08-18 21:33 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.068 · 2026-08-18 22:08 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1644,8 +1644,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.067';
-const APP_BUILD   = '2026-08-18 21:33';
+const APP_VERSION = '1BK_V68.13.1.068';
+const APP_BUILD   = '2026-08-18 22:08';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4987,7 +4987,7 @@ function cycleMonitorSort(){
 /* ============================ K 线图（腾讯 K 线 JSONP） ============================
    数据源：https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=<sym>,day,,,<n>,qfq
    返回 data[sym].qfqday = [[date, open, close, high, low, volume], ...]（前复权日K） */
-/* 东方财富 K 线（CORS 友好备用源）：腾讯周/月线在部分网络下获取失败时的兜底。
+/* 东方财富 K 线（CORS 友好，双源并行竞速主源之一）：与腾讯互为兜底。
    返回结构与腾讯一致 { data:{ sym:{ qfq<period>: [[date,open,close,high,low,vol],...] } } }，
    以便复用现有 parseKline。secid：sh→1. code / sz→0. code / bj(83/87/43→1., 92→0.) / hk→116. */
 function emSecid(sym){
@@ -5007,8 +5007,12 @@ async function emKlineJsonp(sym, period){
   const days = period === 'day' ? 500 : (period === 'week' ? 120 : 80);
   const url = 'https://push2his.eastmoney.com/api/qt/stock/kline/get?lmt=0&klt=' + klt +
     '&secid=' + secid + '&fields1=f1,f2,f3,f4,f5&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&fqt=1&beg=0&end=20500101';
+  /* v68.13.1.068：硬超时（AbortController 8s）。fetch 浏览器端默认永不超时，
+     若东方财富连接被挂起会永久 pending → klineJsonp 永远转圈；加超时保证必然 settle 并回退腾讯。 */
+  let ctrl = null, to = null;
+  try { if (typeof AbortController !== 'undefined') { ctrl = new AbortController(); to = setTimeout(() => { try { ctrl.abort(); } catch(e){} }, 8000); } } catch(e){}
   try {
-    const r = await fetch(url, { cache: 'no-cache' });
+    const r = await fetch(url, ctrl ? { cache: 'no-cache', signal: ctrl.signal } : { cache: 'no-cache' });
     if (!r.ok) return null;
     const j = await r.json();
     const kls = (j && j.data && j.data.klines) || [];
@@ -5018,14 +5022,21 @@ async function emKlineJsonp(sym, period){
     const out = { data: {} }; out.data[sym] = {}; out.data[sym]['qfq' + period] = rows.slice(-days);
     return out;
   } catch (e) { return null; }
+  finally { if (to) clearTimeout(to); }
 }
 
-function klineJsonp(sym, period, count){
-  /* 优先东方财富（CORS 友好、周/月稳定），失败兜底腾讯 JSONP/fetch。
-     编排层：东方财富返回有效数据即采用，否则退回腾讯原逻辑（tencentKlineJsonp）。 */
-  return Promise.resolve().then(() => emKlineJsonp(sym, period))
-    .then(em => (em ? em : tencentKlineJsonp(sym, period, count)))
-    .catch(() => tencentKlineJsonp(sym, period, count));
+async function klineJsonp(sym, period, count){
+  /* v68.13.1.068：东方财富优先（CORS 友好、已加 8s 硬超时），失败/超时再回退腾讯
+     （自身 ~11s 总超时）。顺序回退避免对腾讯的冗余请求（降低其限频/挂起风险）。
+     双源皆不可用才抛出带诊断的错误，绝不让 K 线弹窗永久转圈。 */
+  const em = await emKlineJsonp(sym, period);   /* 内部 8s 超时，返回数据或 null */
+  if (em && em.data && em.data[sym]) return em;
+  try {
+    return await tencentKlineJsonp(sym, period, count);
+  } catch (e) {
+    const te = (e && e.message) ? e.message : String(e);
+    throw new Error('K线加载失败（东方财富无有效数据；腾讯兜底：' + te + '）');
+  }
 }
 
 function tencentKlineJsonp(sym, period, count){
