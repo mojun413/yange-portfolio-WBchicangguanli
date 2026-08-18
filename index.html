@@ -1182,7 +1182,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.058</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.059</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1390,6 +1390,31 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
           #page-analysis .an-warn{display:flex;gap:8px;align-items:flex-start;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:8px;padding:8px 10px;margin-top:8px;font-size:13px}
           #page-analysis .an-warn .ic{flex:0 0 auto}
           #page-analysis .empty{padding:24px;text-align:center;color:var(--txt-2);font-size:13px;line-height:1.6}
+          /* v70：技术面量化分析 */
+          #page-analysis .tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+          #page-analysis .tech-card{background:var(--panel-2);border:1px solid var(--line-2);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+          #page-analysis .tc-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+          #page-analysis .tc-head b{font-size:14px;color:var(--text)}
+          #page-analysis .tc-code{font-size:11px;color:var(--txt-2)}
+          #page-analysis .tc-price{margin-left:auto;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+          #page-analysis .tc-adv{font-size:13px;font-weight:700;padding:6px 10px;border-radius:8px}
+          #page-analysis .tc-adv.adv-strong{background:rgba(229,72,77,.12);color:#b91c1c;border:1px solid rgba(229,72,77,.3)}
+          #page-analysis .tc-adv.adv-hold{background:rgba(245,158,11,.12);color:#92400e;border:1px solid rgba(245,158,11,.3)}
+          #page-analysis .tc-adv.adv-watch{background:rgba(107,114,128,.1);color:#4b5563;border:1px solid rgba(107,114,128,.25)}
+          #page-analysis .tc-adv.adv-cut{background:rgba(21,163,74,.12);color:#166534;border:1px solid rgba(21,163,74,.3)}
+          #page-analysis .tc-adv .tc-adv-txt{font-weight:400;font-size:12px;margin-left:6px}
+          #page-analysis .tc-metrics{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:12px;color:var(--txt-2)}
+          #page-analysis .tc-metrics .tm{display:flex;justify-content:space-between;gap:6px;border-bottom:1px dashed var(--line-2);padding:2px 0}
+          #page-analysis .tc-metrics .tm b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+          #page-analysis .tc-sigs{display:flex;flex-wrap:wrap;gap:5px}
+          #page-analysis .tc-sigs .sig{position:relative;font-size:11px;padding:2px 8px;border-radius:999px;cursor:help}
+          #page-analysis .tc-sigs .sig i{display:none;position:absolute;bottom:130%;left:50%;transform:translateX(-50%);background:#1f2937;color:#f3f4f6;font-style:normal;font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;z-index:5;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+          #page-analysis .tc-sigs .sig:hover i{display:block}
+          #page-analysis .tc-sigs .sig-pos{background:rgba(229,72,77,.12);color:#b91c1c;border:1px solid rgba(229,72,77,.3)}
+          #page-analysis .tc-sigs .sig-neg{background:rgba(21,163,74,.12);color:#166534;border:1px solid rgba(21,163,74,.3)}
+          #page-analysis .tc-sigs .sig-neu{background:rgba(107,114,128,.1);color:#4b5563;border:1px solid rgba(107,114,128,.25)}
+          #page-analysis .tc-score{font-size:12px;color:var(--txt-2);padding-top:4px;border-top:1px solid var(--line-2)}
+          #page-analysis .tc-score b{font-size:14px;color:var(--text)}
         </style>
         <div id="analysisBody"></div>
       </section>
@@ -1583,7 +1608,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.058 · 2026-08-18 00:10 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.059 · 2026-08-18 11:56 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1644,8 +1669,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.058';
-const APP_BUILD   = '2026-08-18 00:10';
+const APP_VERSION = '1BK_V68.13.1.059';
+const APP_BUILD   = '2026-08-18 11:56';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4097,7 +4122,11 @@ function renderAnalysis(){
     '<div class="panel-body">' + researchHTML + '</div></div>' +
     '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>预警与纪律</div>' +
     '<div class="panel-sub">祖训规则引擎自动盯盘 · 交易时段破线自动通知 · 单标的 > ' + SINGLE_WARN_PCT + '% 预警 · 主力净流出/概念异动实时监测</div></div>' +
-    '<div class="panel-body">' + alertHTML + '</div></div>';
+    '<div class="panel-body">' + alertHTML + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div class="panel-title"><span class="bar"></span>技术面量化分析</div>' +
+    '<div class="spacer"></div><button class="btn-sm" id="btnTechAnalyze">开始分析</button>' +
+    '<div class="panel-sub">对每只持仓拉取日K（前复权 120 根），计算 MA/MACD/KDJ/RSI/BOLL/量能 并给出策略建议 · 技术面仅供参考，决策请结合基本面与养鹅心法</div></div>' +
+    '<div class="panel-body"><div id="techAnalysisBody"><div class="empty">点「开始分析」——对全部持仓做技术面量化分析（拉取约需 5~15 秒）</div></div></div></div>';
   box.querySelectorAll('[data-an-range]').forEach(b => b.onclick = () => { state.settings.analysisRange = b.dataset.anRange; persist.settings(); renderAnalysis(); });
   box.querySelectorAll('[data-bench]').forEach(b => b.onclick = () => { state.settings.benchmark = b.dataset.bench; persist.settings(); renderAnalysis(); });
   const calWrap = box.querySelector('.cal-grid-wrap');
@@ -4116,6 +4145,9 @@ function renderAnalysis(){
   if (nb) nb.onclick = () => { try { if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') Notification.requestPermission().then(p => toast('浏览器通知' + (p === 'granted' ? '已开启' : '保持关闭'), 'info')); else toast('浏览器通知已开启或不支持', 'info'); } catch(e){ toast('通知开启失败：' + e.message, 'err'); } };
   const bia = box.querySelector('#btnIdentifyAll');
   if (bia) bia.onclick = async () => { bia.disabled = true; const t0 = bia.textContent; bia.textContent = '识别中…'; const n = await autoIdentifyIndustries(true); bia.textContent = t0; bia.disabled = false; renderAnalysis(); toast('已按东财申万行业重新识别 ' + n + ' 个标的（基金按名称主题推断）', 'ok'); };
+  /* v70：技术面量化分析 */
+  const bta = box.querySelector('#btnTechAnalyze');
+  if (bta) bta.onclick = () => { runTechAnalysis(bta); };
   /* 1BK_V68.14.0 ⑥：行业+概念一键批量刷新（概念优先离线表 CONCEPT_MAP，缺失名称推断，非破坏性） */
   const brc = box.querySelector('#btnRefreshIndCon');
   if (brc) brc.onclick = async () => {
@@ -4131,6 +4163,156 @@ function renderAnalysis(){
     brc.textContent = t0; brc.disabled = false; renderAnalysis();
     toast('已刷新 ' + state.holdings.length + ' 个标的：行业 ' + indN + ' 个更新 · 概念 ' + conN + ' 个回填（行业=申万一级，概念=离线表+名称推断）', 'ok');
   };
+}
+
+/* ============================ 技术面量化分析（v70） ============================
+   对每只持仓拉取日K（前复权，120 根），计算 MA/MACD/KDJ/RSI/BOLL/量能 指标，
+   规则引擎给出多空信号与策略建议。技术面仅作参考，决策请结合基本面与养鹅心法。 */
+function techSMA(arr, n, i){
+  if (i < n - 1) return null;
+  let s = 0; for (let k = i - n + 1; k <= i; k++) s += arr[k];
+  return s / n;
+}
+function techEMA(arr, n){
+  const o = new Array(arr.length); if (!arr.length) return o;
+  let e = arr[0]; o[0] = e; const k = 2 / (n + 1);
+  for (let t = 1; t < arr.length; t++){ e = arr[t] * k + e * (1 - k); o[t] = e; }
+  return o;
+}
+function calcTechIndicators(rows){
+  const n = rows.length;
+  if (n < 60) return null;
+  const C = rows.map(r => r.close), H = rows.map(r => r.high), L = rows.map(r => r.low), V = rows.map(r => r.vol);
+  const i = n - 1;
+  /* MA（maX[t] 对齐 C[t+X-1]） */
+  const ma5 = techSMA(C, 5, i), ma10 = techSMA(C, 10, i), ma20 = techSMA(C, 20, i), ma60 = techSMA(C, 60, i);
+  const ma20Prev5 = techSMA(C, 20, i - 5);
+  /* MACD（12/26/9） */
+  const e12 = techEMA(C, 12), e26 = techEMA(C, 26);
+  const dif = e12.map((v, t) => v - e26[t]);
+  const dea = techEMA(dif, 9);
+  const macd = dif.map((v, t) => (v - dea[t]) * 2);
+  /* KDJ（9,3,3，K/D 初值 50） */
+  let pk = 50, pd = 50, k = 50, d = 50, j = 50;
+  for (let t = 0; t < n; t++){
+    const s = Math.max(0, t - 8);
+    let hh = -Infinity, ll = Infinity;
+    for (let q = s; q <= t; q++){ hh = Math.max(hh, H[q]); ll = Math.min(ll, L[q]); }
+    const rsv = (hh === ll) ? 50 : (C[t] - ll) / (hh - ll) * 100;
+    k = 2 / 3 * pk + 1 / 3 * rsv;
+    d = 2 / 3 * pd + 1 / 3 * k;
+    j = 3 * k - 2 * d;
+    pk = k; pd = d;
+  }
+  /* RSI(14)（Wilder 平滑） */
+  let g = 0, l = 0, rsi = 50;
+  for (let t = 1; t <= 14; t++){ const ch = C[t] - C[t - 1]; if (ch > 0) g += ch; else l -= ch; }
+  g /= 14; l /= 14;
+  rsi = (l === 0) ? 100 : 100 - 100 / (1 + g / l);
+  for (let t = 15; t < n; t++){ const ch = C[t] - C[t - 1]; const ug = ch > 0 ? ch : 0, ul = ch < 0 ? -ch : 0; g = (g * 13 + ug) / 14; l = (l * 13 + ul) / 14; rsi = (l === 0) ? 100 : 100 - 100 / (1 + g / l); }
+  /* BOLL(20,2) */
+  let sum = 0; for (let t = i - 19; t <= i; t++) sum += C[t];
+  const bollMid = sum / 20;
+  let sq = 0; for (let t = i - 19; t <= i; t++) sq += (C[t] - bollMid) * (C[t] - bollMid);
+  const sd = Math.sqrt(sq / 20);
+  const bollUp = bollMid + 2 * sd, bollLow = bollMid - 2 * sd;
+  /* 量能：5日 / 10日均量比 */
+  let v5 = 0, v10 = 0;
+  for (let t = i - 4; t <= i; t++) v5 += V[t];
+  for (let t = i - 9; t <= i; t++) v10 += V[t];
+  const volRatio = v10 > 0 ? (v5 / 5) / (v10 / 10) : 1;
+  return {
+    ma5, ma10, ma20, ma60, ma20Prev5,
+    dif: dif[i], dea: dea[i], macd: macd[i], macdPrev: macd[i - 1],
+    difPrev5: dif[i - 5], deaPrev5: dea[i - 5],
+    k, d, j, rsi, bollUp, bollMid, bollLow, volRatio
+  };
+}
+/* 信号引擎：返回 [{label, dir, desc}]，dir 为方向分（正=多/负=空/0=中性） */
+function techSignals(rows, ind){
+  const sig = [];
+  const push = (label, dir, desc) => sig.push({ label, dir, desc });
+  const C = rows[rows.length - 1].close;
+  if (ind.ma5 > ind.ma10 && ind.ma10 > ind.ma20) push('多头排列', 2, 'MA5>MA10>MA20，短中期趋势向上');
+  else if (ind.ma5 < ind.ma10 && ind.ma10 < ind.ma20) push('空头排列', -2, 'MA5<MA10<MA20，短中期趋势向下');
+  if (C > ind.ma20 && ind.ma20 > ind.ma20Prev5) push('站上MA20', 1, '价格在20日线上方且20日线走升');
+  else if (C < ind.ma20 && ind.ma20 < ind.ma20Prev5) push('跌破MA20', -1, '价格在20日线下方且20日线走弱');
+  if (ind.dif > ind.dea && ind.difPrev5 <= ind.deaPrev5) push('MACD金叉', 2, 'DIF 上穿 DEA（近5日）');
+  else if (ind.dif < ind.dea && ind.difPrev5 >= ind.deaPrev5) push('MACD死叉', -2, 'DIF 下穿 DEA（近5日）');
+  if (ind.dif > 0 && ind.macd > ind.macdPrev) push('红柱放大', 1, 'DIF 在零轴上方且 MACD 柱放大');
+  else if (ind.dif < 0 && ind.macd < ind.macdPrev) push('绿柱放大', -1, 'DIF 在零轴下方且 MACD 柱放大');
+  if (ind.j > 80) push('KDJ超买', -1, 'J=' + ind.j.toFixed(1) + ' > 80，短线过热');
+  else if (ind.j < 20) push('KDJ超卖', 1, 'J=' + ind.j.toFixed(1) + ' < 20，短线超跌');
+  if (ind.rsi > 70) push('RSI超买', -1, 'RSI=' + ind.rsi.toFixed(1) + ' > 70，注意回调');
+  else if (ind.rsi < 30) push('RSI超卖', 1, 'RSI=' + ind.rsi.toFixed(1) + ' < 30，超跌待反弹');
+  if (C > ind.bollUp) push('突破上轨', 1, '价格突破布林上轨，强势但注意回踩');
+  else if (C < ind.bollLow) push('跌破下轨', 1, '价格跌破布林下轨，超跌反弹机会');
+  const up = rows[rows.length - 1].close > rows[rows.length - 2].close;
+  if (ind.volRatio >= 1.5 && up) push('放量上攻', 1, '量比 ' + ind.volRatio.toFixed(2) + '，放量上涨量价配合');
+  else if (ind.volRatio >= 1.5) push('放量下跌', -1, '量比 ' + ind.volRatio.toFixed(2) + '，放量下杀注意风险');
+  else if (ind.volRatio <= 0.7) push('缩量', 0, '量比 ' + ind.volRatio.toFixed(2) + '，观望情绪浓');
+  const chg5 = (C / rows[rows.length - 6].close - 1) * 100;
+  if (chg5 > 8) push('5日涨幅过大', -1, '5日 +' + chg5.toFixed(1) + '%，短线过热');
+  else if (chg5 < -8) push('5日超跌', 1, '5日 ' + chg5.toFixed(1) + '%，超跌待反弹');
+  return sig;
+}
+function techAdvice(score){
+  if (score >= 4) return { act: '加仓', cls: 'adv-strong', txt: '技术面偏强：多头信号占优，可逢低加仓或继续持有' };
+  if (score >= 1) return { act: '持有', cls: 'adv-hold', txt: '技术面中性偏多：以持有为主，回踩不破位可低吸' };
+  if (score >= -2) return { act: '观望', cls: 'adv-watch', txt: '技术面中性偏空：控制仓位，观望等待企稳' };
+  return { act: '减仓', cls: 'adv-cut', txt: '技术面走弱：空头信号占优，建议减仓防守' };
+}
+function techCardHTML(h, rows){
+  const nm = h.name || h.code;
+  if (!rows || rows.length < 60){
+    return '<div class="tech-card"><div class="tc-head"><b>' + esc(nm) + '</b><span class="tc-code">' + esc(h.code) + '</span></div>' +
+      '<div class="empty" style="padding:14px">K线数据不足（<60 根），无法计算技术指标</div></div>';
+  }
+  const ind = calcTechIndicators(rows);
+  const sigs = techSignals(rows, ind);
+  const score = sigs.reduce((s, x) => s + x.dir, 0);
+  const adv = techAdvice(score);
+  const last = rows[rows.length - 1];
+  const chg5 = (last.close / rows[rows.length - 6].close - 1) * 100;
+  const chg20 = (last.close / rows[rows.length - 21].close - 1) * 100;
+  const pct = v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+  const maCls = ind.ma5 > ind.ma20 ? 'style="color:#b91c1c"' : 'style="color:#166534"';
+  return '<div class="tech-card">' +
+    '<div class="tc-head"><b>' + esc(nm) + '</b><span class="tc-code">' + esc(h.code) + '</span><span class="tc-price">¥' + last.close.toFixed(2) + '</span></div>' +
+    '<div class="tc-adv ' + adv.cls + '">' + adv.act + '<span class="tc-adv-txt">' + adv.txt + '</span></div>' +
+    '<div class="tc-metrics">' +
+      '<span class="tm"><span>MA 5/10/20/60</span><b ' + maCls + '>' + ind.ma5.toFixed(2) + ' / ' + ind.ma10.toFixed(2) + ' / ' + ind.ma20.toFixed(2) + ' / ' + (isFinite(ind.ma60) ? ind.ma60.toFixed(2) : '—') + '</b></span>' +
+      '<span class="tm"><span>MACD 12/26/9</span><b>' + ind.dif.toFixed(3) + ' / ' + ind.dea.toFixed(3) + ' / ' + ind.macd.toFixed(3) + '</b></span>' +
+      '<span class="tm"><span>KDJ</span><b>' + ind.k.toFixed(1) + ' / ' + ind.d.toFixed(1) + ' / ' + ind.j.toFixed(1) + '</b></span>' +
+      '<span class="tm"><span>RSI(14)</span><b>' + ind.rsi.toFixed(1) + '</b></span>' +
+      '<span class="tm"><span>BOLL 20</span><b>' + ind.bollLow.toFixed(2) + ' / ' + ind.bollMid.toFixed(2) + ' / ' + ind.bollUp.toFixed(2) + '</b></span>' +
+      '<span class="tm"><span>量比 5/10</span><b>' + ind.volRatio.toFixed(2) + '</b></span>' +
+      '<span class="tm"><span>区间</span><b>' + pct(chg5) + ' / ' + pct(chg20) + '</b></span>' +
+    '</div>' +
+    (sigs.length ? '<div class="tc-sigs">' + sigs.map(s => '<span class="sig sig-' + (s.dir > 0 ? 'pos' : s.dir < 0 ? 'neg' : 'neu') + '">' + esc(s.label) + '<i>' + esc(s.desc) + '</i></span>').join('') + '</div>' : '') +
+    '<div class="tc-score">多空评分 <b>' + (score >= 0 ? '+' : '') + score + '</b><span class="dim"> · 技术面仅供参考，决策请结合基本面与养鹅心法</span></div>' +
+  '</div>';
+}
+async function runTechAnalysis(btn){
+  const body = document.getElementById('techAnalysisBody');
+  if (!body) return;
+  const hs = state.holdings.filter(h => !h.closed && effType(h.code, h.type, h.typeLocked) !== 'fund');
+  if (!hs.length){ body.innerHTML = '<div class="empty">暂无持仓标的可分析</div>'; return; }
+  if (btn) btn.disabled = true;
+  body.innerHTML = '<div class="dim" style="padding:14px"><span class="spin"></span>正在拉取 ' + hs.length + ' 只持仓日K并计算指标（每只约 0.5 秒）…</div>';
+  const cards = [];
+  for (let idx = 0; idx < hs.length; idx++){
+    const h = hs[idx];
+    let rows = [];
+    try { rows = parseKline(await klineJsonp(quoteSymbol(h), 'day', 120), quoteSymbol(h), 'day'); } catch(e){}
+    if ((idx + 1) % 3 === 0 || idx === hs.length - 1){
+      body.innerHTML = '<div class="dim" style="padding:14px"><span class="spin"></span>正在分析 ' + (idx + 1) + '/' + hs.length + '：' + esc(h.name || h.code) + '…</div>';
+    }
+    cards.push(techCardHTML(h, rows));
+  }
+  body.innerHTML = '<div class="tech-grid">' + cards.join('') + '</div>' +
+    '<div class="an-note">技术面量化基于日K（前复权，120 根）的规则引擎，输出仅供参考；与「预警与纪律」联动使用效果更佳——建议在分析后到对应标的设置止损/止盈线。</div>';
+  if (btn) btn.disabled = false;
 }
 function concPanelHTML(){
   const agg = openAggregate();
