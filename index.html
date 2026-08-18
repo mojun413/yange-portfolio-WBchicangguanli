@@ -1182,7 +1182,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.068</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.069</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1583,7 +1583,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.068 · 2026-08-18 22:08 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.069 · 2026-08-18 22:19 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1644,8 +1644,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.068';
-const APP_BUILD   = '2026-08-18 22:08';
+const APP_VERSION = '1BK_V68.13.1.069';
+const APP_BUILD   = '2026-08-18 22:19';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -5323,7 +5323,7 @@ function openKlineByCode(code){
   const c = String(code).replace(/\D/g, '');
   showKlineDialog(w.name || code, watchSym(w));
 }
-/* K 线弹窗：周期切换（日K/周K/月K）+ 缩放平移 + loading → 同花顺风格 SVG + 十字光标
+/* K 线弹窗：日K + 缩放平移 + loading → 同花顺风格 SVG + 十字光标
    v68.14：日K 500 根（≈2年）；滚轮锚点缩放 / 拖拽平移 / +−↺ 按钮；开高低收 4 位小数 */
 function showKlineDialog(name, sym){
   const isFund = String(sym).slice(0, 2) === 'jj';
@@ -5334,8 +5334,6 @@ function showKlineDialog(name, sym){
       '<h3 style="margin:0">' + esc(name) + ' · K线（前复权）</h3>' +
       '<div class="kl-tabs" id="klTabs">' +
         '<span class="kt active" data-p="day">日K</span>' +
-        '<span class="kt" data-p="week">周K</span>' +
-        '<span class="kt" data-p="month">月K</span>' +
       '</div>' +
       '<div class="kl-zoom" title="滚轮缩放 · 按住拖拽平移">' +
         '<button id="klZoomOut" title="缩小">−</button>' +
@@ -5429,7 +5427,7 @@ function showKlineDialog(name, sym){
   const onDragEnd = () => { if (drag){ drag = null; document.body.style.cursor = ''; } };
   document.addEventListener('mousemove', onDragMove);
   document.addEventListener('mouseup', onDragEnd);
-  /* 自动刷新调度：日/周/月K 60 秒（v68.13.9 已移除分时图与 2 秒轮询）；弹窗隐藏时暂停；
+  /* 自动刷新调度：日K 60 秒（v68.13.9 已移除分时图与 2 秒轮询、v069 移除周/月K）；弹窗隐藏时暂停；
      1BK_V68.13.1.009：非交易时段冻结不轮询（K线数据休市不变，省请求） */
   const schedule = (period) => {
     clearRefresh();
@@ -5443,7 +5441,7 @@ function showKlineDialog(name, sym){
     if (loading) return;
     loading = true;
     periodNow = period;
-    if (!silent) body.innerHTML = '<span class="spin"></span> 加载' + ({day:'日K', week:'周K', month:'月K'})[period] + '…';
+    if (!silent) body.innerHTML = '<span class="spin"></span> 加载日K…';
     klineJsonp(sym, period).then(data => {
       const rows = parseKline(data, sym, period);
       if (!rows.length){
