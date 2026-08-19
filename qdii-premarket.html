@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QDII 盘前估值</title>
+<style>
+:root{
+  --bg:#0c0e12; --panel:#171a21; --panel2:#1f232b; --line:#272d38;
+  --txt:#e8edf4; --dim:#8b98a9; --faint:#5c6a7d;
+  --up:#e5484d; --down:#1ea97c; --flat:#8b98a9;
+  --orange:#ff7a3d; --orange2:#ff5b1a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;min-height:100vh;font-size:14px}
+.wrap{max-width:520px;margin:0 auto;padding:0 0 80px}
+/* ===== 顶栏 ===== */
+.top{padding:18px 16px 12px;display:flex;align-items:center;gap:10px}
+.back{display:flex;align-items:center;gap:6px;color:var(--txt);font-size:14px;font-weight:600;cursor:pointer}
+.back .ico{font-size:20px;font-weight:300}
+.title-block{display:flex;align-items:center;gap:8px}
+.title-ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--orange),var(--orange2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+.title-name{font-size:19px;font-weight:700}
+.night{display:inline-flex;align-items:center;gap:5px;background:rgba(255,122,61,.12);color:var(--orange);border:1px solid rgba(255,122,61,.35);padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+.night .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.meta{margin-left:auto;display:flex;align-items:center;gap:8px}
+.icon-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--dim);cursor:pointer;background:transparent;border:none;font-size:18px}
+.icon-btn:hover{background:var(--panel2);color:var(--txt)}
+/* ===== 4 卡 ===== */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:0 14px 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 10px 11px;text-align:center;overflow:hidden;position:relative}
+.card .n{font-size:12px;color:var(--dim);margin-bottom:6px}
+.card .p{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.up{color:var(--up)} .dn{color:var(--down)} .fl{color:var(--flat)}
+/* ===== 状态 ===== */
+.status{padding:8px 16px 12px;font-size:12px;color:var(--dim);display:flex;align-items:center;flex-wrap:wrap;gap:0}
+.status .lnk{color:var(--accent,#3b8eff);margin-left:6px;cursor:pointer;font-weight:600}
+/* ===== Tab+按钮 ===== */
+.tab-row{display:flex;align-items:center;justify-content:space-between;padding:6px 14px 10px}
+.tabs{display:flex;gap:6px;background:var(--panel);border-radius:22px;padding:4px}
+.tab{padding:6px 14px;border-radius:18px;font-size:13px;color:var(--dim);cursor:pointer;transition:.15s;font-weight:600}
+.tab.on{background:var(--orange);color:#fff}
+.tab:not(.on):hover{color:var(--txt)}
+.act-btns{display:flex;gap:8px}
+.act{padding:6px 13px;border-radius:18px;background:var(--panel);border:1px solid var(--line);color:var(--txt);font-size:12.5px;display:flex;align-items:center;gap:4px;cursor:pointer}
+.act:hover{border-color:var(--orange);color:var(--orange)}
+.act .ico{font-size:13px}
+/* ===== 列表 ===== */
+.list{padding:0 14px}
+.row{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.row:hover{border-color:#344052}
+.row .nm{font-size:14px;font-weight:500}
+.row .left{display:flex;align-items:center;gap:8px;min-width:0}
+.row .nm-block{display:flex;flex-direction:column;gap:4px}
+.tag{display:inline-flex;align-items:center;background:rgba(255,122,61,.15);color:var(--orange);border:1px solid rgba(255,122,61,.35);padding:1px 7px;border-radius:4px;font-size:10.5px;font-weight:600;line-height:1.4}
+.row .right{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;min-width:80px;text-align:right}
+/* ===== 底部导航 ===== */
+.bnav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 0;z-index:10}
+.bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--dim);text-decoration:none;padding:4px 0}
+.bnav a.on{color:var(--orange)}
+.bnav a .ico{font-size:18px;line-height:1}
+.bnav a.on .ico{font-weight:800}
+/* ===== 浮动选择条 ===== */
+.float-pop{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:5px;display:flex;gap:4px;z-index:11;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.float-pop button{padding:6px 18px;border-radius:18px;border:none;background:transparent;color:var(--txt);font-size:12.5px;cursor:pointer}
+.float-pop button.on{background:var(--orange);color:#fff;font-weight:600}
+/* ===== 加载 ===== */
+.loading-row{padding:40px;text-align:center;color:var(--dim);font-size:13px}
+.empty{padding:40px;text-align:center;color:var(--dim);font-size:13px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--dim);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ===== 自选编辑 ===== */
+.star{cursor:pointer;color:var(--faint);font-size:16px;padding:4px}
+.star.on{color:var(--orange)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="back" onclick="history.length>1?history.back():void 0"><span class="ico">‹</span><span>盘</span></div>
+    <div class="title-block">
+      <div class="title-name">纳斯盘前估值</div>
+    </div>
+    <span class="night" id="nightTag"><span class="dot"></span><span id="nightText">夜盘 距开盘 --:--:--</span></span>
+    <div class="meta">
+      <button class="icon-btn" title="刷新" onclick="refresh()">↻</button>
+    </div>
+  </div>
+
+  <div class="cards" id="cards"><!-- 4 ETF 卡 --></div>
+
+  <div class="status">
+    基于年报、季报持仓估算 · 更新于 <span id="updTime">--</span> · 仅供参考
+  </div>
+
+  <div class="tab-row">
+    <div class="tabs">
+      <div class="tab" data-tab="hot" onclick="switchTab('hot')">热门</div>
+      <div class="tab on" data-tab="all" onclick="switchTab('all')">全部</div>
+      <div class="tab" data-tab="fav" onclick="switchTab('fav')">自选</div>
+    </div>
+    <div class="act-btns">
+      <div class="act" onclick="showSwitch()"><span class="ico">↗</span>分享</div>
+      <div class="act" onclick="refresh()"><span class="ico">↻</span>刷新</div>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<div class="float-pop" id="floatPop" style="display:none">
+  <button class="on" data-view="close" onclick="hideFloat()">收盘数据</button>
+  <button data-view="24h" onclick="hideFloat()">美股24小时</button>
+</div>
+
+<nav class="bnav">
+  <a class="on"><span class="ico">⌂</span><span>首页</span></a>
+  <a><span class="ico">▦</span><span>板块</span></a>
+  <a><span class="ico">⌽</span><span>日韩</span></a>
+  <a><span class="ico">◆</span><span>有色</span></a>
+  <a><span class="ico">◉</span><span>我的</span></a>
+</nav>
+
+<script>
+'use strict';
+/* ===== 数据源配置 ===== */
+// 顶部 4 张 ETF 卡：QDII 常用的海外 ETF（腾讯美股代码，ACAO:*）
+const TOP4 = [
+  { code:'usQQQ',  name:'纳指ETF' },
+  { code:'usSPY',  name:'标普ETF' },
+  { code:'usDIA',  name:'道指ETF' },
+  { code:'usUUP',  name:'汇率', suffix:' DXY' },
+];
+
+// QDII 基金列表（代码 + 显示名）—— 全部经过 腾讯 jj 接口实测有数据
+const FUNDS = [
+  ['016053','华宝纳斯达克精选'],
+  ['005698','华夏全球科技'],
+  ['005907','招商纳斯达克100'],
+  ['006105','招商纳斯达克100A'],
+  ['006299','广发全球医疗保健'],
+  ['006479','广发纳斯达克100'],
+  ['010154','中银全球策略'],
+  ['012752','中欧时代先锋'],
+  ['019005','银华消费主题'],
+  ['050025','博时标普500'],
+  ['159740','大成恒生科技ETF'],
+  ['159801','招商国证生物医药ETF'],
+  ['160216','国泰大宗商品'],
+  ['161040','富国全球医药'],
+  ['161128','易方达标普信息科技'],
+  ['161213','国投瑞银全球新兴'],
+  ['161815','银华抗通胀主题'],
+  ['513010','易方达恒生科技ETF'],
+  ['513050','中概互联ETF'],
+  ['513090','易方达港股通'],
+  ['005559','汇添富中证医药'],
+];
+const HOT_TOP = 12;          // 热门 tab 显示前 N 只
+const REFRESH_MS = 30000;    // 30s 自动刷新
+const TX_URL = 'https://qt.gtimg.cn/q=';
+
+/* ===== 工具 ===== */
+const $ = id => document.getElementById(id);
+const fmtPct = v => (v == null || !isFinite(v)) ? '--' : (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+const cls = v => v > 0 ? 'up' : (v < 0 ? 'dn' : 'fl');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ===== 距开盘倒计时（美股夏令时 = 北京 21:30；冬令时 = 22:30，11 月首周日切换）=====
+   8 月 19 日处于夏令时：开盘 21:30
+   "夜盘" = 美股处于盘前/盘中/盘后估算时段（北京时间 16:00 ~ 次日 04:00） */
+function usMarketState(){
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const mins = h * 60 + m + s / 60;
+  // 夏令时：盘前 16:00(=960) — 开盘 21:30(=1290) — 盘中 21:30~次日 04:00(=240)
+  // 当前时段：
+  let state, openMin;
+  if (mins >= 960 && mins < 1290){ state = 'pre'; openMin = 1290; }             // 盘前
+  else if (mins >= 1290 || mins < 240){ state = 'live'; openMin = 1290; }       // 盘中（含凌晨）
+  else if (mins >= 240 && mins < 540){ state = 'closed'; openMin = 1290; }      // 已收盘 04:00~09:00
+  else { state = 'pre'; openMin = 1290; }                                       // 09:00~16:00 等待盘前
+  // 倒计时到下一个 21:30
+  let delta = (openMin - mins + 1440) % 1440;
+  if (state === 'live' && mins < 1290) delta = 0; // 已在盘中
+  return { state, hh: Math.floor(delta / 60), mm: Math.floor(delta % 60), ss: Math.floor((delta * 60) % 60) };
+}
+function pad2(n){ return String(n).padStart(2, '0'); }
+
+/* ===== 拉腾讯 ETF 行情 ===== */
+async function loadTop4(){
+  const codes = TOP4.map(t => t.code).join(',');
+  const r = await fetch(TX_URL + codes, { cache: 'no-store' });
+  if (!r.ok) throw new Error('腾讯行情 HTTP ' + r.status);
+  const t = await r.text();
+  const map = {};
+  t.split(';').forEach(line => {
+    const m = line.match(/v_(\w+)="([^"]*)"/);
+    if (m){
+      const f = m[2].split('~');
+      const price = parseFloat(f[3]), pre = parseFloat(f[4]);
+      if (isFinite(price) && isFinite(pre) && pre > 0){
+        map[m[1]] = { price, pct: (price - pre) / pre * 100 };
+      }
+    }
+  });
+  return map;
+}
+
+/* ===== 拉 QDII 基金估值（腾讯 jj 前缀，需分批 5 只/请求避免限频） ===== */
+async function loadFunds(){
+  /* 腾讯 jj 限制：单次请求无论多少代码只返回 1 只 → 改为每只单独请求，间隔 150ms */
+  const GAP = 150;
+  const map = {};
+  for (const f of FUNDS){
+    const code = f[0];
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 6000);
+      const r = await fetch(TX_URL + 'jj' + code, { cache: 'no-store', signal: ctrl.signal });
+      clearTimeout(t);
+      const txt = await r.text();
+      txt.split(';').forEach(line => {
+        const m = line.match(/v_jj(\w+)="([^"]*)"/);
+        if (m){
+          const f2 = m[2].split('~');
+          const pct = parseFloat(f2[7]);
+          if (isFinite(pct) && pct !== 0) map[m[1]] = { pct };
+        }
+      });
+    } catch (e){ /* 单只失败不影响其他 */ }
+    await new Promise(r => setTimeout(r, GAP));
+  }
+  return map;
+}
+
+/* ===== 自选（localStorage） ===== */
+const FAV_KEY = 'qdii_fav_v1';
+const getFav = () => { try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]') || []; } catch(e){ return []; } };
+const setFav = arr => { try { localStorage.setItem(FAV_KEY, JSON.stringify(arr)); } catch(e){} };
+function toggleFav(code){
+  const arr = getFav();
+  const i = arr.indexOf(code);
+  if (i >= 0) arr.splice(i, 1); else arr.push(code);
+  setFav(arr);
+  renderFunds(getLastBd());
+}
+
+/* ===== 渲染 ===== */
+let currentTab = 'all';
+let lastTop = {}, lastBd = {};
+const getLastBd = () => lastBd;
+
+function renderTop(map){
+  $('cards').innerHTML = TOP4.map(t => {
+    const d = map[t.code];
+    if (!d) return '<div class="card"><div class="n">' + t.name + '</div><div class="p fl">--</div></div>';
+    return '<div class="card"><div class="n">' + t.name + (t.suffix || '') + '</div><div class="p ' + cls(d.pct) + '">' + fmtPct(d.pct) + '</div></div>';
+  }).join('');
+}
+
+function renderFunds(map){
+  const fav = new Set(getFav());
+  let funds;
+  if (currentTab === 'hot'){
+    funds = FUNDS.slice(0, HOT_TOP);
+  } else if (currentTab === 'fav'){
+    funds = FUNDS.filter(f => fav.has(f[0]));
+  } else {
+    funds = FUNDS;
+  }
+  const list = $('list');
+  if (currentTab === 'fav' && !funds.length){
+    list.innerHTML = '<div class="empty">还没有自选基金，点击列表上的 ☆ 加入</div>';
+    return;
+  }
+  list.innerHTML = funds.map(f => {
+    const code = f[0], name = f[1];
+    const d = map[code];
+    const pct = d && isFinite(d.pct) ? d.pct : null;
+    const c = pct == null ? 'fl' : cls(pct);
+    const isFav = fav.has(code);
+    return '<div class="row">' +
+      '<div class="left"><span class="star ' + (isFav ? 'on' : '') + '" onclick="event.stopPropagation();toggleFav(\'' + code + '\')">' + (isFav ? '★' : '☆') + '</span>' +
+      '<div class="nm-block"><span class="nm">' + name + '</span><span class="tag">夜盘</span></div></div>' +
+      '<div class="right ' + c + '">' + fmtPct(pct) + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function switchTab(name){
+  currentTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+  renderFunds(lastBd);
+}
+
+function showSwitch(){ $('floatPop').style.display = 'flex'; }
+function hideFloat(){ $('floatPop').style.display = 'none'; }
+
+/* ===== 倒计时 ===== */
+function tickClock(){
+  const s = usMarketState();
+  const txt = s.state === 'live' ? '交易中'
+    : (s.state === 'pre' ? '夜盘 距开盘'
+    : (s.state === 'closed' ? '已收盘'
+    : '夜盘'));
+  $('nightText').textContent = txt + ' ' + pad2(s.hh) + ':' + pad2(s.mm) + ':' + pad2(s.ss);
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ===== 刷新流程 ===== */
+let loading = false;
+async function refresh(){
+  if (loading) return;
+  loading = true;
+  try {
+    const [top, bd] = await Promise.all([loadTop4(), loadFunds()]);
+    lastTop = top; lastBd = bd;
+    renderTop(top);
+    renderFunds(bd);
+    const d = new Date();
+    $('updTime').textContent = d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  } catch (e){
+    console.error('盘前估值加载失败:', e);
+    $('updTime').textContent = '加载失败：' + (e && e.message || e);
+  } finally {
+    loading = false;
+  }
+}
+
+/* ===== 启动 ===== */
+refresh();
+setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>
