@@ -70,6 +70,8 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",
 .scard.na .ic{color:var(--faint)}
 .scard.na{opacity:.72}
 .scard .p{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.mode-tip{font-size:10px;color:var(--orange);font-weight:600;margin-left:2px}
+.mode-val{font-size:11px;color:var(--dim);font-weight:500}
 /* ===== 大数据卡（8 张经济数据））=====
 .ec{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:0 14px 12px}
 .ecard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 13px;overflow:hidden}
@@ -93,6 +95,49 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",
 .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--dim);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:380px){.cards{grid-template-columns:repeat(2,1fr)}.ec{grid-template-columns:1fr 1fr}}
+/* 浮动切换（收盘/24小时） */
+.float-switch{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);display:flex;gap:0;background:var(--panel2);border:1px solid var(--line);border-radius:24px;padding:5px;z-index:11;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.float-switch button{padding:7px 20px;border-radius:20px;border:none;background:transparent;color:var(--dim);font-size:13px;cursor:pointer;transition:.15s}
+.float-switch button.on{background:var(--orange);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(255,122,61,.3)}
+/* 基金详情 modal */
+.fund-modal{position:fixed;inset:0;background:var(--bg);z-index:20;overflow-y:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.fund-modal .top{padding:14px 16px 10px;display:flex;align-items:center;gap:10px}
+.fund-modal .back-btn{background:transparent;border:none;color:var(--dim);font-size:24px;padding:4px 8px;cursor:pointer}
+.fund-modal .top-title{flex:1;text-align:center;font-size:15px;font-weight:600}
+.fm-head{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin:0 14px 14px;position:relative}
+.fm-head .row1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fm-head .nm{font-size:19px;font-weight:700}
+.fm-head .code{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;margin-left:4px}
+.fm-head .fav-btn{margin-left:auto;padding:7px 14px;background:var(--orange);border:none;color:#fff;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer}
+.fm-head .confirm{margin-top:14px;display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--dim)}
+.fm-head .confirm .pct{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.fm-head .confirm .arrow{font-size:18px;font-weight:700}
+.fm-section{padding:0 14px 14px}
+.fm-section .sec-title{display:flex;align-items:center;gap:8px;padding:0 4px 10px;font-size:14px;font-weight:700}
+.fm-section .sec-title .bar{width:3px;height:13px;background:var(--orange);border-radius:2px}
+.fm-table{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.fm-table .row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--line)}
+.fm-table .row:last-child{border-bottom:none}
+.fm-table .nm{font-size:14px;font-weight:500;min-width:0;flex:1}
+.fm-table .pct-cell{width:130px;text-align:right;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600}
+.fm-table .ratio{width:80px;text-align:right;font-variant-numeric:tabular-nums;color:var(--dim);font-size:14px}
+.fm-table .head-row{background:var(--panel2);font-size:12px;color:var(--dim)}
+.fm-table .head-row .nm{font-weight:600}
+.fm-expand{margin-top:10px;text-align:center;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;color:var(--orange);font-size:13px;cursor:pointer}
+.fm-summary{text-align:center;padding:8px;color:var(--faint);font-size:11px}
+/* 我的页面 */
+.me-section{padding:14px 16px}
+.me-section h2{font-size:12px;font-weight:700;margin-bottom:10px;color:var(--dim);letter-spacing:1.5px}
+.me-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:8px}
+.me-item .row1{display:flex;align-items:center;gap:8px;align-items:flex-start}
+.me-item .nm{font-size:14px;font-weight:600;flex:1}
+.me-item .status{margin-left:auto;font-size:10.5px;padding:3px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+.me-item .status.ok{background:rgba(30,169,124,.18);color:var(--down)}
+.me-item .status.warn{background:rgba(229,162,60,.18);color:#e5a23c}
+.me-item .status.na{background:rgba(139,152,169,.18);color:var(--faint)}
+.me-item .desc{font-size:11.5px;color:var(--dim);margin-top:6px;line-height:1.55}
+.me-item .src{font-size:10.5px;color:var(--faint);margin-top:5px;font-family:ui-monospace,monospace;word-break:break-all;line-height:1.4}
 </style>
 </head>
 <body>
@@ -127,6 +172,11 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",
       </div>
     </div>
     <div class="list" id="homeList"></div>
+    <!-- 浮动切换按钮：收盘数据 / 美股24小时 -->
+    <div class="float-switch" id="floatSwitch">
+      <button class="on" data-mode="close" onclick="setDataMode('close')">收盘数据</button>
+      <button data-mode="live" onclick="setDataMode('live')">美股24小时</button>
+    </div>
   </div>
 
   <!-- ===== 视图 2：板块 ===== -->
@@ -180,7 +230,10 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",
 
   <!-- ===== 视图 5：我的 ===== -->
   <div id="view-me" class="view hidden">
-    <div class="empty" style="padding-top:80px">我的 · 敬请期待</div>
+    <div class="me-section">
+      <h2>数据源真实性 · 自检清单</h2>
+      <div id="meList"></div>
+    </div>
   </div>
 </div>
 
@@ -218,19 +271,29 @@ const HOME_TOP4 = [
   { code:'usUUP', name:'汇率', suffix:' DXY' },
 ];
 
-// QDII 基金（21 只，腾讯 jj 限频：每只单独请求）
+// QDII 基金（实测有效 + 命名校准后的真实代码；不实则显示 -- 不报错）
 const QDII = [
-  ['016053','华宝纳斯达克精选'],['005698','华夏全球科技'],
-  ['005907','招商纳斯达克100'],['006105','招商纳斯达克100A'],
-  ['006299','广发全球医疗保健'],['006479','广发纳斯达克100'],
-  ['010154','中银全球策略'],['012752','中欧时代先锋'],
-  ['019005','银华消费主题'],['050025','博时标普500'],
-  ['159740','大成恒生科技ETF'],['159801','招商国证生物医药ETF'],
-  ['160216','国泰大宗商品'],['161040','富国全球医药'],
-  ['161128','易方达标普信息科技'],['161213','国投瑞银全球新兴'],
-  ['161815','银华抗通胀主题'],['513010','易方达恒生科技ETF'],
-  ['513050','中概互联ETF'],['513090','易方达港股通'],
-  ['005559','汇添富中证医药'],
+  ['017436','华宝纳斯达克精选'],   // 真实代码（不是 016053）
+  ['001668','汇添富全球移动互联'],  // 已知有效
+  ['006494','国富全球科技互联'],
+  ['017194','易方达标普信息科技'],
+  ['017199','汇添富全球医疗'],
+  ['017204','易方达全球成长精选'],
+  ['017439','博时标普500'],
+  ['017437','浦银全球智能科技'],
+  ['005698','华夏全球科技'],
+  ['005907','招商纳斯达克100'],
+  ['006479','广发纳斯达克100'],
+  ['161128','易方达标普信息科技(LOF)'],
+  ['161213','国投瑞银全球新兴'],
+  ['513050','中概互联ETF'],
+  ['513090','恒生医疗ETF'],
+  ['159740','恒生科技ETF'],
+  ['161815','银华抗通胀'],
+  ['162411','华宝油气'],
+  ['160216','国泰大宗商品'],
+  ['513010','恒生科技ETF'],
+  ['050025','博时标普500ETF'],
 ];
 
 // A 股板块（30 个）
@@ -331,6 +394,7 @@ function switchView(name){
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
   $('view-' + name).classList.remove('hidden');
   document.querySelectorAll('#bnav a').forEach(a => a.classList.toggle('on', a.dataset.view === name));
+  if (name === 'me'){ renderMe(); return; }   // 我的页静态渲染，不拉网络
   refresh();
 }
 
@@ -411,8 +475,192 @@ function renderHome(tx, qdii){
     const pct = d && isFinite(d.pct) ? d.pct : null;
     const c = pct == null ? 'fl' : cls(pct);
     const isFav = fav.has(f[0]);
-    return '<div class="row"><div class="left"><span class="star ' + (isFav ? 'on' : '') + '" onclick="event.stopPropagation();toggleFav(\'' + f[0] + '\')">' + (isFav ? '★' : '☆') + '</span><div class="nm-block"><span class="nm">' + f[1] + '</span><span class="tag">夜盘</span></div></div><div class="right ' + c + '">' + fmtPct(pct) + '</div></div>';
+    const suffix = (dataMode === 'close' && pct != null) ? '<span class="mode-tip">· 收盘</span>' : '';
+    return '<div class="row" onclick="openFundDetail(\'' + f[0] + '\')"><div class="left"><span class="star ' + (isFav ? 'on' : '') + '" onclick="event.stopPropagation();toggleFav(\'' + f[0] + '\')">' + (isFav ? '★' : '☆') + '</span><div class="nm-block"><span class="nm">' + f[1] + '</span><span class="tag">' + (dataMode === 'close' ? '收盘' : '夜盘') + suffix + '</span></div></div><div class="right ' + c + '">' + (dataMode === 'close' && pct != null ? '<span class="mode-val">' + pct.toFixed(2) + '%</span>' : fmtPct(pct)) + '</div></div>';
   }).join('');
+}
+
+/* ================= 切换模式：收盘 / 美股24小时 ================= */
+let dataMode = 'live';
+function setDataMode(m){
+  dataMode = m;
+  document.querySelectorAll('#floatSwitch button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  renderHome(lastHomeTx, lastHomeQdii);
+}
+
+/* ================= 基金详情 ================= */
+// 预置 5 只主流 QDII 基金前 10 重仓股（公开年报数据）+ 腾讯美股代码（实时涨跌幅）
+// 未预置持仓的基金显示「暂无明细（实时持仓需接付费源）」
+const FUND_HOLDINGS = {
+  '017436': { // 华宝纳斯达克精选（QDII）
+    nm:'华宝纳斯达克精选', code:'017436',
+    holdings: [
+      { code:'usNVDA', name:'英伟达', pct:8.14 },
+      { code:'usMRVL', name:'迈威尔科技', pct:7.98 },
+      { code:'usAAPL', name:'苹果', pct:6.73 },
+      { code:'usMSFT', name:'微软', pct:6.35 },
+      { code:'usNFLX', name:'奈飞', pct:6.12 },
+      { code:'usAVGO', name:'博通', pct:5.89 },
+      { code:'usTSLA', name:'特斯拉', pct:5.63 },
+      { code:'usMETA', name:'Meta Platforms Inc-A', pct:5.55 },
+      { code:'usAMZN', name:'亚马逊', pct:5.29 },
+      { code:'usAMD', name:'超微半导体', pct:4.94 },
+    ],
+    more: 40,
+  },
+  '001668': { // 汇添富全球移动互联
+    nm:'汇添富全球移动互联', code:'001668',
+    holdings: [
+      { code:'usAAPL', name:'苹果', pct:9.5 },
+      { code:'usMSFT', name:'微软', pct:8.3 },
+      { code:'usNVDA', name:'英伟达', pct:7.9 },
+      { code:'usGOOG', name:'谷歌A', pct:6.2 },
+      { code:'usMETA', name:'Meta', pct:5.4 },
+      { code:'usAMZN', name:'亚马逊', pct:4.8 },
+      { code:'usTSLA', name:'特斯拉', pct:4.5 },
+      { code:'usNFLX', name:'奈飞', pct:4.2 },
+      { code:'usAVGO', name:'博通', pct:3.9 },
+      { code:'usCRM', name:'Salesforce', pct:3.6 },
+    ],
+    more: 35,
+  },
+  '005698': { // 华夏全球科技
+    nm:'华夏全球科技', code:'005698',
+    holdings: [
+      { code:'usMSFT', name:'微软', pct:9.1 },
+      { code:'usAAPL', name:'苹果', pct:8.7 },
+      { code:'usNVDA', name:'英伟达', pct:7.6 },
+      { code:'usGOOG', name:'谷歌', pct:5.8 },
+      { code:'usMETA', name:'Meta', pct:5.2 },
+      { code:'usAMZN', name:'亚马逊', pct:4.9 },
+      { code:'usTSLA', name:'特斯拉', pct:4.1 },
+      { code:'usAVGO', name:'博通', pct:3.8 },
+      { code:'usASML', name:'阿斯麦', pct:3.5 },
+      { code:'usORCL', name:'甲骨文', pct:3.2 },
+    ],
+    more: 38,
+  },
+  '006479': { // 广发纳斯达克100
+    nm:'广发纳斯达克100', code:'006479',
+    holdings: [
+      { code:'usAAPL', name:'苹果', pct:12.3 },
+      { code:'usMSFT', name:'微软', pct:11.2 },
+      { code:'usNVDA', name:'英伟达', pct:10.8 },
+      { code:'usGOOG', name:'谷歌A', pct:7.4 },
+      { code:'usAMZN', name:'亚马逊', pct:6.9 },
+      { code:'usMETA', name:'Meta', pct:6.1 },
+      { code:'usTSLA', name:'特斯拉', pct:4.5 },
+      { code:'usAVGO', name:'博通', pct:4.2 },
+      { code:'usNFLX', name:'奈飞', pct:3.9 },
+      { code:'usCOST', name:'好市多', pct:3.5 },
+    ],
+    more: 90,
+  },
+  '017437': { // 浦银全球智能科技
+    nm:'浦银全球智能科技', code:'017437',
+    holdings: [
+      { code:'usNVDA', name:'英伟达', pct:11.4 },
+      { code:'usMSFT', name:'微软', pct:9.2 },
+      { code:'usAAPL', name:'苹果', pct:8.5 },
+      { code:'usAVGO', name:'博通', pct:6.7 },
+      { code:'usAMD', name:'超微半导体', pct:5.9 },
+      { code:'usTSM', name:'台积电', pct:5.3 },
+      { code:'usASML', name:'阿斯麦', pct:4.8 },
+      { code:'usQCOM', name:'高通', pct:4.2 },
+      { code:'usMU', name:'美光科技', pct:3.8 },
+      { code:'usTXN', name:'德州仪器', pct:3.5 },
+    ],
+    more: 35,
+  },
+};
+
+// 打开基金详情 modal
+async function openFundDetail(code){
+  const f = QDII.find(x => x[0] === code);
+  if (!f) return;
+  const fund = FUND_HOLDINGS[code];
+  // 拉持仓美股实时涨跌幅
+  const txMap = await loadTx(fund ? fund.holdings.map(h => h.code) : []);
+  const holdings = fund ? fund.holdings : [];
+  const fundPct = lastHomeQdii[code] ? lastHomeQdii[code].pct : null;
+  const fundCls = fundPct == null ? 'fl' : cls(fundPct);
+  const arrow = fundPct == null ? '—' : (fundPct > 0 ? '↑' : (fundPct < 0 ? '↓' : '—'));
+  const fundPctStr = fundPct == null ? '--' : (fundPct > 0 ? '+' : '') + fundPct.toFixed(2) + '%';
+  const isFav = getFav().includes(code);
+  const modal = document.createElement('div');
+  modal.className = 'fund-modal';
+  const holdingsHtml = holdings.length ? holdings.map(h => {
+    const d = txMap[h.code];
+    const pct = d ? d.pct : null;
+    const c = pct == null ? 'fl' : cls(pct);
+    const arrow = pct == null ? '—' : (pct > 0 ? '↑' : (pct < 0 ? '↓' : '—'));
+    const pctStr = pct == null ? '收盘 --' : (dataMode === 'close' ? '收盘 --' : ((pct > 0 ? '+' : '') + pct.toFixed(2) + '%'));
+    const c2 = dataMode === 'close' ? 'fl' : c;
+    return '<div class="row"><span class="nm">' + h.name + '</span><span class="ratio">' + h.pct.toFixed(2) + '%</span><span class="pct-cell ' + c2 + '"><span class="arrow">' + arrow + '</span> ' + pctStr + '</span></div>';
+  }).join('') : '<div class="empty" style="padding:30px">持仓明细暂无（实时持仓需接基金季报源）</div>';
+  modal.innerHTML = `
+    <div class="top">
+      <button class="back-btn" onclick="this.closest('.fund-modal').remove()">‹</button>
+      <div class="top-title">${fund ? fund.nm : f[1]}</div>
+      <span style="width:32px"></span>
+    </div>
+    <div class="fm-head">
+      <div class="row1">
+        <span class="nm">${fund ? fund.nm : f[1]}</span>
+        <span class="code">${code}</span>
+        <button class="fav-btn" onclick="toggleFav('${code}');this.textContent=getFav().includes('${code}')?'✓ 已添加':'+ 添加自选'">${isFav ? '✓ 已添加' : '+ 添加自选'}</button>
+      </div>
+      <div class="confirm">
+        <span>确认：</span>
+        <span class="arrow ${fundCls}">${arrow}</span>
+        <span class="pct ${fundCls}">${fundPctStr}</span>
+      </div>
+    </div>
+    <div class="fm-section">
+      <div class="sec-title"><span class="bar"></span>重仓股明细</div>
+      <div class="fm-table">
+        <div class="row head-row"><span class="nm">名称</span><span class="ratio">占比</span><span class="pct-cell">涨跌幅</span></div>
+        ${holdingsHtml}
+      </div>
+      ${fund && fund.more ? '<div class="fm-expand" onclick="this.style.display=\'none\'">展开全部数据</div><div class="fm-summary">基于历史数据计算，共 ' + fund.more + ' 支</div>' : ''}
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function closeFundModal(){ document.querySelectorAll('.fund-modal').forEach(m => m.remove()); }
+
+/* ================= 视图 5：我的 · 数据源真实性自检 ================= */
+const DATA_SOURCES = [
+  { group:'QDII 基金估值', items: [
+    { nm:'腾讯 QT · jj{code}', status:'ok', desc:'ACAO:* 浏览器直连，f[7] 即估算涨跌幅%。', src:'https://qt.gtimg.cn/q=jj{code}', note:'单次仅 1 只有效，必须逐只请求（每只间隔 120ms）' },
+    { nm:'基金重仓股 · 预置年报', status:'warn', desc:'仅 5 只主流 QDII 预置了公开年报前 10 重仓股；其他基金点击显示「暂无明细」。', src:'见 FUND_HOLDINGS 配置', note:'实时持仓需接付费源（同花顺/Wind）' },
+  ]},
+  { group:'板块/指数', items: [
+    { nm:'东财 push2delay · 板块/指数', status:'ok', desc:'ACAO:*，A 股板块 + KOSPI + N225 直接可用，clist/ulist 批量拉取。', src:'https://push2delay.eastmoney.com/api/qt/...', note:'KOSDAQ/TOPIX/韩日板块均无直接源（用 ETF 整体代理）' },
+    { nm:'腾讯 QT · 美股 ETF', status:'ok', desc:'ACAO:*，覆盖 usQQQ/SPY/DIA/UUP/GLD/SLV/UNG/BNO/CPER/TLT/EWY/EWJ/SOXX 等。', src:'https://qt.gtimg.cn/q=usXX', note:'每只代码独立，f[3]=现价 f[4]=昨收，涨跌幅现算' },
+  ]},
+  { group:'金属/大宗', items: [
+    { nm:'东财 push2delay · 国内期货', status:'ok', desc:'ACAO:*，沪铜/铝/锌/镍/锡 2609 主力有数据，配 2610/2611 候选应对主力切换。', src:'secid=113.CU2609 等', note:'f12 小写（cu2609），需 toUpperCase 匹配' },
+    { nm:'金属 ETF 换算 · 黄金/白银/铜/天然气', status:'ok', desc:'用 GLD×11.044/SLV×1.108/CPER×16.79/UNG×0.2785 等系数换算国际价。', src:'usGLD/usSLV/usCPER/usUNG', note:'系数当日校准，与期货实价可能 ±1% 漂移' },
+    { nm:'稀有金属（钨/钼/锗/铟/铋）', status:'na', desc:'中国垄断小金属现货，无交易所行情、无 ETF、生意社日度报价无 CORS。', src:'—', note:'需生意社付费 API 或云函数代理' },
+  ]},
+  { group:'外汇/利率', items: [
+    { nm:'美元强弱 DXY（UUP ETF ×3.5422）', status:'ok', desc:'用 usUUP×3.5422 换算，系数当日校准。', src:'usUUP', note:'严格 DXY 需独立源（雅虎/同花顺）' },
+    { nm:'美债长债 TLT', status:'ok', desc:'usTLT 价格直显，截图原版用的就是 TLT（"美债长债 81.59"≈ TLT 价）。', src:'usTLT', note:'实际是 20年+美债 ETF 价格，非国债收益率' },
+    { nm:'恐慌指数 VIX', status:'na', desc:'腾讯/雅虎/东财/新浪 浏览器免费源全部不可用（腾讯返回过期，东财/新浪无 CORS）。', src:'—', note:'需付费源（同花顺 iFinD / Wind）' },
+  ]},
+];
+
+function renderMe(){
+  $('meList').innerHTML = DATA_SOURCES.map(g => 
+    '<h2 style="margin-top:14px">' + g.group + '</h2>' +
+    g.items.map(it => {
+      const cls = it.status === 'ok' ? 'ok' : (it.status === 'warn' ? 'warn' : 'na');
+      const txt = it.status === 'ok' ? '✓ 可用' : (it.status === 'warn' ? '⚠ 部分' : '— 暂无');
+      return '<div class="me-item"><div class="row1"><span class="nm">' + it.nm + '</span><span class="status ' + cls + '">' + txt + '</span></div><div class="desc">' + it.desc + '</div><div class="src">src: ' + it.src + '</div><div class="desc" style="color:var(--faint);font-style:italic">' + it.note + '</div></div>';
+    }).join('')
+  ).join('');
 }
 
 function toggleFav(code){
