@@ -20,7 +20,7 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",
 /* ===== 顶栏（所有视图共享）===== */
 .top{padding:18px 16px 12px;display:flex;align-items:center;gap:10px}
 .title-block{display:flex;align-items:center;gap:8px}
-.title-ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#3b8eff,#1a5cff);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.title-ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#ff7a3d,#ff5b1a);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
 .title-name{font-size:18px;font-weight:700}
 .icon-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--dim);cursor:pointer;background:transparent;border:none;font-size:16px}
 .meta{margin-left:auto;display:flex;align-items:center;gap:6px}
@@ -64,6 +64,11 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",
 .scard .left{display:flex;align-items:center;gap:8px;min-width:0}
 .scard .ic{width:22px;height:22px;border-radius:5px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .scard .nm{font-size:13px;font-weight:500}
+.scard .sub{font-size:10.5px;color:var(--faint);margin-top:2px;font-variant-numeric:tabular-nums}
+.scard .right2{text-align:right}
+.scard .pv{font-size:11.5px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.scard.na .ic{color:var(--faint)}
+.scard.na{opacity:.72}
 .scard .p{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
 /* ===== 大数据卡（8 张经济数据））=====
 .ec{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:0 14px 12px}
@@ -289,22 +294,23 @@ const GLOBAL_FX = [
   { key:'gas',    code:'usUNG',  mul:0.2785,  dp:3, name:'天然气',     unit:'美元/MMBtu' },
 ];
 
-// 工业金属（5 项）
+// 工业金属（5 项，国内期货主力候选，东财 secid=113.品种+月份）
+// 合约随主力切换自动前移：多个候选取第一个有数据的，未来月份预置避免失效
 const METALS_BASE = [
-  { code:'usCPER', mul:16.79, dp:2, name:'铜', unit:'美分/磅' },
-  { code:'usAA',   mul:1,     dp:2, name:'铝', unit:'美铝股价' },  // 仅近似
-  { code:null, name:'锌', unit:'--' },
-  { code:null, name:'镍', unit:'--' },
-  { code:null, name:'锡', unit:'--' },
+  { name:'铜', label:'沪铜', contracts:['CU2609','CU2610','CU2611'], dp:0, unit:'元/吨' },
+  { name:'铝', label:'沪铝', contracts:['AL2609','AL2610','AL2611'], dp:0, unit:'元/吨' },
+  { name:'锌', label:'沪锌', contracts:['ZN2609','ZN2610','ZN2611'], dp:0, unit:'元/吨' },
+  { name:'镍', label:'沪镍', contracts:['NI2609','NI2610','NI2611'], dp:0, unit:'元/吨' },
+  { name:'锡', label:'沪锡', contracts:['SN2609','SN2610','SN2611'], dp:0, unit:'元/吨' },
 ];
 
-// 其他金属（5 项）
+// 其他金属（5 项，稀有金属无交易所行情，暂无浏览器可用的实时源）
 const METALS_OTHER = [
-  { code:null, name:'钨', unit:'--' },
-  { code:null, name:'钼', unit:'--' },
-  { code:null, name:'锗', unit:'--' },
-  { code:null, name:'铟', unit:'--' },
-  { code:null, name:'铋', unit:'--' },
+  { name:'钨', note:'现货日报价' },
+  { name:'钼', note:'现货日报价' },
+  { name:'锗', note:'现货日报价' },
+  { name:'铟', note:'现货日报价' },
+  { name:'铋', note:'现货日报价' },
 ];
 
 const REFRESH_MS = 30000;
@@ -483,7 +489,7 @@ function renderJpkr(eastMap, txMap){
 }
 
 /* ================= 视图 4：有色 ================= */
-function renderMetals(tx){
+function renderMetals(tx, futMap){
   // 8 张全球经济数据
   $('metalsCards').innerHTML = GLOBAL_FX.map(f => {
     if (f.na) return '<div class="ecard"><div class="n">' + f.name + '</div><div class="v fl">--</div><div class="p fl">暂无实时源</div></div>';
@@ -493,18 +499,34 @@ function renderMetals(tx){
     const c = cls(d.pct);
     return '<div class="ecard"><div class="n">' + f.name + '</div><div class="v ' + c + '">' + (v.toFixed(f.dp)) + '</div><div class="p ' + c + '">' + fmtPct(d.pct) + '</div></div>';
   }).join('');
-  // 工业金属
+  // 工业金属（国内期货，显示现价+涨跌）
   $('metalBaseGrid').innerHTML = METALS_BASE.map(m => {
-    if (!m.code) return '<div class="scard"><div class="left"><span class="ic">·</span><span class="nm">' + m.name + '</span></div><span class="p fl">--</span></div>';
-    const d = tx[m.code];
-    const pct = d ? d.pct : null;
-    const c = pct == null ? 'fl' : cls(pct);
-    return '<div class="scard"><div class="left"><span class="ic">·</span><span class="nm">' + m.name + '</span></div><span class="p ' + c + '">' + fmtPct(pct) + '</span></div>';
+    let d = null, usedCode = null;
+    for (const c of m.contracts){
+      if (futMap[c]){ d = futMap[c]; usedCode = c; break; }
+    }
+    if (!d) return '<div class="scard"><div class="left"><span class="ic">◈</span><div><div class="nm">' + m.name + '</div><div class="sub">' + m.label + ' · 暂无</div></div></div><span class="p fl">--</span></div>';
+    const c = cls(d.pct);
+    const mv = usedCode.slice(0, 2);   // '26' → 26年
+    const mm = usedCode.slice(2);      // '09' → 9月
+    return '<div class="scard"><div class="left"><span class="ic">◈</span><div><div class="nm">' + m.name + '</div><div class="sub">' + m.label + mv + '·' + mm + '月 元/吨</div></div></div><div class="right2"><div class="p ' + c + '">' + fmtPct(d.pct) + '</div><div class="pv ' + c + '">' + (d.price != null ? d.price.toFixed(m.dp) : '--') + '</div></div></div>';
   }).join('');
-  // 其他金属
+  // 其他金属（稀有金属：无交易所行情，明确占位说明）
   $('metalOtherGrid').innerHTML = METALS_OTHER.map(m => {
-    return '<div class="scard"><div class="left"><span class="ic">·</span><span class="nm">' + m.name + '</span></div><span class="p fl">--</span></div>';
+    return '<div class="scard na"><div class="left"><span class="ic">·</span><div><div class="nm">' + m.name + '</div><div class="sub">' + (m.note || '') + '</div></div></div><span class="p fl">--</span></div>';
   }).join('');
+}
+
+/* 拉国内期货金属（东财 secid=113.合约，批量） */
+async function loadFutures(){
+  const secids = [];
+  METALS_BASE.forEach(m => m.contracts.forEach(c => secids.push('113.' + c)));
+  const r = await fetch(EM_URL + '?secids=' + secids.join(',') + '&fields=f2,f3,f12,f14&fltt=2&invt=2', { cache: 'no-store' });
+  if (!r.ok) throw new Error('期货 HTTP ' + r.status);
+  const j = await r.json();
+  const map = {};
+  (j.data && j.data.diff || []).forEach(x => { if (x && x.f12) map[String(x.f12).toUpperCase()] = { pct: x.f3, price: x.f2 }; });
+  return map;
 }
 
 /* ================= 夜盘倒计时（仅首页显示） ================= */
@@ -535,7 +557,10 @@ async function refresh(){
   loading = true;
   try {
     if (currentView === 'home'){
+      $('homeList').innerHTML = '<div class="loading"><span class="spin"></span>QDII 估值加载中（21 只逐一拉取）…</div>';
       const tx = await loadTx(HOME_TOP4.map(t => t.code));
+      lastHomeTx = tx;
+      renderHome(tx, {});
       const qdii = await loadQDII();
       lastHomeTx = tx; lastHomeQdii = qdii;
       renderHome(tx, qdii);
@@ -550,8 +575,9 @@ async function refresh(){
       const tx = await loadTx(['usEWY','usEWJ','usSOXX','usTM','usSONY','usHMC','usAA','usFCX']);
       renderJpkr(east, tx);
     } else if (currentView === 'metals'){
-      const tx = await loadTx(GLOBAL_FX.filter(f => !f.na).map(f => f.code).concat(['usAA']));
-      renderMetals(tx);
+      const tx = await loadTx(GLOBAL_FX.filter(f => !f.na).map(f => f.code));
+      const fut = await loadFutures();
+      renderMetals(tx, fut);
     }
   } catch(e){ console.error(e); }
   finally { loading = false; }
