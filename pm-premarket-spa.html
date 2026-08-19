@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>盘前估值 · 全球市场面板</title>
+<style>
+:root{
+  --bg:#0c0e12; --panel:#171a21; --panel2:#1f232b; --line:#272d38;
+  --txt:#e8edf4; --dim:#8b98a9; --faint:#5c6a7d;
+  --up:#e5484d; --down:#1ea97c; --flat:#8b98a9;
+  --orange:#ff7a3d; --orange2:#ff5b1a;
+  --red2:#f23e4a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;min-height:100vh;font-size:14px}
+.wrap{max-width:520px;margin:0 auto;padding:0 0 80px}
+.hidden{display:none!important}
+.up{color:var(--up)} .dn{color:var(--down)} .fl{color:var(--flat)}
+/* ===== 顶栏（所有视图共享）===== */
+.top{padding:18px 16px 12px;display:flex;align-items:center;gap:10px}
+.title-block{display:flex;align-items:center;gap:8px}
+.title-ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#3b8eff,#1a5cff);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.title-name{font-size:18px;font-weight:700}
+.icon-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--dim);cursor:pointer;background:transparent;border:none;font-size:16px}
+.meta{margin-left:auto;display:flex;align-items:center;gap:6px}
+/* ===== 首页（QDII）特有 ===== */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:0 14px 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 8px 11px;text-align:center;overflow:hidden}
+.card .n{font-size:12px;color:var(--dim);margin-bottom:6px}
+.card .p{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.night{display:inline-flex;align-items:center;gap:5px;background:rgba(255,122,61,.12);color:var(--orange);border:1px solid rgba(255,122,61,.35);padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+.night .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.status{padding:8px 16px 12px;font-size:12px;color:var(--dim)}
+.tab-row{display:flex;align-items:center;justify-content:space-between;padding:6px 14px 10px}
+.tabs{display:flex;gap:6px;background:var(--panel);border-radius:22px;padding:4px}
+.tab{padding:6px 14px;border-radius:18px;font-size:13px;color:var(--dim);cursor:pointer;font-weight:600}
+.tab.on{background:var(--orange);color:#fff}
+.act-btns{display:flex;gap:8px}
+.act{padding:6px 13px;border-radius:18px;background:var(--panel);border:1px solid var(--line);color:var(--txt);font-size:12.5px;display:flex;align-items:center;gap:4px;cursor:pointer}
+.list{padding:0 14px}
+.row{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.row .left{display:flex;align-items:center;gap:8px;min-width:0}
+.row .nm-block{display:flex;flex-direction:column;gap:4px}
+.row .nm{font-size:14px;font-weight:500}
+.tag{display:inline-flex;align-items:center;background:rgba(255,122,61,.15);color:var(--orange);border:1px solid rgba(255,122,61,.35);padding:1px 7px;border-radius:4px;font-size:10.5px;font-weight:600;line-height:1.4}
+.row .right{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;min-width:80px;text-align:right}
+.star{cursor:pointer;color:var(--faint);font-size:16px;padding:4px}
+.star.on{color:var(--orange)}
+/* ===== 板块/日韩/有色 网格 ===== */
+.sec-head{padding:4px 16px 10px;display:flex;align-items:center;gap:8px}
+.sec-title{font-size:14px;font-weight:700}
+.sec-dot{width:3px;height:13px;background:var(--orange);border-radius:2px}
+.sec-state{display:inline-flex;align-items:center;gap:5px;background:rgba(255,122,61,.15);color:var(--orange);border:1px solid rgba(255,122,61,.35);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.sec-state::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--orange)}
+.sec-state.green{background:rgba(30,169,124,.15);color:var(--down);border-color:rgba(30,169,124,.35)}
+.sec-state.green::before{background:var(--down)}
+.sec-state.gray{background:rgba(139,152,169,.15);color:var(--dim);border-color:rgba(139,152,169,.35)}
+.sec-state.gray::before{background:var(--dim)}
+.sec-count{margin-left:auto;font-size:11.5px;color:var(--faint)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:0 14px}
+.scard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center}
+.scard .left{display:flex;align-items:center;gap:8px;min-width:0}
+.scard .ic{width:22px;height:22px;border-radius:5px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.scard .nm{font-size:13px;font-weight:500}
+.scard .p{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+/* ===== 大数据卡（8 张经济数据））=====
+.ec{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:0 14px 12px}
+.ecard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 13px;overflow:hidden}
+.ecard .n{font-size:12px;color:var(--dim);margin-bottom:6px}
+.ecard .v{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.ecard .p{font-size:11.5px;font-weight:600;margin-top:2px}
+.gp{padding:0 14px 12px}
+.gp .ghead{padding:0 4px 8px;display:flex;align-items:center;gap:8px}
+.gp .ghead h3{font-size:13px;font-weight:700}
+.gp .ghead .bar{width:3px;height:12px;background:var(--orange);border-radius:2px}
+/* ===== 底部导航 ===== */
+.bnav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 0 6px;z-index:10}
+.bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--dim);text-decoration:none;padding:4px 0;cursor:pointer}
+.bnav a.on{color:var(--red2)}
+.bnav a.on svg{stroke:var(--red2);fill:none}
+.bnav a svg{width:22px;height:22px;stroke:var(--dim);fill:none;stroke-width:1.4}
+.bnav .me-circle{font-size:24px;line-height:1}
+/* ===== 通用 ===== */
+.loading{padding:40px;text-align:center;color:var(--dim);font-size:13px}
+.empty{padding:40px;text-align:center;color:var(--dim);font-size:13px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--dim);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:380px){.cards{grid-template-columns:repeat(2,1fr)}.ec{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- 公共顶栏 -->
+  <div class="top">
+    <div class="title-block">
+      <div class="title-ico">盘</div>
+      <div class="title-name" id="titleName">盘前估值</div>
+    </div>
+    <span class="night hidden" id="nightTag"><span class="dot"></span><span id="nightText"></span></span>
+    <div class="meta">
+      <button class="icon-btn" onclick="shareModal()">↗</button>
+      <button class="icon-btn" onclick="refresh()">···</button>
+      <button class="icon-btn" onclick="refresh()">↻</button>
+    </div>
+  </div>
+
+  <!-- ===== 视图 1：首页 QDII ===== -->
+  <div id="view-home" class="view">
+    <div class="cards" id="homeCards"></div>
+    <div class="status">基于年报、季报持仓估算 · 更新于 <span id="homeUpd">--</span> · 仅供参考</div>
+    <div class="tab-row">
+      <div class="tabs">
+        <div class="tab" data-tab="hot" onclick="switchHomeTab('hot')">热门</div>
+        <div class="tab on" data-tab="all" onclick="switchHomeTab('all')">全部</div>
+        <div class="tab" data-tab="fav" onclick="switchHomeTab('fav')">自选</div>
+      </div>
+      <div class="act-btns">
+        <div class="act" onclick="shareModal()">↗ 分享</div>
+        <div class="act" onclick="refresh()">↻ 刷新</div>
+      </div>
+    </div>
+    <div class="list" id="homeList"></div>
+  </div>
+
+  <!-- ===== 视图 2：板块 ===== -->
+  <div id="view-sectors" class="view hidden">
+    <div class="sec-head">
+      <span class="sec-dot"></span>
+      <span class="sec-title">板块数据</span>
+      <span class="sec-state" id="secState">大A盘中</span>
+      <span class="sec-count" id="secCount">30 个板块</span>
+    </div>
+    <div class="grid" id="sectorsGrid"></div>
+  </div>
+
+  <!-- ===== 视图 3：日韩 ===== -->
+  <div id="view-jpkr" class="view hidden">
+    <div class="gp">
+      <div class="ghead"><span class="bar"></span><h3>韩国综合</h3><span class="sec-state green" id="jpkrState1">日韩 交易中</span></div>
+      <div class="ec" id="krIndex"></div>
+    </div>
+    <div class="gp">
+      <div class="ghead"><span class="bar"></span><h3>韩国核心板块</h3></div>
+      <div class="grid" id="krGrid"></div>
+    </div>
+    <div class="gp">
+      <div class="ghead"><span class="bar"></span><h3>日本综合</h3></div>
+      <div class="ec" id="jpIndex"></div>
+    </div>
+    <div class="gp">
+      <div class="ghead"><span class="bar"></span><h3>日本核心板块</h3></div>
+      <div class="grid" id="jpGrid"></div>
+    </div>
+  </div>
+
+  <!-- ===== 视图 4：有色 ===== -->
+  <div id="view-metals" class="view hidden">
+    <div class="sec-head">
+      <span class="sec-dot"></span>
+      <span class="sec-title">全球经济数据</span>
+      <span class="sec-state green" id="metalsState">有色 已更新</span>
+    </div>
+    <div class="ec" id="metalsCards"></div>
+    <div class="gp">
+      <div class="ghead"><span class="bar"></span><h3>工业金属</h3></div>
+      <div class="grid" id="metalBaseGrid"></div>
+    </div>
+    <div class="gp">
+      <div class="ghead"><span class="bar"></span><h3>其他金属</h3></div>
+      <div class="grid" id="metalOtherGrid"></div>
+    </div>
+  </div>
+
+  <!-- ===== 视图 5：我的 ===== -->
+  <div id="view-me" class="view hidden">
+    <div class="empty" style="padding-top:80px">我的 · 敬请期待</div>
+  </div>
+</div>
+
+<nav class="bnav" id="bnav">
+  <a data-view="home" class="on" onclick="switchView('home')">
+    <svg viewBox="0 0 24 24"><path d="M12 3 L4 21 L20 21 Z"/></svg>
+    <span>首页</span>
+  </a>
+  <a data-view="sectors" onclick="switchView('sectors')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/></svg>
+    <span>板块</span>
+  </a>
+  <a data-view="jpkr" onclick="switchView('jpkr')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+    <span>日韩</span>
+  </a>
+  <a data-view="metals" onclick="switchView('metals')">
+    <svg viewBox="0 0 24 24"><path d="M12 2 L22 12 L12 22 L2 12 Z"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+    <span>有色</span>
+  </a>
+  <a data-view="me" onclick="switchView('me')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16 8 13 12 13 C16 13 20 16 20 21"/></svg>
+    <span>我的</span>
+  </a>
+</nav>
+
+<script>
+'use strict';
+/* ================= 数据配置 ================= */
+// 顶部 4 张 ETF 卡（首页共用）
+const HOME_TOP4 = [
+  { code:'usQQQ', name:'纳指ETF' },
+  { code:'usSPY', name:'标普ETF' },
+  { code:'usDIA', name:'道指ETF' },
+  { code:'usUUP', name:'汇率', suffix:' DXY' },
+];
+
+// QDII 基金（21 只，腾讯 jj 限频：每只单独请求）
+const QDII = [
+  ['016053','华宝纳斯达克精选'],['005698','华夏全球科技'],
+  ['005907','招商纳斯达克100'],['006105','招商纳斯达克100A'],
+  ['006299','广发全球医疗保健'],['006479','广发纳斯达克100'],
+  ['010154','中银全球策略'],['012752','中欧时代先锋'],
+  ['019005','银华消费主题'],['050025','博时标普500'],
+  ['159740','大成恒生科技ETF'],['159801','招商国证生物医药ETF'],
+  ['160216','国泰大宗商品'],['161040','富国全球医药'],
+  ['161128','易方达标普信息科技'],['161213','国投瑞银全球新兴'],
+  ['161815','银华抗通胀主题'],['513010','易方达恒生科技ETF'],
+  ['513050','中概互联ETF'],['513090','易方达港股通'],
+  ['005559','汇添富中证医药'],
+];
+
+// A 股板块（30 个）
+const BOARDS = [
+  ['BK1134','AI算力','🧠'],['BK1128','CPO','💡'],['BK0917','半导体','🖥️'],['BK1137','存储','📱'],
+  ['BK0922','数据中心','🗄️'],['BK0579','云计算','☁️'],['BK0963','商业航天','🚀'],['BK0629','卫星','🛰️'],
+  ['BK1090','机器人','🤖'],['BK0802','自动驾驶','🚗'],['BK0577','核电','⚛️'],['BK0581','电网','⚡'],
+  ['BK0490','军工','🛡️'],['BK0493','新能源','🔋'],['BK0588','光伏','☀️'],['BK0574','锂电池','🔌'],
+  ['BK0464','石油','🛢️'],['BK0843','天然气','🔥'],['BK0478','铜/有色','🟠'],['BK0547','黄金','🥇'],
+  ['BK1283','银行金融','🏦'],['BK1216','生物医药','💊'],['BK0438','消费','🛒'],['BK0578','稀土永磁','🧲'],
+  ['BK1106','创新药','🧬'],['BK1148','固态电池','⚡'],['BK1182','量子计算','🔮'],['BK1037','消费电子','📲'],
+  ['BK1124','科技投资','💼'],['BK1041','医疗器械','🩺'],
+];
+
+// 日韩综合指数（东财 mkt=100）
+const JPKR_INDEX = [
+  { code:'KS11', src:'east', name:'KOSPI' },
+  { code:'N225', src:'east', name:'日经225' },
+  // KOSDAQ/TOPIX 无直接数据，用 ETF 替代
+  { code:'usEWY', src:'tx', name:'KOSDAQ(代)' },
+  { code:'usEWJ', src:'tx', name:'TOPIX(代)' },
+];
+
+// 韩国核心板块（10 个，ETF/个股替代）
+const KR_BOARDS = [
+  { code:'usEWY', name:'韩国综合', ico:'🇰🇷' },     // 整体
+  { code:'513310', name:'中韩半导体', ico:'💾' },     // 存储+半导体
+  { code:'513310', name:'半导体', ico:'🔬' },
+  { code:'usFLUT', name:'电池', ico:'🔋' },           // 暂无直接，用usFLUT?
+  { code:'usSONY', name:'消费电子', ico:'📺' },
+  { code:'usHMC', name:'汽车', ico:'🚙' },
+  { code:'usEWY', name:'互联网', ico:'🌐' },          // 整体代理
+  { code:'usEWY', name:'生物医药', ico:'💊' },        // 整体代理
+  { code:'usFCX', name:'化工', ico:'⚗️' },            // 近似
+  { code:'usHMC', name:'造船', ico:'🚢' },            // 近似
+];
+
+// 日本核心板块（10 个）
+const JP_BOARDS = [
+  { code:'usSOXX', name:'半导体设备', ico:'🔬' },
+  { code:'usSOXX', name:'工业自动化', ico:'🏭' },
+  { code:'usTM', name:'精密制造', ico:'⚙️' },
+  { code:'usTM', name:'汽车产业链', ico:'🚗' },
+  { code:'usSONY', name:'消费电子', ico:'📺' },
+  { code:'usSOXX', name:'半导体材料', ico:'🔧' },
+  { code:'usSONY', name:'游戏娱乐', ico:'🎮' },
+  { code:'usEWJ', name:'科技投资', ico:'💼' },
+  { code:'usSONY', name:'消费零售', ico:'🛍️' },
+  { code:'usEWJ', name:'金融', ico:'🏦' },
+];
+
+// 全球经济数据（8 项，ETF 换算）
+const GLOBAL_FX = [
+  { key:'brent',  code:'usBNO',  mul:1.7477, dp:2, name:'布伦特原油', unit:'美元/桶' },
+  { key:'vix',    code:null,    mul:1,       dp:2, name:'恐慌指数',   unit:'VIX', na:true },
+  { key:'usd',    code:'usUUP',  mul:3.5422,  dp:2, name:'美元强弱',   unit:'DXY' },
+  { key:'bond',   code:'usTLT',  mul:1,       dp:2, name:'美债长债',   unit:'TLT' },
+  { key:'gold',   code:'usGLD',  mul:11.044,  dp:0, name:'黄金盎司',   unit:'美元/盎司' },
+  { key:'silver', code:'usSLV',  mul:1.108,   dp:2, name:'白银盎司',   unit:'美元/盎司' },
+  { key:'copper', code:'usCPER', mul:16.79,   dp:2, name:'国际铜',     unit:'美分/磅' },
+  { key:'gas',    code:'usUNG',  mul:0.2785,  dp:3, name:'天然气',     unit:'美元/MMBtu' },
+];
+
+// 工业金属（5 项）
+const METALS_BASE = [
+  { code:'usCPER', mul:16.79, dp:2, name:'铜', unit:'美分/磅' },
+  { code:'usAA',   mul:1,     dp:2, name:'铝', unit:'美铝股价' },  // 仅近似
+  { code:null, name:'锌', unit:'--' },
+  { code:null, name:'镍', unit:'--' },
+  { code:null, name:'锡', unit:'--' },
+];
+
+// 其他金属（5 项）
+const METALS_OTHER = [
+  { code:null, name:'钨', unit:'--' },
+  { code:null, name:'钼', unit:'--' },
+  { code:null, name:'锗', unit:'--' },
+  { code:null, name:'铟', unit:'--' },
+  { code:null, name:'铋', unit:'--' },
+];
+
+const REFRESH_MS = 30000;
+const TX_URL = 'https://qt.gtimg.cn/q=';
+const EM_URL = 'https://push2delay.eastmoney.com/api/qt/ulist.np/get';
+
+/* ================= 工具 ================= */
+const $ = id => document.getElementById(id);
+const fmtPct = v => (v == null || !isFinite(v)) ? '--' : (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+const cls = v => v > 0 ? 'up' : (v < 0 ? 'dn' : 'fl');
+const sign = v => v > 0 ? '▲' : (v < 0 ? '▼' : '—');
+const pad2 = n => String(n).padStart(2, '0');
+
+/* ================= 视图切换 ================= */
+let currentView = 'home';
+function switchView(name){
+  currentView = name;
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  $('view-' + name).classList.remove('hidden');
+  document.querySelectorAll('#bnav a').forEach(a => a.classList.toggle('on', a.dataset.view === name));
+  refresh();
+}
+
+/* ================= 加载：腾讯 ETF（批量） ================= */
+async function loadTx(codes){
+  if (!codes.length) return {};
+  const r = await fetch(TX_URL + codes.join(','), { cache: 'no-store' });
+  if (!r.ok) throw new Error('腾讯 HTTP ' + r.status);
+  const t = await r.text();
+  const map = {};
+  t.split(';').forEach(line => {
+    const m = line.match(/v_(\w+)="([^"]*)"/);
+    if (m){
+      const f = m[2].split('~');
+      const price = parseFloat(f[3]), pre = parseFloat(f[4]);
+      if (isFinite(price) && isFinite(pre) && pre > 0){
+        map[m[1]] = { price, pct: (price - pre) / pre * 100 };
+      }
+    }
+  });
+  return map;
+}
+
+/* ================= 加载：QDII 基金（每只单独请求） ================= */
+async function loadQDII(){
+  const map = {};
+  for (const [code] of QDII){
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 5000);
+      const r = await fetch(TX_URL + 'jj' + code, { cache: 'no-store', signal: ctrl.signal });
+      clearTimeout(t);
+      const txt = await r.text();
+      txt.split(';').forEach(line => {
+        const m = line.match(/v_jj(\w+)="([^"]*)"/);
+        if (m){
+          const f = m[2].split('~');
+          const pct = parseFloat(f[7]);
+          if (isFinite(pct) && pct !== 0) map[m[1]] = { pct };
+        }
+      });
+    } catch(e){}
+    await new Promise(r => setTimeout(r, 120));
+  }
+  return map;
+}
+
+/* ================= 加载：东财 ulist  ================= */
+async function loadEM(secids){
+  const r = await fetch(EM_URL + '?secids=' + secids.join(',') + '&fields=f2,f3,f12,f14&fltt=2&invt=2', { cache: 'no-store' });
+  if (!r.ok) throw new Error('东财 HTTP ' + r.status);
+  const j = await r.json();
+  const map = {};
+  (j.data && j.data.diff || []).forEach(x => { if (x && x.f12 && x.f12 !== '-') map[x.f12] = { pct: x.f3 }; });
+  return map;
+}
+
+/* ================= 视图 1：首页 ================= */
+let homeTab = 'all';
+const FAV_KEY = 'pm_fav_v1';
+const getFav = () => { try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]') || []; } catch(e){ return []; } };
+const setFav = a => { try { localStorage.setItem(FAV_KEY, JSON.stringify(a)); } catch(e){} };
+
+function renderHome(tx, qdii){
+  $('homeCards').innerHTML = HOME_TOP4.map(t => {
+    const d = tx[t.code];
+    if (!d) return '<div class="card"><div class="n">' + t.name + '</div><div class="p fl">--</div></div>';
+    return '<div class="card"><div class="n">' + t.name + (t.suffix || '') + '</div><div class="p ' + cls(d.pct) + '">' + fmtPct(d.pct) + '</div></div>';
+  }).join('');
+  const fav = new Set(getFav());
+  let funds = homeTab === 'hot' ? QDII.slice(0, 12) : (homeTab === 'fav' ? QDII.filter(f => fav.has(f[0])) : QDII);
+  if (homeTab === 'fav' && !funds.length){
+    $('homeList').innerHTML = '<div class="empty">还没有自选基金，点击列表上的 ☆ 加入</div>';
+    return;
+  }
+  $('homeList').innerHTML = funds.map(f => {
+    const d = qdii[f[0]];
+    const pct = d && isFinite(d.pct) ? d.pct : null;
+    const c = pct == null ? 'fl' : cls(pct);
+    const isFav = fav.has(f[0]);
+    return '<div class="row"><div class="left"><span class="star ' + (isFav ? 'on' : '') + '" onclick="event.stopPropagation();toggleFav(\'' + f[0] + '\')">' + (isFav ? '★' : '☆') + '</span><div class="nm-block"><span class="nm">' + f[1] + '</span><span class="tag">夜盘</span></div></div><div class="right ' + c + '">' + fmtPct(pct) + '</div></div>';
+  }).join('');
+}
+
+function toggleFav(code){
+  const a = getFav();
+  const i = a.indexOf(code);
+  if (i >= 0) a.splice(i, 1); else a.push(code);
+  setFav(a);
+  renderHome(lastHomeTx, lastHomeQdii);
+}
+
+function switchHomeTab(name){
+  homeTab = name;
+  document.querySelectorAll('#view-home .tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+  renderHome(lastHomeTx, lastHomeQdii);
+}
+
+/* ================= 视图 2：板块 ================= */
+function renderSectors(map){
+  $('sectorsGrid').innerHTML = BOARDS.map(b => {
+    const d = map[b[0]];
+    const pct = d && d.pct;
+    const c = pct == null ? 'fl' : cls(pct);
+    return '<div class="scard"><div class="left"><span class="ic">' + (b[2] || '·') + '</span><span class="nm">' + b[1] + '</span></div><span class="p ' + c + '">' + fmtPct(pct) + '</span></div>';
+  }).join('');
+}
+
+/* ================= 视图 3：日韩 ================= */
+function renderJpkr(eastMap, txMap){
+  // 综合指数（韩国 2 卡 + 日本 2 卡）
+  $('krIndex').innerHTML = [
+    ['KS11','KOSPI', eastMap],
+    ['usEWY','KOSDAQ(代)', txMap],
+    ['N225','日经225', eastMap],
+    ['usEWJ','TOPIX(代)', txMap],
+  ].map(([k, name, m]) => {
+    const d = m[k];
+    const c = d ? cls(d.pct) : 'fl';
+    return '<div class="ecard"><div class="n">' + name + '</div><div class="v ' + c + '">' + (d ? fmtPct(d.pct) : '--') + '</div><div class="p ' + c + '">' + (d ? 'Pct' + (d.pct > 0 ? '+' : '') + d.pct.toFixed(2) + '%' : '--') + '</div></div>';
+  }).join('');
+  // 韩国综合（KOSPI + KOSDAQ代）
+  $('krIndex').innerHTML = [
+    ['KS11','KOSPI', eastMap],
+    ['usEWY','KOSDAQ(代)', txMap],
+  ].map(([k, name, m]) => {
+    const d = m[k];
+    const c = d ? cls(d.pct) : 'fl';
+    const sg = d ? (d.pct > 0 ? '+' : '') + d.pct.toFixed(2) + '%' : '--';
+    return '<div class="ecard"><div class="n">' + name + '</div><div class="v ' + c + '">' + (d ? fmtPct(d.pct) : '--') + '</div><div class="p ' + c + '">' + sg + '</div></div>';
+  }).join('');
+  // 韩国核心板块（10 项）
+  $('krGrid').innerHTML = KR_BOARDS.map(b => {
+    const d = txMap[b.code];
+    const pct = d ? d.pct : null;
+    const c = pct == null ? 'fl' : cls(pct);
+    return '<div class="scard"><div class="left"><span class="ic">' + (b.ico || '·') + '</span><span class="nm">' + b.name + '</span></div><span class="p ' + c + '">' + fmtPct(pct) + '</span></div>';
+  }).join('');
+  // 日本综合（日经225 + TOPIX代）
+  $('jpIndex').innerHTML = [
+    ['N225','日经225', eastMap],
+    ['usEWJ','TOPIX(代)', txMap],
+  ].map(([k, name, m]) => {
+    const d = m[k];
+    const c = d ? cls(d.pct) : 'fl';
+    const sg = d ? (d.pct > 0 ? '+' : '') + d.pct.toFixed(2) + '%' : '--';
+    return '<div class="ecard"><div class="n">' + name + '</div><div class="v ' + c + '">' + (d ? fmtPct(d.pct) : '--') + '</div><div class="p ' + c + '">' + sg + '</div></div>';
+  }).join('');
+  // 日本核心板块（10 项）
+  $('jpGrid').innerHTML = JP_BOARDS.map(b => {
+    const d = txMap[b.code];
+    const pct = d ? d.pct : null;
+    const c = pct == null ? 'fl' : cls(pct);
+    return '<div class="scard"><div class="left"><span class="ic">' + (b.ico || '·') + '</span><span class="nm">' + b.name + '</span></div><span class="p ' + c + '">' + fmtPct(pct) + '</span></div>';
+  }).join('');
+}
+
+/* ================= 视图 4：有色 ================= */
+function renderMetals(tx){
+  // 8 张全球经济数据
+  $('metalsCards').innerHTML = GLOBAL_FX.map(f => {
+    if (f.na) return '<div class="ecard"><div class="n">' + f.name + '</div><div class="v fl">--</div><div class="p fl">暂无实时源</div></div>';
+    const d = tx[f.code];
+    if (!d) return '<div class="ecard"><div class="n">' + f.name + '</div><div class="v fl">--</div><div class="p fl">获取失败</div></div>';
+    const v = d.price * f.mul;
+    const c = cls(d.pct);
+    return '<div class="ecard"><div class="n">' + f.name + '</div><div class="v ' + c + '">' + (v.toFixed(f.dp)) + '</div><div class="p ' + c + '">' + fmtPct(d.pct) + '</div></div>';
+  }).join('');
+  // 工业金属
+  $('metalBaseGrid').innerHTML = METALS_BASE.map(m => {
+    if (!m.code) return '<div class="scard"><div class="left"><span class="ic">·</span><span class="nm">' + m.name + '</span></div><span class="p fl">--</span></div>';
+    const d = tx[m.code];
+    const pct = d ? d.pct : null;
+    const c = pct == null ? 'fl' : cls(pct);
+    return '<div class="scard"><div class="left"><span class="ic">·</span><span class="nm">' + m.name + '</span></div><span class="p ' + c + '">' + fmtPct(pct) + '</span></div>';
+  }).join('');
+  // 其他金属
+  $('metalOtherGrid').innerHTML = METALS_OTHER.map(m => {
+    return '<div class="scard"><div class="left"><span class="ic">·</span><span class="nm">' + m.name + '</span></div><span class="p fl">--</span></div>';
+  }).join('');
+}
+
+/* ================= 夜盘倒计时（仅首页显示） ================= */
+function usState(){
+  const d = new Date();
+  const m = d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+  if (m >= 960 && m < 1290) return { state:'pre', open:1290 };
+  if (m >= 1290 || m < 240) return { state:'live', open:1290 };
+  return { state:'closed', open:1290 };
+}
+function tickClock(){
+  const s = usState();
+  const txt = s.state === 'live' ? '交易中' : (s.state === 'pre' ? '夜盘 距开盘' : '已收盘');
+  const open = s.open;
+  const m = new Date().getHours() * 60 + new Date().getMinutes() + new Date().getSeconds() / 60;
+  const delta = (open - m + 1440) % 1440;
+  const hh = Math.floor(delta / 60), mm = Math.floor(delta % 60), ss = Math.floor((delta * 60) % 60);
+  $('nightText').textContent = txt + ' ' + pad2(hh) + ':' + pad2(mm) + ':' + pad2(ss);
+}
+setInterval(tickClock, 1000);
+tickClock();
+$('nightTag').classList.remove('hidden');
+
+/* ================= 主刷新：按当前视图加载 ================= */
+let loading = false, lastHomeTx = {}, lastHomeQdii = {};
+async function refresh(){
+  if (loading) return;
+  loading = true;
+  try {
+    if (currentView === 'home'){
+      const tx = await loadTx(HOME_TOP4.map(t => t.code));
+      const qdii = await loadQDII();
+      lastHomeTx = tx; lastHomeQdii = qdii;
+      renderHome(tx, qdii);
+      const d = new Date();
+      $('homeUpd').textContent = d.toFullString();
+    } else if (currentView === 'sectors'){
+      const secids = BOARDS.map(b => '90.' + b[0]);
+      const map = await loadEM(secids);
+      renderSectors(map);
+    } else if (currentView === 'jpkr'){
+      const east = await loadEM(['100.KS11', '100.N225']);
+      const tx = await loadTx(['usEWY','usEWJ','usSOXX','usTM','usSONY','usHMC','usAA','usFCX']);
+      renderJpkr(east, tx);
+    } else if (currentView === 'metals'){
+      const tx = await loadTx(GLOBAL_FX.filter(f => !f.na).map(f => f.code).concat(['usAA']));
+      renderMetals(tx);
+    }
+  } catch(e){ console.error(e); }
+  finally { loading = false; }
+}
+
+/* 时间格式化（不依赖浏览器地区） */
+Date.prototype.toFullString = function(){
+  return this.getFullYear() + '-' + pad2(this.getMonth() + 1) + '-' + pad2(this.getDate()) + ' ' + pad2(this.getHours()) + ':' + pad2(this.getMinutes()) + ':' + pad2(this.getSeconds());
+};
+
+function shareModal(){ /* 占位 */ }
+
+/* ===== 启动 ===== */
+refresh();
+setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>
