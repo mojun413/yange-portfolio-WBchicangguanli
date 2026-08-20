@@ -1184,7 +1184,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.073</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.074</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1586,7 +1586,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.073 · 2026-08-20 12:53 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.074 · 2026-08-20 13:03 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1647,8 +1647,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.073';
-const APP_BUILD   = '2026-08-20 12:53';
+const APP_VERSION = '1BK_V68.13.1.074';
+const APP_BUILD   = '2026-08-20 13:03';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -4694,8 +4694,10 @@ async function renderMarketLive(){
 function renderWatch(){
   const grid = document.getElementById('monitorGrid');
   if (!grid) return;
-  /* 分类计数：全部 / 个股 / ETF（场内基金）/ 基金（场外基金）/ 建仓池 */
-  const isFundW = w => { const c = String(w.code || '').replace(/\D/g, ''); return effType(c, w.type, w.typeLocked) === 'fund' && !isExchangeTraded(c); };
+  /* 分类计数：全部 / 个股 / ETF（场内基金）/ 基金（场外基金）/ 建仓池
+     isFundW 按代码段判定场外基金（effType 以 fund 视角探测，不依赖 w.type 存量值，
+     避免早期数据 type 存成 stock 导致 017436 等场外基金被误归入「个股」） */
+  const isFundW = w => { const c = String(w.code || '').replace(/\D/g, ''); return effType(c, 'fund', false) === 'fund' && !isExchangeTraded(c); };
   const cats = {
     all: watchList.length,
     etf: watchList.filter(w => isExchangeTraded(w.code)).length,
@@ -9024,6 +9026,23 @@ function migrateNasdaqA(){
   return n;
 }
 
+/* v74：自选标的类型自动识别修正——代码段是场外基金但 type 存错（早期数据存成 stock）→ 改为 fund。
+   保证：①盯盘分类正确（基金归入「基金」tab）；②行情符号走 jj 前缀（否则 market 为空时符号错、行情拿不到）。
+   幂等（无命中返回 0 不提示）；增量修正存量数据，后续新增入口本身已正确识别类型。 */
+function autoFixWatchType(){
+  let n = 0;
+  const fix = list => list.forEach(w => {
+    const c = String(w.code || '').replace(/\D/g, '');
+    if (effType(c, 'fund', false) === 'fund' && !isExchangeTraded(c) && w.type !== 'fund'){ w.type = 'fund'; n++; }
+  });
+  fix(watchList);
+  fix(watchBuy);
+  if (!n) return 0;
+  try { persistWatch(); } catch(e){}
+  try { persistWatchBuy(); } catch(e){}
+  return n;
+}
+
 function init(){
   applyUITheme(getUITheme());   /* 外观主题：尽早应用，避免闪烁 */
   setupSystemThemeWatch();      /* v69：主题「跟随系统」实时响应系统深浅色切换 */
@@ -9040,6 +9059,8 @@ function init(){
     if (_mig > 0) setTimeout(() => toast('已将华宝纳斯达克精选 C(017437) 迁移为 A(017436)（共 ' + _mig + ' 处：持仓/交易/自选）。' +
       '如云端仍有旧数据，请在「设置」手动点「本机覆盖云端」同步一次', 'info'), 900);
   } catch(e){}
+  /* v74：自选类型自动识别（场外基金归入「基金」分类，行情符号走 jj 前缀）；幂等，无命中静默 */
+  try { autoFixWatchType(); } catch(e){}
   initNav();
   bind();
   renderThemeGrid();          /* 设置页主题选择网格 */
