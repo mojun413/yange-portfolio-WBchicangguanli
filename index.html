@@ -268,6 +268,8 @@ input.mini[type=date]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mon
 .watch-card .mc-name{font-size:11px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;padding-right:12px;padding-left:22px}
 .watch-card .mc-pct{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.2px;line-height:1.15}
 .watch-card .mc-price{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.3}
+.watch-card .mc-est{display:inline-block;margin-left:3px;padding:0 3px;font-size:9px;line-height:13px;border-radius:3px;color:#b45309;background:rgba(245,166,35,.16);border:1px solid rgba(245,166,35,.35);vertical-align:1px;cursor:help}
+.q-est{display:inline-block;margin-left:3px;padding:0 3px;font-size:9px;line-height:14px;border-radius:3px;color:#b45309;background:rgba(245,166,35,.16);border:1px solid rgba(245,166,35,.35);vertical-align:1px;cursor:help}
 .watch-card.up{border-color:rgba(229,72,77,.24);background:rgba(229,72,77,.07)}
 .watch-card.down{border-color:rgba(21,163,74,.26);background:rgba(21,163,74,.08)}
 .watch-card .watch-del{position:absolute;top:1px;right:1px;width:14px;height:14px;line-height:11px;text-align:center;border:none;background:transparent;color:var(--muted);font-size:12px;border-radius:3px;cursor:pointer;padding:0}
@@ -1182,7 +1184,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.070</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.071</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1583,7 +1585,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.070 · 2026-08-20 09:36 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.071 · 2026-08-20 12:17 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1644,8 +1646,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.070';
-const APP_BUILD   = '2026-08-20 09:36';
+const APP_VERSION = '1BK_V68.13.1.071';
+const APP_BUILD   = '2026-08-20 12:17';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2490,7 +2492,7 @@ async function refreshQuotes(silent){
     let idxMap = {};
     try {
       const idxCodes = [...new Set(all.map(h => ((CONFIG.qdiiIndexTrack || {})[h.code] || {}).idx).filter(Boolean))];
-      if (idxCodes.length) idxMap = (await fetchQuotes(idxCodes)).out;
+      if (idxCodes.length) idxMap = await fetchQuotes(idxCodes);   /* fetchQuotes 直接返回 out（sym→行情），勿再取 .out */
     } catch (e) { idxMap = {}; }
     const post = [];
     all.forEach(h => {
@@ -2691,7 +2693,7 @@ function updateLivePrices(){
     const q = state.quotes[el.dataset.q];
     if (!q || !isFinite(q.price)) return;
     if (el.classList.contains('lc-price')){
-      el.textContent = price4(q.price);
+      el.innerHTML = price4(q.price) + (q.estimated && q.qdiiIdx ? '<span class="q-est" title="估算净值（' + esc(q.qdiiIdx) + '联动）">估</span>' : '');
       el.classList.remove('dim');
     } else if (el.classList.contains('lc-pct') && isFinite(q.pct)){
       const arrow = q.pct > 0 ? '▲' : (q.pct < 0 ? '▼' : '·');
@@ -2725,7 +2727,11 @@ function updateLivePrices(){
     const h = qmap.get(td.dataset.q); if (!h) return;
     const c = calcHolding(h); if (!isFinite(c.price)) return;
     const clsN = cls(c.pct);
-    if (td.classList.contains('q-price')){ td.textContent = price4(c.price); td.className = 'mono q-price ' + clsN; }
+    if (td.classList.contains('q-price')){
+      const qd = state.quotes[td.dataset.q];
+      td.innerHTML = price4(c.price) + (qd && qd.estimated && qd.qdiiIdx ? '<span class="q-est" title="估算净值（' + esc(qd.qdiiIdx) + '联动）">估</span>' : '');
+      td.className = 'mono q-price ' + clsN;
+    }
     else if (td.classList.contains('q-mv')){ td.textContent = money(c.mv); }
     else if (td.classList.contains('q-fpnl')){ td.textContent = isFinite(c.floatPnl) ? sign2(c.floatPnl) : '—'; td.className = 'mono q-fpnl ' + cls(c.floatPnl); }
     else if (td.classList.contains('q-roi')){ td.textContent = pct2(c.roi); td.className = 'mono q-roi ' + cls(c.roi); }
@@ -4562,7 +4568,7 @@ function renderLive(){
       priceHtml = '<div class="lc-price dim" ' + dq + '>—</div>';
       pctHtml = '<div class="lc-noquote">净值</div>';
     } else {
-      priceHtml = '<div class="lc-price" ' + dq + '>' + price4(price) + '</div>';
+      priceHtml = '<div class="lc-price" ' + dq + (q.estimated && q.qdiiIdx ? ' title="估算净值（' + esc(q.qdiiIdx) + '联动）"' : '') + '>' + price4(price) + (q.estimated && q.qdiiIdx ? '<span class="q-est">估</span>' : '') + '</div>';
       if (isFinite(pct)){
         const arrow = pct > 0 ? '▲' : (pct < 0 ? '▼' : '·');
         const cName = pct > 0 ? 'up' : (pct < 0 ? 'down' : 'flat');
@@ -4605,6 +4611,24 @@ async function refreshMonitor(silent){
   try {
     const syms = [...new Set([...watchList.map(watchSym), ...watchBuy.map(watchSym)])];
     const map = await fetchQuotes(syms);
+    /* QDII 自选估算（v71）：自选/建仓池里的 QDII 基金同样做指数联动估算（与持仓页一致），
+       让盯盘自选卡也显示实时估算净值而非滞后披露值 */
+    try {
+      const cfgAll = watchList.concat(watchBuy);
+      const idxCodes = [...new Set(cfgAll.map(w => ((CONFIG.qdiiIndexTrack || {})[String(w.code).replace(/\D/g, '')] || {}).idx).filter(Boolean))];
+      if (idxCodes.length){
+        const idxMap = await fetchQuotes(idxCodes);
+        for (const w of cfgAll){
+          const cfg = (CONFIG.qdiiIndexTrack || {})[String(w.code).replace(/\D/g, '')];
+          if (!cfg) continue;
+          const sym = watchSym(w);
+          const q = map[sym];
+          if (!q || q.err || q.estimated || !isFinite(q.price)) continue;
+          const est = await enhanceQdiiIndex(String(w.code).replace(/\D/g, ''), q, idxMap[cfg.idx]);
+          if (est && est.estimated) map[sym] = est;
+        }
+      }
+    } catch(e){}
     watchQuotes = map;
     renderWatch();
     try { checkWatchBuy(); } catch(e){}
@@ -4733,7 +4757,8 @@ function renderWatch(){
       '<button class="watch-buy" data-buy="' + esc(w.code) + '" title="加入建仓池（设置目标买入价，到价提醒建仓）">入池</button>' +
       '<div class="mc-name">' + esc(name) + '</div>' +
       '<div class="mc-pct ' + clsN + '">' + (isFinite(pct) ? arrow + (pct > 0 ? '+' : '') + pct.toFixed(3) + '%' : '<span class="dim">—</span>') + '</div>' +
-      '<div class="mc-price">' + (isFinite(price) ? price4(price) : '<span class="dim">—</span>') + '</div>' +
+      '<div class="mc-price">' + (isFinite(price) ? price4(price) : '<span class="dim">—</span>') +
+        (q.estimated && q.qdiiIdx ? '<span class="mc-est" title="估算净值（' + esc(q.qdiiIdx) + '联动）">估</span>' : '') + '</div>' +
     '</div>';
   }).join('');
   const upC = list.filter(w => { const q = watchQuotes[watchSym(w)]; return isFinite(q && q.pct) && q.pct > 0; }).length;
