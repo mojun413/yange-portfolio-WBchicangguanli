@@ -1182,7 +1182,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.069</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.070</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1583,7 +1583,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.069 · 2026-08-18 22:19 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.070 · 2026-08-20 09:36 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1644,8 +1644,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.069';
-const APP_BUILD   = '2026-08-18 22:19';
+const APP_VERSION = '1BK_V68.13.1.070';
+const APP_BUILD   = '2026-08-20 09:36';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1671,6 +1671,17 @@ const CONFIG = {
   // 基金盘中估算净值（天天基金，可选增强源；该接口时有下线，失败会自动停用且不影响主数据）
   useFundEstimate : true,
   fundApi      : 'https://fundgz.1234567.com.cn/js/',
+  /* QDII 主动基金「指数联动估算」（v70）：腾讯基金接口对 QDII 不提供盘中估算（jj 前缀返回的
+     估算字段恒为 0），天天基金对 QDII 也无估值（fundgz 404），且 QDII 净值披露滞后 T+2 →
+     用其业绩基准对应指数（腾讯 us 前缀实时接口，浏览器直连 ACAO）反推当前估算净值。
+     idx  = 腾讯美股指数代码（usNDX 纳斯达克100 / usIXIC 纳斯达克综合 / usINX 标普500）
+     beta = 基金净值对指数单日涨跌的敏感度（业绩基准权重；主动基金超配高β科技股可调 >1，
+            保守可调 0.9，默认 1.0）
+     label = 界面展示的指数名 */
+  qdiiIndexTrack : {
+    '017436' : { idx: 'usNDX', beta: 1.0, label: '纳指100' },   // 华宝纳斯达克精选A（基准：人民币调整纳指100×90%）
+    '017437' : { idx: 'usNDX', beta: 1.0, label: '纳指100' }    // 华宝纳斯达克精选C
+  },
   // 腾讯股票行情字段下标（已实测核对）：3=现价 4=昨收 5=今开 30=时间 31=涨跌额 32=涨跌% 33=最高 34=最低。
   // 涨跌幅由 现价/昨收 自算更稳；最高/最低在不同版本下标略有差异，程序会在 33/34、31/32 间自动识别。
   fieldIndex : { name:1, code:2, price:3, preClose:4, open:5 },
@@ -2401,6 +2412,46 @@ async function enhanceFundEstimate(code, q){
   } catch (e) { fundEstFails++; return q; }
 }
 
+/* QDII 指数联动估算（v70）：基金无盘中估算（腾讯 jj 估算字段为 0 / 天天基金无估值）时，
+   用业绩基准指数实时行情反推估算净值。估算值写入 q（price/pct/estimated/qdiiIdx*），
+   失败一律静默降级，绝不影响主数据。估算公式：
+     估算净值 = 披露净值 × [1 + (指数当前 ÷ 净值日指数收盘 − 1) × beta]
+   锚点（净值日 D 的指数收盘）：QDII T+2 披露节奏下 D 恒等于指数上一交易日（L−1），
+   直接用指数接口的昨收字段即可；锚点按净值日缓存到 localStorage，跨日/跨披露自动重建。 */
+const QDII_ANCHOR_KEY = 'qdiiAnchor';
+function qdiiAnchorCache(){ try { return JSON.parse(localStorage.getItem(K(QDII_ANCHOR_KEY)) || 'null') || {}; } catch(e){ return {}; } }
+async function enhanceQdiiIndex(code, q, idx){
+  const cfg = (CONFIG.qdiiIndexTrack || {})[code];
+  if (!cfg || !q || q.err || q.estimated) return q;              // 无配置 / 已有估值不处理
+  if (!(isFinite(q.price) && q.price > 0) || !q.navDate) return q;
+  if (!idx || idx.err || !(isFinite(idx.price) && idx.price > 0)) return q;
+  const cache = qdiiAnchorCache();
+  const ent = cache[code];
+  let cD = 0;                                                     // 净值日 D 的指数收盘
+  const idxDate = String(idx.time || '').slice(0, 10);
+  if (ent && ent.d === q.navDate && isFinite(ent.c) && ent.c > 0){
+    cD = ent.c;                                                   // 锚点缓存命中（跨刷新稳定）
+  } else if (q.navDate === idxDate){
+    cD = idx.price;                                               // 净值日==指数最新日：净值已含全天行情
+  } else if (isFinite(idx.preClose) && idx.preClose > 0){
+    cD = idx.preClose;                                            // D == L−1：昨收即净值日收盘（QDII 常态）
+    try { cache[code] = { d: q.navDate, c: cD }; localStorage.setItem(K(QDII_ANCHOR_KEY), JSON.stringify(cache)); } catch(e){}
+  } else {
+    return q;
+  }
+  const move = cD > 0 ? idx.price / cD : NaN;
+  if (!(isFinite(move) && move > 0)) return q;
+  const beta = isFinite(cfg.beta) ? cfg.beta : 1.0;
+  const estNav = q.price * (1 + (move - 1) * beta);
+  if (!(isFinite(estNav) && estNav > 0)) return q;
+  return Object.assign({}, q, {
+    price: estNav, preClose: q.price,
+    pct: (estNav / q.price - 1) * 100,                           // 相对披露净值的累计涨跌%
+    estimated: true, qdiiIdx: cfg.label || '', qdiiIdxPrice: idx.price,
+    qdiiIdxTime: idx.time || '', qdiiBeta: beta
+  });
+}
+
 let refreshing = false;
 async function refreshQuotes(silent){
   if (refreshing) return;
@@ -2435,13 +2486,22 @@ async function refreshQuotes(silent){
     });
     let fixed = 0;
     try { fixed = (await resolveByFallback(all, map)).fixed; } catch (e) {}
+    /* QDII 指数联动：收集命中配置的指数代码，去重拉取一次实时行情（多只基金共享同一指数不重复请求） */
+    let idxMap = {};
+    try {
+      const idxCodes = [...new Set(all.map(h => ((CONFIG.qdiiIndexTrack || {})[h.code] || {}).idx).filter(Boolean))];
+      if (idxCodes.length) idxMap = (await fetchQuotes(idxCodes)).out;
+    } catch (e) { idxMap = {}; }
     const post = [];
     all.forEach(h => {
       const q = state.quotes[qkey(h)];
       if (!q) return;
       if (q.err){ failed++; if (q.unreachable) unreachable++; return; }
       if (q.name && !/\uFFFD/.test(q.name) && (!h.name || h.name === h.code)) { h.name = q.name; persist.holdings(); }
-      if (effType(h.code, h.type, h.typeLocked) === 'fund' && !isExchangeTraded(h.code)) post.push(enhanceFundEstimate(h.code, q).then(nq => { state.quotes[qkey(h)] = nq; }));
+      if (effType(h.code, h.type, h.typeLocked) === 'fund' && !isExchangeTraded(h.code)) post.push(enhanceFundEstimate(h.code, q).then(async nq => {
+        const cfg = (CONFIG.qdiiIndexTrack || {})[h.code];
+        return cfg ? enhanceQdiiIndex(h.code, nq, idxMap[cfg.idx]) : nq;   /* 天天基金无估值 → 指数联动 */
+      }).then(nq => { state.quotes[qkey(h)] = nq; }));
     });
     if (post.length) await Promise.all(post);
     if (fixed && !silent) toast('已自动校正 ' + fixed + ' 个标的的交易所前缀', 'ok');
@@ -2490,6 +2550,18 @@ function marketPhase(now){
   return 'closed';
 }
 function isTradingTime(now){ return marketPhase(now) === 'open'; }
+/* 美股交易时段（QDII 估算联动用，v70）：夏令时 21:30–04:00 / 冬令时 22:30–05:00（北京时间）。
+   为简化不区分时制，取 21:00–05:30 宽窗口；周日全天休市（美东周五收盘对应北京周六 05:00，
+   周六 00:00–05:00 仍属周五盘后交易可刷新，周六 21:00 起至周日休市）。 */
+function isUsTradingTime(now){
+  const d = now || new Date();
+  const t = d.getHours() * 60 + d.getMinutes();
+  const dow = d.getDay();
+  if (dow === 0) return false;
+  if (t >= 21 * 60) return dow !== 6;      /* 21:00–24:00：周六晚起休市 */
+  if (t < 5 * 60 + 30) return true;        /* 00:00–05:30：凌晨交易中（周一~五盘中 / 周六凌晨=周五盘后） */
+  return false;
+}
 function marketPhaseLabel(ph){
   return ({ weekend:'周末休市', holiday:'今日休市', pre:'未开盘', open:'交易中', noon:'午间休市', closed:'已收盘' })[ph] || '休市';
 }
@@ -6004,9 +6076,11 @@ function subPanel(h, c){
   const q = state.quotes[qkey(h)] || {};
   const meta = '<div class="hint" style="margin:0 0 10px">' +
     (c.quoteErr ? '<span style="color:var(--warn)">⚠ ' + esc(c.quoteErr) + '</span>' :
-      ((effType(h.code, h.type, h.typeLocked) === 'fund' ? (q.estimated ? '盘中估算净值' : '最新单位净值') + ' ' + price4(q.price) +
+      ((effType(h.code, h.type, h.typeLocked) === 'fund' ?
+            (q.estimated ? (q.qdiiIdx ? '估算净值（' + esc(q.qdiiIdx) + '联动）' : '盘中估算净值') : '最新单位净值') + ' ' + price4(q.price) +
             (isFinite(q.accNav) ? ' · 累计净值 ' + price4(q.accNav) : '') +
-            (q.navDate ? ' · 净值日期 ' + esc(q.navDate) : '') + (q.gzsj ? ' · 估值时间 ' + esc(q.gzsj) : '')
+            (q.navDate ? ' · 净值日期 ' + esc(q.navDate) : '') + (q.gzsj ? ' · 估值时间 ' + esc(q.gzsj) : '') +
+            (q.qdiiIdx ? ' · 指数 ' + esc(q.qdiiIdx) + ' ' + price4(q.qdiiIdxPrice) + (q.qdiiIdxTime ? '（' + esc(q.qdiiIdxTime) + '）' : '') : '')
         : '昨收 ' + price4(q.preClose) + (isFinite(q.high) ? ' · 最高 ' + price4(q.high) + ' · 最低 ' + price4(q.low) : '')) +
        ' · 累计手续费 ' + n2(c.fees))) + '</div>';
   return '<div class="sub-box">' + meta + tRefBlock(h, c, q) +
@@ -8650,7 +8724,8 @@ function setupTimer(){
   const sec = Math.max(CONFIG.minRefreshSec, Number(state.settings.refreshSec) || CONFIG.defaultRefreshSec);
   timer = setInterval(() => {
     if (document.hidden) return;
-    if (!isTradingTime()) return;            /* 非交易时间不刷新 */
+    const ph = marketPhase();
+    if (ph !== 'open' && !isUsTradingTime()) return;   /* A股交易时段 + 美股交易时段（QDII 估算实时联动） */
     refreshQuotes(true);
   }, sec * 1000);
 }
