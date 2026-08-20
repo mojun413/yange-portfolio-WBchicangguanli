@@ -1184,7 +1184,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.075</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.076</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1586,7 +1586,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.075 · 2026-08-20 13:09 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.076 · 2026-08-20 13:27 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1647,8 +1647,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.075';
-const APP_BUILD   = '2026-08-20 13:09';
+const APP_VERSION = '1BK_V68.13.1.076';
+const APP_BUILD   = '2026-08-20 13:27';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2422,9 +2422,38 @@ async function enhanceFundEstimate(code, q){
    锚点（净值日 D 的指数收盘）：QDII T+2 披露节奏下 D 恒等于指数上一交易日（L−1），
    直接用指数接口的昨收字段即可；锚点按净值日缓存到 localStorage，跨日/跨披露自动重建。 */
 const QDII_ANCHOR_KEY = 'qdiiAnchor';
+/* 场外基金「名称 → 跟踪指数」通用映射（v76）：天天基金 fundgz 估算接口已失效（实测 404），
+   对无法获取盘中估算的场外基金，按基金名称匹配跟踪指数做「指数联动估算」（与纳斯达克精选A同方案）。
+   海外指数用腾讯 us/r_ 前缀实时接口；A股指数用 sh/sz 实时接口（均为浏览器直连已验证）。
+   仅收录实测可用的指数代码；主动型/无法匹配的基金保持「最新净值」显示（估算链静默跳过）。 */
+const FUND_IDX_MAP = [
+  { re: /纳斯达克|纳指/,   idx: 'usNDX',    label: '纳指100' },
+  { re: /标普|S&P|sp500/i, idx: 'usINX',    label: '标普500' },
+  { re: /道琼斯|道指/,     idx: 'usDJI',    label: '道琼斯' },
+  { re: /恒生/,            idx: 'r_hkHSI',  label: '恒生指数' },
+  { re: /沪深300/,         idx: 'sh000300', label: '沪深300' },
+  { re: /中证500/,         idx: 'sh000905', label: '中证500' },
+  { re: /上证50/,          idx: 'sh000016', label: '上证50' },
+  { re: /科创50/,          idx: 'sh000688', label: '科创50' },
+  { re: /创业板/,          idx: 'sz399006', label: '创业板指' },
+  { re: /白酒/,            idx: 'sz399997', label: '中证白酒' },
+  { re: /医疗|医药/,       idx: 'sz399989', label: '中证医疗' },
+  { re: /证券|券商/,       idx: 'sz399975', label: '证券公司' },
+  { re: /银行/,            idx: 'sz399986', label: '中证银行' },
+  { re: /基建/,            idx: 'sz399995', label: '基建工程' }
+];
+/* 匹配场外基金跟踪指数：精确配置（qdiiIndexTrack，可带 beta 微调）优先，其次按名称关键词。
+   返回 { idx, label, beta? } 或 null。 */
+function matchFundIndex(code, name){
+  const cfg = (CONFIG.qdiiIndexTrack || {})[String(code || '').replace(/\D/g, '')];
+  if (cfg) return cfg;
+  const n = String(name || '');
+  for (const r of FUND_IDX_MAP){ if (r.re.test(n)) return { idx: r.idx, label: r.label }; }
+  return null;
+}
 function qdiiAnchorCache(){ try { return JSON.parse(localStorage.getItem(K(QDII_ANCHOR_KEY)) || 'null') || {}; } catch(e){ return {}; } }
-async function enhanceQdiiIndex(code, q, idx){
-  const cfg = (CONFIG.qdiiIndexTrack || {})[code];
+async function enhanceQdiiIndex(code, q, idx, cfg){
+  cfg = cfg || matchFundIndex(code, q && q.name);
   if (!cfg || !q || q.err || q.estimated) return q;              // 无配置 / 已有估值不处理
   if (!(isFinite(q.price) && q.price > 0) || !q.navDate) return q;
   if (!idx || idx.err || !(isFinite(idx.price) && idx.price > 0)) return q;
@@ -2489,10 +2518,13 @@ async function refreshQuotes(silent){
     });
     let fixed = 0;
     try { fixed = (await resolveByFallback(all, map)).fixed; } catch (e) {}
-    /* QDII 指数联动：收集命中配置的指数代码，去重拉取一次实时行情（多只基金共享同一指数不重复请求） */
+    /* 指数联动（v76 通用化）：收集所有场外基金匹配到的跟踪指数代码，去重拉取一次实时行情 */
     let idxMap = {};
     try {
-      const idxCodes = [...new Set(all.map(h => ((CONFIG.qdiiIndexTrack || {})[h.code] || {}).idx).filter(Boolean))];
+      const idxCodes = [...new Set(all.map(h => {
+        const mi = matchFundIndex(h.code, h.name);
+        return mi ? mi.idx : null;
+      }).filter(Boolean))];
       if (idxCodes.length) idxMap = await fetchQuotes(idxCodes);   /* fetchQuotes 直接返回 out（sym→行情），勿再取 .out */
     } catch (e) { idxMap = {}; }
     const post = [];
@@ -2502,8 +2534,8 @@ async function refreshQuotes(silent){
       if (q.err){ failed++; if (q.unreachable) unreachable++; return; }
       if (q.name && !/\uFFFD/.test(q.name) && (!h.name || h.name === h.code)) { h.name = q.name; persist.holdings(); }
       if (effType(h.code, h.type, h.typeLocked) === 'fund' && !isExchangeTraded(h.code)) post.push(enhanceFundEstimate(h.code, q).then(async nq => {
-        const cfg = (CONFIG.qdiiIndexTrack || {})[h.code];
-        return cfg ? enhanceQdiiIndex(h.code, nq, idxMap[cfg.idx]) : nq;   /* 天天基金无估值 → 指数联动 */
+        const mi = matchFundIndex(h.code, nq.name || h.name);
+        return mi ? enhanceQdiiIndex(h.code, nq, idxMap[mi.idx], mi) : nq;   /* fundgz 无估算 → 指数联动兜底 */
       }).then(nq => { state.quotes[qkey(h)] = nq; }));
     });
     if (post.length) await Promise.all(post);
@@ -4613,20 +4645,23 @@ async function refreshMonitor(silent){
   try {
     const syms = [...new Set([...watchList.map(watchSym), ...watchBuy.map(watchSym)])];
     const map = await fetchQuotes(syms);
-    /* QDII 自选估算（v71）：自选/建仓池里的 QDII 基金同样做指数联动估算（与持仓页一致），
-       让盯盘自选卡也显示实时估算净值而非滞后披露值 */
+    /* 场外基金指数联动估算（v76 通用化）：自选/建仓池里能匹配跟踪指数的场外基金，
+       与持仓页一致做实时估算（fundgz 估算接口已失效，名称匹配指数联动兜底） */
     try {
       const cfgAll = watchList.concat(watchBuy);
-      const idxCodes = [...new Set(cfgAll.map(w => ((CONFIG.qdiiIndexTrack || {})[String(w.code).replace(/\D/g, '')] || {}).idx).filter(Boolean))];
+      const idxCodes = [...new Set(cfgAll.map(w => {
+        const mi = matchFundIndex(w.code, w.name);
+        return mi ? mi.idx : null;
+      }).filter(Boolean))];
       if (idxCodes.length){
         const idxMap = await fetchQuotes(idxCodes);
         for (const w of cfgAll){
-          const cfg = (CONFIG.qdiiIndexTrack || {})[String(w.code).replace(/\D/g, '')];
-          if (!cfg) continue;
+          const mi = matchFundIndex(w.code, w.name);
+          if (!mi) continue;
           const sym = watchSym(w);
           const q = map[sym];
           if (!q || q.err || q.estimated || !isFinite(q.price)) continue;
-          const est = await enhanceQdiiIndex(String(w.code).replace(/\D/g, ''), q, idxMap[cfg.idx]);
+          const est = await enhanceQdiiIndex(String(w.code).replace(/\D/g, ''), q, idxMap[mi.idx], mi);
           if (est && est.estimated) map[sym] = est;
         }
       }
