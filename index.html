@@ -824,7 +824,7 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
    红=涨（A股惯例），绿=跌；按 |pct| 比例填条宽 */
 .board-list{display:flex;flex-direction:column;gap:2px}
 .board-row{
-  display:grid;grid-template-columns:140px 1fr 96px;
+  display:grid;grid-template-columns:112px 1fr 86px;
   align-items:center;gap:14px;
   padding:6px 10px;border-radius:7px;
   cursor:pointer;transition:background .15s;
@@ -1225,7 +1225,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.080</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.081</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1320,6 +1320,28 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
         </div>
           </div>
           <div class="ms-col">
+        <!-- 1BK_V68.13.1.080：板块强弱 TOP 15（独立 panel，三类切换 + 涨幅/跌幅榜切换；v081 移入右栏 · 每日操作记录上方） -->
+        <div class="panel" id="boardPanel">
+          <div class="panel-head">
+            <div class="panel-title"><span class="bar"></span>板块强弱<span class="board-phase" id="boardPhase">盘中·TOP 15</span></div>
+            <div class="panel-sub" id="boardSub">概念板块 · 交易时段每 5 秒刷新 · 休市零请求 · 红涨绿跌</div>
+            <div class="spacer"></div>
+            <span class="seg" id="boardCatSeg" role="tablist" aria-label="板块类型">
+              <button type="button" class="seg-btn on" data-cat="3" title="概念板块（如人形机器人/CPO/黄金概念等题材）">概念</button>
+              <button type="button" class="seg-btn" data-cat="2" title="行业板块（按行业大类）">行业</button>
+              <button type="button" class="seg-btn" data-cat="1" title="地域板块（如上海/广东/北京等）">地域</button>
+            </span>
+            <span class="seg" id="boardSortSeg" role="tablist" aria-label="排序方向">
+              <button type="button" class="seg-btn on" data-sort="desc" title="由强到弱（涨幅 TOP）">涨幅榜</button>
+              <button type="button" class="seg-btn" data-sort="asc" title="由弱到强（跌幅 TOP）">跌幅榜</button>
+            </span>
+            <button class="btn-sm" id="btnBoardRefresh" title="立即拉取板块行情（穿透非交易时段强制刷新）">刷新</button>
+          </div>
+          <div class="panel-body tight">
+            <div class="board-list" id="boardList"></div>
+            <div class="board-foot" id="boardFoot"></div>
+          </div>
+        </div>
 <div class="panel">
           <div class="panel-head">
             <div class="panel-title"><span class="bar"></span>每日操作记录</div>
@@ -1348,29 +1370,6 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
           </div>
           <div class="panel-body tight"><div class="table-wrap" id="opTable"></div></div>
         </div>
-          </div>
-        </div>
-
-        <!-- 1BK_V68.13.1.080：板块强弱 TOP 15（独立 panel，三类切换 + 涨幅/跌幅榜切换） -->
-        <div class="panel" id="boardPanel" style="margin-top:14px">
-          <div class="panel-head">
-            <div class="panel-title"><span class="bar"></span>板块强弱<span class="board-phase" id="boardPhase">盘中·TOP 15</span></div>
-            <div class="panel-sub" id="boardSub">概念板块 · 交易时段每 5 秒刷新 · 休市零请求 · 红涨绿跌</div>
-            <div class="spacer"></div>
-            <span class="seg" id="boardCatSeg" role="tablist" aria-label="板块类型">
-              <button type="button" class="seg-btn on" data-cat="3" title="概念板块（如人形机器人/CPO/黄金概念等题材）">概念</button>
-              <button type="button" class="seg-btn" data-cat="2" title="行业板块（按行业大类）">行业</button>
-              <button type="button" class="seg-btn" data-cat="1" title="地域板块（如上海/广东/北京等）">地域</button>
-            </span>
-            <span class="seg" id="boardSortSeg" role="tablist" aria-label="排序方向">
-              <button type="button" class="seg-btn on" data-sort="desc" title="由强到弱（涨幅 TOP）">涨幅榜</button>
-              <button type="button" class="seg-btn" data-sort="asc" title="由弱到强（跌幅 TOP）">跌幅榜</button>
-            </span>
-            <button class="btn-sm" id="btnBoardRefresh" title="立即拉取板块行情（穿透非交易时段强制刷新）">刷新</button>
-          </div>
-          <div class="panel-body tight">
-            <div class="board-list" id="boardList"></div>
-            <div class="board-foot" id="boardFoot"></div>
           </div>
         </div>
       </section>
@@ -1650,7 +1649,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.080 · 2026-08-21 19:41 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.081 · 2026-08-21 21:41 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1711,8 +1710,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.080';
-const APP_BUILD   = '2026-08-21 19:41';
+const APP_VERSION = '1BK_V68.13.1.081';
+const APP_BUILD   = '2026-08-21 21:41';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
