@@ -818,6 +818,47 @@ input[type=color]{padding:2px;height:36px;cursor:pointer;border-radius:8px}
 @media (min-width:1281px){
   .monitor-split{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
 }
+
+/* ===================== 板块强弱 TOP 15（1BK_V68.13.1.080） =====================
+   横向条形图 + 行业/概念/地域切换 + 涨幅榜/跌幅榜切换
+   红=涨（A股惯例），绿=跌；按 |pct| 比例填条宽 */
+.board-list{display:flex;flex-direction:column;gap:2px}
+.board-row{
+  display:grid;grid-template-columns:140px 1fr 96px;
+  align-items:center;gap:14px;
+  padding:6px 10px;border-radius:7px;
+  cursor:pointer;transition:background .15s;
+  font-variant-numeric:tabular-nums;user-select:none;
+}
+.board-row:hover{background:var(--panel-2)}
+.board-name{font-size:13px;font-weight:600;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board-name .lead{display:block;font-size:10px;font-weight:500;color:var(--muted);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.board-bar-track{position:relative;height:14px;background:var(--line-2);border-radius:7px;overflow:hidden}
+.board-bar{position:absolute;top:0;bottom:0;border-radius:7px;transition:width .4s ease;min-width:2px}
+/* 单向填充：涨幅榜时 from-left；跌幅榜时 from-right；用 [data-side] 切方向 */
+.board-bar[data-side="up"]{left:0;background:linear-gradient(90deg,#e5484d,#b91c1c)}
+.board-bar[data-side="down"]{right:0;background:linear-gradient(270deg,#15803d,#15a34a)}
+.board-pct{font-size:13.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;letter-spacing:-.2px}
+.board-pct.up{color:var(--up)}
+.board-pct.down{color:var(--down)}
+.board-pct.flat{color:var(--flat)}
+.board-foot{font-size:11.5px;color:var(--muted);margin-top:8px;padding:4px 6px;line-height:1.6}
+.board-foot b{color:var(--text);font-weight:700}
+.board-foot a{color:var(--accent);text-decoration:none}
+.board-foot a:hover{text-decoration:underline}
+/* 阶段胶囊：盘中红，已收盘灰（与设计语言"主色=红"呼应） */
+.board-phase{display:inline-block;margin-left:6px;font-size:11px;font-weight:600;
+  padding:2px 9px;border-radius:999px;background:rgba(229,72,77,.10);color:var(--up);vertical-align:2px;letter-spacing:.3px}
+.board-phase.flat{background:var(--panel-2);color:var(--muted)}
+/* 子段控件：切类型 + 切排序 */
+#boardCatSeg, #boardSortSeg{display:inline-flex;gap:3px;background:var(--panel-2);
+  border:1px solid var(--line-2);border-radius:8px;padding:3px;margin-right:6px}
+#boardCatSeg .seg-btn, #boardSortSeg .seg-btn{border:0;background:transparent;color:var(--muted);
+  padding:4px 11px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+#boardCatSeg .seg-btn:hover, #boardSortSeg .seg-btn:hover{color:var(--text)}
+#boardCatSeg .seg-btn.on, #boardSortSeg .seg-btn.on{background:var(--accent);color:#fff;box-shadow:0 1px 4px rgba(181,86,58,.26)}
 @media (max-width:1280px){
   .cards{grid-template-columns:repeat(3,1fr)}
   .g-holding{grid-template-columns:repeat(4,1fr)}
@@ -1184,7 +1225,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.079</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.080</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1307,6 +1348,29 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
           </div>
           <div class="panel-body tight"><div class="table-wrap" id="opTable"></div></div>
         </div>
+          </div>
+        </div>
+
+        <!-- 1BK_V68.13.1.080：板块强弱 TOP 15（独立 panel，三类切换 + 涨幅/跌幅榜切换） -->
+        <div class="panel" id="boardPanel" style="margin-top:14px">
+          <div class="panel-head">
+            <div class="panel-title"><span class="bar"></span>板块强弱<span class="board-phase" id="boardPhase">盘中·TOP 15</span></div>
+            <div class="panel-sub" id="boardSub">概念板块 · 交易时段每 5 秒刷新 · 休市零请求 · 红涨绿跌</div>
+            <div class="spacer"></div>
+            <span class="seg" id="boardCatSeg" role="tablist" aria-label="板块类型">
+              <button type="button" class="seg-btn on" data-cat="3" title="概念板块（如人形机器人/CPO/黄金概念等题材）">概念</button>
+              <button type="button" class="seg-btn" data-cat="2" title="行业板块（按行业大类）">行业</button>
+              <button type="button" class="seg-btn" data-cat="1" title="地域板块（如上海/广东/北京等）">地域</button>
+            </span>
+            <span class="seg" id="boardSortSeg" role="tablist" aria-label="排序方向">
+              <button type="button" class="seg-btn on" data-sort="desc" title="由强到弱（涨幅 TOP）">涨幅榜</button>
+              <button type="button" class="seg-btn" data-sort="asc" title="由弱到强（跌幅 TOP）">跌幅榜</button>
+            </span>
+            <button class="btn-sm" id="btnBoardRefresh" title="立即拉取板块行情（穿透非交易时段强制刷新）">刷新</button>
+          </div>
+          <div class="panel-body tight">
+            <div class="board-list" id="boardList"></div>
+            <div class="board-foot" id="boardFoot"></div>
           </div>
         </div>
       </section>
@@ -1586,7 +1650,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.079 · 2026-08-21 13:16 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.080 · 2026-08-21 19:41 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1647,8 +1711,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.079';
-const APP_BUILD   = '2026-08-21 13:16';
+const APP_VERSION = '1BK_V68.13.1.080';
+const APP_BUILD   = '2026-08-21 19:41';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -1712,7 +1776,7 @@ const PAGE_TITLES = { overview:'总览', monitor:'盯盘看板', settle:'清仓�
 function switchPage(page){
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
   document.querySelectorAll('.bn').forEach(n => n.classList.toggle('active', n.dataset.page === page));
-  if (page === 'monitor'){ try { renderMarketLive(true); } catch(e){} }
+  if (page === 'monitor'){ try { renderMarketLive(true); } catch(e){} try { refreshBoards(true); } catch(e){} }
   if (page === 'settings'){ try { warnStorageCapacity(); } catch(e){} }   /* 1BK_V68.13.1.009：切到设置页刷新容量预警 */
   const t = document.getElementById('pageTitleCurrent');
   if (t) t.textContent = PAGE_TITLES[page] || page;
@@ -4732,6 +4796,157 @@ async function renderMarketLive(){
     if (sym && typeof showKlineDialog === 'function') showKlineDialog(name || sym, sym);
   });
 })();
+
+/* ===================== 板块强弱 TOP 15（1BK_V68.13.1.080） =====================
+   数据源：东财 clist 接口（push2delay.eastmoney.com 沙箱稳定性优于 push2 主域）
+     m:90 t:1 地域板块（31 个）  m:90 t:2 行业板块（496 个）  m:90 t:3 概念板块（504 个）
+   fltt=2&invt=2 强制小数（避免整数被四舍五入 → 显示成 0%）
+   fid=f3&po=1 默认按涨幅降序；pz=200 取全量供 TOP 15 二次排序
+   字段：f12=板块BK代码 / f14=名称 / f3=涨跌幅% / f2=当前点位 / f4=涨跌点位
+        f104=上涨家数 / f105=下跌家数 / f128=领涨股名 / f140=领涨股代码 / f141=领涨股涨幅
+   刷新策略（与现有 v68.13.1.018 行情秒级 ticker 一致）：
+     - 交易时段（09:15–11:30 / 13:00–15:05）每 5 秒刷新一次（板块变化慢于个股）
+     - 非交易时段零请求：保留最近一次快照（来自上一交易日收盘或当日盘中缓存）
+     - 首屏 init 强制拉一次（force=true），立即展示
+   视觉：横向条形图，红=涨/绿=跌，按 |pct| 比例填条宽，单向布局（涨幅榜=左→右红，跌幅榜=右→左绿）*/
+const BOARD_CAT_NAME = { 1:'地域', 2:'行业', 3:'概念' };
+const BOARD_CAT_FS   = { 1:'m:90+t:1', 2:'m:90+t:2', 3:'m:90+t:3' };
+let boardState = { cat:3, sort:'desc', data:[], ts:0, loading:false, lastTradeTs:0 };
+let boardTimer = null;
+
+async function fetchBoards(cat){
+  /* 东财 clist：pn/pz=页/条；po=1 降序；fid=f3 排序键；
+     fs=m:90+t:n 板块市场+类型；fields 一次性取齐 */
+  const url = 'https://push2delay.eastmoney.com/api/qt/clist/get?pn=1&pz=200&po=1&fltt=2&invt=2&fid=f3&fs=' + BOARD_CAT_FS[cat] + '&fields=f12,f14,f3,f2,f4,f104,f105,f128,f140,f141';
+  const r = await fetch(url, { cache:'no-store' });
+  if (!r.ok) throw new Error('http ' + r.status);
+  const j = await r.json();
+  if (!j || !j.data) return [];
+  const diff = j.data.diff || {};
+  const items = Array.isArray(diff) ? diff : Object.values(diff);
+  return items.map(x => ({
+    code: x.f12,                           // BK1173
+    name: x.f14,                           // 锂矿概念
+    pct:  typeof x.f3 === 'number' ? x.f3 : 0,    // 涨跌幅%
+    idx:  typeof x.f2 === 'number' ? x.f2 : null, // 当前点位
+    chg:  typeof x.f4 === 'number' ? x.f4 : null, // 涨跌点位
+    upN:  x.f104 || 0,                     // 上涨家数
+    dnN:  x.f105 || 0,                     // 下跌家数
+    lead: x.f128 || '',                    // 领涨股名称
+    leadCode: x.f140 || '',
+    leadPct: typeof x.f141 === 'number' ? x.f141 / 100 : null,  // 领涨股涨幅%（东财原始 f141 是百分比单位 1=1%）
+  })).filter(x => x.name);
+}
+
+function renderBoards(){
+  const list = document.getElementById('boardList');
+  if (!list) return;
+  let rows = boardState.data.slice();
+  rows.sort((a,b) => (b.pct||0) - (a.pct||0));
+  if (boardState.sort === 'asc') rows.reverse();
+  const top = rows.slice(0, 15);
+  if (!top.length){
+    list.innerHTML = '<div class="dim" style="padding:18px 14px;text-align:center;font-size:13px">暂无板块数据 · 点「刷新」重试</div>';
+    return;
+  }
+  /* |pct| 最大值线性映射到 ≤100% 条宽（涨幅榜时相对于"榜首"），避免弱涨幅被无限拉平 */
+  const maxAbs = Math.max(0.1, ...top.map(r => Math.abs(r.pct || 0)));
+  /* 方向：desc=红从左 / asc=绿从右；单方向渲染更易读 */
+  const side = boardState.sort === 'asc' ? 'down' : 'up';
+  list.innerHTML = top.map(r => {
+    const pct = r.pct || 0;
+    const w = Math.min(100, Math.max(3, (Math.abs(pct) / maxAbs) * 100));
+    const sign = pct > 0 ? '+' : '';
+    const cls = pct > 0.05 ? 'up' : (pct < -0.05 ? 'down' : 'flat');
+    /* 副行小字：领涨股（含涨幅）便于一眼看懂龙头 — 不至于挤爆名称 */
+    const leadTxt = r.lead ? ('领涨 ' + r.lead + (isFinite(r.leadPct) ? ' +' + r.leadPct.toFixed(2) + '%' : '')) : '';
+    return '<div class="board-row" data-bk="' + esc(r.code) + '" data-name="' + esc(r.name) + '" title="' + esc(r.name) + ' · 涨' + r.upN + '/跌' + r.dnN + ' · 点击查看板块详情">' +
+      '<div class="board-name">' + esc(r.name) + (leadTxt ? '<span class="lead">' + esc(leadTxt) + '</span>' : '') + '</div>' +
+      '<div class="board-bar-track"><div class="board-bar" data-side="' + side + '" style="width:' + w.toFixed(2) + '%"></div></div>' +
+      '<span class="board-pct ' + cls + '">' + sign + pct.toFixed(2) + '%</span>' +
+    '</div>';
+  }).join('');
+  /* Footer 一行总览：板块数 / 上涨 / 下跌 / 时间戳 / 「查看全部」入口（链到东财板块中心） */
+  const foot = document.getElementById('boardFoot');
+  if (foot){
+    const all = boardState.data;
+    const up = all.filter(r => (r.pct||0) > 0).length;
+    const dn = all.filter(r => (r.pct||0) < 0).length;
+    const now = boardState.ts ? new Date(boardState.ts) : new Date();
+    const t = now.toLocaleTimeString('zh-CN', { hour12:false });
+    const moreUrl = 'https://quote.eastmoney.com/center/boardlist.html#' + (boardState.cat === 3 ? 'concept' : (boardState.cat === 2 ? 'industry' : 'area'));
+    foot.innerHTML = '共 <b>' + all.length + '</b> 个' + BOARD_CAT_NAME[boardState.cat] + '板块 · 涨 <b style="color:var(--up)">' + up + '</b> · 平 ' + (all.length - up - dn) + ' · 跌 <b style="color:var(--down)">' + dn + '</b> · ' + t + ' 快照' +
+      ' · <a target="_blank" rel="noopener" href="' + moreUrl + '">查看全部板块 →</a>';
+  }
+}
+
+async function refreshBoards(force){
+  if (boardState.loading) return;
+  /* 非交易时段：已有数据就跳过（避免无效请求）；force=true（首屏/手动）穿透 */
+  if (!force && !isTradingTime() && boardState.data.length){
+    /* 顺便更新副标题文案为"休市已暂停"，但不停数据刷新 */
+    const sub = document.getElementById('boardSub');
+    if (sub) sub.textContent = BOARD_CAT_NAME[boardState.cat] + '板块 · ' + marketPhaseLabel(marketPhase()) + '，已暂停刷新 · 红涨绿跌';
+    const phase = document.getElementById('boardPhase');
+    if (phase){ phase.className = 'board-phase flat'; phase.textContent = '已收盘·TOP 15'; }
+    return;
+  }
+  boardState.loading = true;
+  const sub = document.getElementById('boardSub');
+  if (sub && force !== 'silent') sub.innerHTML = '<span class="spin"></span> 正在拉取板块行情…';
+  try {
+    const data = await fetchBoards(boardState.cat);
+    boardState.data = data;
+    boardState.ts = Date.now();
+    const trading = isTradingTime();
+    if (trading) boardState.lastTradeTs = boardState.ts;
+    renderBoards();
+    if (sub) sub.textContent = BOARD_CAT_NAME[boardState.cat] + '板块 · ' + (trading ? '交易时段每 5 秒刷新' : marketPhaseLabel(marketPhase()) + '，已暂停刷新') + ' · 红涨绿跌';
+    const phase = document.getElementById('boardPhase');
+    if (phase){ phase.className = 'board-phase' + (trading ? '' : ' flat'); phase.textContent = (trading ? '盘中' : '已收盘') + '·TOP 15'; }
+  } catch (e){
+    if (sub) sub.textContent = '板块拉取失败（' + esc(e.message || String(e)) + '），请检查网络后点「刷新」';
+  }
+  finally { boardState.loading = false; }
+}
+
+/* 一次性绑定面板交互：分类切换 / 排序切换 / 刷新按钮 / 行点击 */
+function bindBoardPanel(){
+  const cat = document.getElementById('boardCatSeg');
+  const sort = document.getElementById('boardSortSeg');
+  const btn = document.getElementById('btnBoardRefresh');
+  const list = document.getElementById('boardList');
+  if (cat && !cat.dataset.bound){
+    cat.dataset.bound = '1';
+    cat.addEventListener('click', e => {
+      const b = e.target.closest('.seg-btn'); if (!b || !cat.contains(b)) return;
+      cat.querySelectorAll('.seg-btn').forEach(x => x.classList.toggle('on', x === b));
+      const c = +b.dataset.cat;
+      if (c && c !== boardState.cat){ boardState.cat = c; refreshBoards(true); }
+    });
+  }
+  if (sort && !sort.dataset.bound){
+    sort.dataset.bound = '1';
+    sort.addEventListener('click', e => {
+      const b = e.target.closest('.seg-btn'); if (!b || !sort.contains(b)) return;
+      sort.querySelectorAll('.seg-btn').forEach(x => x.classList.toggle('on', x === b));
+      boardState.sort = b.dataset.sort;
+      renderBoards();
+    });
+  }
+  if (btn && !btn.dataset.bound){
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => refreshBoards(true));
+  }
+  if (list && !list.dataset.bound){
+    list.dataset.bound = '1';
+    list.addEventListener('click', e => {
+      const row = e.target.closest('.board-row'); if (!row) return;
+      const code = row.dataset.bk;
+      if (code) window.open('https://quote.eastmoney.com/bk/' + code + '.html', '_blank', 'noopener');
+    });
+  }
+}
 
 /* 1BK_V68.13.1.049：全局指数条（同花顺式顶栏跑马灯）— 交易时段每 2 秒刷新并闪烁，休市零请求；点击看 K 线 */
 
@@ -9049,6 +9264,9 @@ function setupTick(){
     if (MARKET.holidayOn && MARKET.holidayOn !== ymdOf(new Date())) MARKET.holidayOn = '';
     renderMarketStatus();
   }, 30000);
+  /* 1BK_V68.13.1.080：板块强弱 TOP 15 ticker — 交易时段每 5 秒刷新（板块变化慢于个股），非交易时段 refreshBoards 内部自动跳过（零请求） */
+  clearInterval(boardTimer); boardTimer = null;
+  boardTimer = setInterval(() => { refreshBoards(); }, 5000);
 }
 function applySettingsToUI(){
   if (!document.documentElement.getAttribute('data-theme')) document.documentElement.style.setProperty('--accent', state.settings.theme || CONFIG.accent);
@@ -9247,6 +9465,8 @@ function init(){
   refreshMonitor(true);
   /* 大盘直播：首屏拉一次；交易时段每 2 秒仅在 monitor 页激活时刷新（休市零请求） */
   renderMarketLive(true);
+  /* 1BK_V68.13.1.080：板块强弱 TOP 15 — 首屏拉一次快照，绑定交互；之后由 setupTick 每 5 秒刷新（休市零请求） */
+  try { bindBoardPanel(); refreshBoards(true); } catch(e){}
   setInterval(() => {
     if (document.hidden) return;
     const mp = document.getElementById('page-monitor');
