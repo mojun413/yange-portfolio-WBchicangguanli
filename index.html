@@ -1225,7 +1225,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.13.1.081</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.14.1.001</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1649,7 +1649,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.13.1.081 · 2026-08-21 21:41 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.14.1.001 · 2026-08-24 09:35 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1710,8 +1710,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.13.1.081';
-const APP_BUILD   = '2026-08-21 21:41';
+const APP_VERSION = '1BK_V68.14.1.001';
+const APP_BUILD   = '2026-08-24 09:35';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -2807,6 +2807,19 @@ function updateLivePrices(){
   const byCode = {};
   watchList.forEach(w => byCode[w.code] = w);
   document.querySelectorAll('.watch-card').forEach(card => {
+    /* v081.1：建仓池卡片（data-buy）→ 增量刷新只更新现价 + 重算距目标价差，绝不覆盖成日涨跌 */
+    if (card.dataset.buy){
+      const q = card.dataset.sym ? watchQuotes[card.dataset.sym] : null;
+      const priceEl = card.querySelector('.mc-price'), pctEl = card.querySelector('.mc-pct');
+      const target = parseFloat(card.dataset.target);
+      if (priceEl){ priceEl.innerHTML = (q && isFinite(q.price)) ? price4(q.price) : '<span class="dim">—</span>'; }
+      if (pctEl && q && isFinite(q.price) && target > 0){
+        const diff = (q.price / target - 1) * 100;   /* ≤0 = 已到价/更低 */
+        pctEl.className = 'mc-pct ' + (diff <= 0 ? 'up' : 'down');
+        pctEl.innerHTML = (diff <= 0 ? '' : '+') + diff.toFixed(3) + '%';
+      }
+      return;
+    }
     const w = byCode[card.dataset.code]; if (!w) return;
     const q = watchQuotes[watchSym(w)];
     if (!q || !isFinite(q.price)) return;
@@ -5058,7 +5071,7 @@ function renderWatchBuy(grid){
     const price = isFinite(q.price) ? q.price : NaN;
     const hit = !!w.hitAt || (isFinite(price) && w.target > 0 && price <= w.target);
     const diff = (isFinite(price) && w.target > 0) ? (price / w.target - 1) * 100 : NaN;   /* ≤0 = 已到价/更低 */
-    return '<div class="watch-card' + (hit ? ' hit' : '') + '" data-code="' + esc(w.code) + '" title="' + esc(w.name || w.code) + '（' + esc(w.code) + '）· 目标价 ¥' + w.target + ' · 点击查看K线">' +
+    return '<div class="watch-card' + (hit ? ' hit' : '') + '" data-code="' + esc(w.code) + '" data-buy="1" data-sym="' + esc(sym) + '" data-target="' + (w.target || 0) + '" title="' + esc(w.name || w.code) + '（' + esc(w.code) + '）· 目标价 ¥' + w.target + ' · 点击查看K线">' +
       (hit ? '<span class="buy-badge" title="已到目标价，可考虑建仓">已到价</span>' : '') +
       '<button class="watch-del" data-del="' + esc(w.code) + '" title="移出建仓池">×</button>' +
       '<div class="mc-name">' + esc(w.name || w.code) + '<span class="mc-sub">目标 ¥' + w.target + '</span></div>' +
