@@ -1239,7 +1239,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
       <div class="topbar-in">
         <div class="tb-brand" id="tbBrand" role="button" tabindex="0" title="回到总览"><span class="dot"></span><span>养鹅怡情<small>PORTFOLIO</small></span><span class="motto">弱水三千，只取一瓢</span></div>
         <div class="page-title-current" id="pageTitleCurrent">总览</div>
-        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.14.1.002</span>
+        <span class="ver-chip" id="verChip" title="当前构建版本 · 点击查看详情">1BK_V68.14.1.003</span>
         <div class="spacer"></div>
         <div class="tb-actions">
           <span id="cloudStatus" class="status" style="font-size:11px;display:none" title="云端数据库同步状态；未配置时自动使用本地存储"></span>
@@ -1663,7 +1663,7 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
             <div class="hint" id="storageWarn" style="display:none;margin-top:4px"></div>
             <div class="setting-row"><div><div class="t">行情自检</div><div class="d">检查行情源连通性与标的代码识别</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnDiag2">运行自检</button></div></div>
-            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.14.1.002 · 2026-10-14 23:29 · 构建时自动更新</div></div>
+            <div class="setting-row"><div><div class="t">版本信息</div><div class="d" id="verInfo">1BK_V68.14.1.003 · 2026-10-14 23:43 · 构建时自动更新</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-sm" id="btnVerCopy" title="复制版本号">复制</button></div></div>
             <div class="setting-row"><div><div class="t">恢复初始数据</div><div class="d">清空全部手动录入，恢复到内嵌初始快照（2026-08-08 腾讯文档最后导出；日常数据请在页面录入）</div></div>
               <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn-warn btn-sm" id="btnImportYangE2">恢复</button></div></div>
@@ -1724,8 +1724,8 @@ input,select,textarea,.card .v,.mc-price,.cal-p,.cs-v,th[data-sort]{ font-varian
  * ========================================================================= */
 /* 版本标识（构建脚本 _bump_version.py 自动递增）：
    每次发布前运行脚本自动 +1 并更新时间戳，改完代码无需手动维护。 */
-const APP_VERSION = '1BK_V68.14.1.002';
-const APP_BUILD   = '2026-10-14 23:29';
+const APP_VERSION = '1BK_V68.14.1.003';
+const APP_BUILD   = '2026-10-14 23:43';
 const CONFIG = {
   storagePrefix : 'pm_',                 // localStorage 键前缀
   defaultRefreshSec : 15,                // 默认自动刷新间隔（秒）
@@ -10349,9 +10349,12 @@ async function cloudPush(){
     cloud.state.offline = true;
     cloud.state.connecting = false;
     const status = (e && (e.status || e.code)) || 0;
+    const em = (e && e.message) || '';
     cloud.state.errMsg = (status === 401 || status === 403)
       ? '云端权限未通过（' + status + '）：请在 Supabase SQL Editor 执行「建表 SQL」（设置 → 云端同步 → 建表 SQL），确认已授权 anon 读写'
-      : ('推送失败：' + ((e && e.message) || '网络异常') + '，自动重试');
+      : (/fetch|network|networkerror|load failed|timeout|dns/i.test(em))
+        ? '连不上 Supabase：多为免费项目被暂停（7天无请求自动暂停）→ 请到 Supabase 控制台打开项目「udkxzpkdobfqlqtlghyk」并点 Resume；或当前网络无法访问 supabase.co（换网络/稍后重试）'
+        : ('推送失败：' + (em || '网络异常') + '，自动重试');
     renderCloudStatus();
     /* 失败自动重试：5s → 15s → 30s → 60s 封顶（权限/网络修好后会自动补推） */
     clearTimeout(cloud.retryTimer);
@@ -10576,7 +10579,10 @@ async function cloudInit(){
   } catch(e){
     console.warn('云同步初始化失败', e);
     cloud.state.connecting = false; cloud.state.offline = true;
-    cloud.state.errMsg = '初始化失败：' + ((e && e.message) || e) + '（检查 URL/key 是否正确、supabase-js 是否可加载）';
+    const emInit = (e && e.message) || e || '';
+    cloud.state.errMsg = (/fetch|network|networkerror|load failed|timeout|dns/i.test(String(emInit)))
+      ? '连不上 Supabase：多为免费项目被暂停（7天无请求自动暂停）→ 请到 Supabase 控制台打开项目「udkxzpkdobfqlqtlghyk」并点 Resume；或当前网络无法访问 supabase.co（换网络/稍后重试）'
+      : ('初始化失败：' + emInit + '（检查 URL/key 是否正确）');
     renderCloudStatus();
     /* 自动重试：3s → 10s → 30s，最多 3 次（成功后清零；手动保存重连会重置计数） */
     const delays = [3000, 10000, 30000];
